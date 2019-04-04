@@ -68,7 +68,8 @@ class ServiceStatus(nagiosplugin.Resource):
             raise nagiosplugin.CheckError(stderr)
         if stdout:
             for line in io.StringIO(stdout.decode('utf-8')):
-                yield nagiosplugin.Metric(self.service, line.strip(), context='systemd')
+                yield nagiosplugin.Metric(self.service, line.strip(),
+                                          context='systemd')
 
 
 class SystemdContext(nagiosplugin.Context):
@@ -77,9 +78,11 @@ class SystemdContext(nagiosplugin.Context):
         super(SystemdContext, self).__init__('systemd')
 
     def evaluate(self, metric, resource):
-        hint = '%s: %s' % (metric.name, metric.value) if metric.value else metric.name
+        hint = '%s: %s' % (metric.name, metric.value) \
+            if metric.value else metric.name
         if metric.value and metric.value != 'active':
-            return self.result_cls(nagiosplugin.Critical, metric=metric, hint=hint)
+            return self.result_cls(nagiosplugin.Critical, metric=metric,
+                                   hint=hint)
         else:
             return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
 
@@ -87,7 +90,8 @@ class SystemdContext(nagiosplugin.Context):
 class SystemdSummary(nagiosplugin.Summary):
 
     def problem(self, results):
-        return ', '.join(['{0}'.format(result) for result in results.most_significant])
+        return ', '.join(['{0}'.format(result)
+                         for result in results.most_significant])
 
     def verbose(self, results):
         return ['{0}: {1}'.format(result.state, result) for result in results]
@@ -96,11 +100,30 @@ class SystemdSummary(nagiosplugin.Summary):
 def main():
     parser = argparse.ArgumentParser()
     exclusive_group = parser.add_mutually_exclusive_group()
-    exclusive_group.add_argument('-e', '--exclude', metavar='UNIT', action='append', default=[],
-        help='Exclude a systemd unit from the checks. This option can be applied multiple times. For example: -e mnt-data.mount -e task.service')
-    exclusive_group.add_argument("-s", "--service", type=str, dest="service", help="Name of the Service that is beeing tested")
-    parser.add_argument('-v', '--verbose', action='count', default=0, help='Increase output verbosity (use up to 3 times)')
 
+    exclusive_group.add_argument(
+        '-e', '--exclude',
+        metavar='UNIT',
+        action='append',
+        default=[],
+        help='Exclude a systemd unit from the checks. This option can be '
+             'applied multiple times. For example: -e mnt-data.mount -e '
+             'task.service'
+    )
+
+    exclusive_group.add_argument(
+        "-s", "--service",
+        type=str,
+        dest="service",
+        help="Name of the Service that is beeing tested"
+    )
+
+    parser.add_argument(
+        '-v', '--verbose',
+        action='count',
+        default=0,
+        help='Increase output verbosity (use up to 3 times)'
+    )
 
     args = parser.parse_args()
 
