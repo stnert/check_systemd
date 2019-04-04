@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
 setup(
-    name='pynagsystemd',
+    name='check_systemd',
     packages=find_packages(),
     version='1.2.0',
-    scripts=['bin/pynagsystemd.py'],
+    scripts=['check_systemd.py'],
     install_requires=[
         'nagiosplugin>=1.2',
     ],
     description='A simple nagios plugin that detects failed systemd units.',
     author='Andrea Briganti',
     author_email='kbytesys@gmail.com',
-    url='https://github.com/kbytesys/pynagsystemd',
-    download_url='https://github.com/kbytesys/pynagsystemd/tarball/v1.2.0',
+    url='https://github.com/Josef-Friedrich/check_systemd',
     keywords=['nagios', 'systemd'],
     license='GNU LGPL v2',
     classifiers=[
