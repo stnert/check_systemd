@@ -4,15 +4,34 @@ import subprocess
 
 BIN = os.path.abspath(os.path.join(os.path.dirname(__file__), 'bin'))
 os.environ['PATH'] = BIN + ':' + os.environ['PATH']
+HOME = os.path.expanduser('~')
+
+
+def write_to_output_file(output):
+    output_file_path = os.path.expanduser('~/.check_systemd_test_output')
+    output_file = open(output_file_path, 'w')
+    output_file.write(output)
+    output_file.close()
 
 
 class TestCheckSystemd(unittest.TestCase):
+
+    def test_ok(self):
+        write_to_output_file('')
+        process = subprocess.run(
+            ['./check_systemd.py'],
+            encoding='utf-8',
+            stdout=subprocess.PIPE,
+            env={'HOME': HOME},
+        )
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.stdout, 'SYSTEMD OK - all\n')
 
     def test_failure(self):
         process = subprocess.run(
             ['./check_systemd.py'],
             encoding='utf-8',
-            stdout=subprocess.PIPE
+            stdout=subprocess.PIPE,
         )
         self.assertEqual(process.returncode, 2)
         self.assertEqual(
