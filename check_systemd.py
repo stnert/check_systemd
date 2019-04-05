@@ -112,10 +112,10 @@ def main():
     )
 
     exclusive_group.add_argument(
-        "-s", "--service",
+        '-s', '--service',
         type=str,
-        dest="service",
-        help="Name of the Service that is beeing tested"
+        dest='service',
+        help='Name of the Service that is beeing tested'
     )
 
     parser.add_argument(
