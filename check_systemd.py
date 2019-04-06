@@ -142,7 +142,11 @@ class SystemdSummary(nagiosplugin.Summary):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description='Nagios / Icinga monitoring plugin to check systemd for '
+                    'failed units.'
+    )
+
     exclusive_group = parser.add_mutually_exclusive_group()
 
     exclusive_group.add_argument(
