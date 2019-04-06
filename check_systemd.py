@@ -3,7 +3,8 @@
 You can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation, either version 2
 of the License.
-Copyright Andrea Briganti a.k.a 'Kbyte'
+Copyright 2014-18 Andrea Briganti a.k.a 'Kbyte'
+Copyright 2019 Josef Friedrich
 """
 import io
 import subprocess
