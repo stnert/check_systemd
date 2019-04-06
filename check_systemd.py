@@ -37,15 +37,17 @@ class SystemdStatus(nagiosplugin.Resource):
         if stderr:
             raise nagiosplugin.CheckError(stderr)
 
+        failed_units = 0
         if stdout:
             for line in io.StringIO(stdout.decode('utf-8')):
                 split_line = line.split()
                 unit = split_line[0]
                 active = split_line[2]
                 if unit not in self.excludes:
+                    failed_units += 1
                     yield nagiosplugin.Metric(unit, active, context='systemd')
-
-        yield nagiosplugin.Metric('all', None, context='systemd')
+        if failed_units == 0:
+            yield nagiosplugin.Metric('all', None, context='systemd')
 
 
 class ServiceStatus(nagiosplugin.Resource):

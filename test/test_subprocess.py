@@ -66,7 +66,6 @@ class TestSubprocess(unittest.TestCase):
             process.stdout,
             'SYSTEMD CRITICAL - test.service: failed\n'
             'critical: test.service: failed\n'
-            'ok: all\n'
         )
 
     def test_failure_multiple(self):
@@ -97,7 +96,6 @@ class TestSubprocess(unittest.TestCase):
             'test2.service: failed\n'
             'critical: test1.service: failed\n'
             'critical: test2.service: failed\n'
-            'ok: all\n'
         )
 
     def test_exclusive_group(self):
