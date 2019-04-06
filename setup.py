@@ -1,16 +1,37 @@
-# -*- coding: utf-8 -*-
+import os
+import re
 from setuptools import setup, find_packages
-import check_systemd
+
+HERE = os.path.abspath(os.path.dirname(__file__))
+
+def read(*parts):
+    with open(os.path.join(HERE, *parts), 'r') as fp:
+        return fp.read()
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(
+        r"^__version__ = ['\"]([^'\"]*)['\"]",
+        version_file,
+        re.M,
+    )
+    if version_match:
+        return version_match.group(1)
+
+    raise RuntimeError("Unable to find version string.")
 
 setup(
     name='check_systemd',
     packages=find_packages(),
-    version=check_systemd.__version__,
+    version=find_version('check_systemd.py'),
     scripts=['check_systemd.py'],
     install_requires=[
         'nagiosplugin>=1.2',
     ],
     description='A simple nagios plugin that detects failed systemd units.',
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     author='Andrea Briganti',
     author_email='kbytesys@gmail.com',
     url='https://github.com/Josef-Friedrich/check_systemd',
