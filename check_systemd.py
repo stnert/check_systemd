@@ -173,14 +173,11 @@ def main():
     if args.service is None:
         check = nagiosplugin.Check(
             SystemdStatus(excludes=args.exclude),
-            nagiosplugin.ScalarContext('failed_units', 1, 2,
-                                       fmt_metric='{value} failed logged in'),
             SystemdContext(),
             SystemdSummary())
     else:
         check = nagiosplugin.Check(
             ServiceStatus(service=args.service),
-
             SystemdContext(),
             SystemdSummary())
     check.main(args.verbose)
