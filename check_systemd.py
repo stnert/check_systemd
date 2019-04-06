@@ -141,7 +141,7 @@ class SystemdSummary(nagiosplugin.Summary):
         return ['{0}: {1}'.format(result.state, result) for result in show]
 
 
-def main():
+def get_argparser():
     parser = argparse.ArgumentParser(
         description='Nagios / Icinga monitoring plugin to check systemd for '
                     'failed units.'
@@ -173,7 +173,11 @@ def main():
         help='Increase output verbosity (use up to 3 times)'
     )
 
-    args = parser.parse_args()
+    return parser
+
+
+def main():
+    args = get_argparser().parse_args()
 
     if args.unit:
         check = nagiosplugin.Check(

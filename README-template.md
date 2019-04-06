@@ -13,19 +13,7 @@ You can also test a single service with -s parameter.
 Released under GNU GPLv2 License.
 
 ```
-usage: nosetests [-h] [-e UNIT | -u UNIT] [-v]
-
-Nagios / Icinga monitoring plugin to check systemd for failed units.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -e UNIT, --exclude UNIT
-                        Exclude a systemd unit from the checks. This option
-                        can be applied multiple times. For example: -e mnt-
-                        data.mount -e task.service
-  -u UNIT, --unit UNIT  Name of the systemd unit that is beeing tested.
-  -v, --verbose         Increase output verbosity (use up to 3 times)
-
+{{ argparse }}
 ```
 
 ## Project pages
