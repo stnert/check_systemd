@@ -106,7 +106,7 @@ class TestSubprocess(unittest.TestCase):
 
     def test_exclusive_group(self):
         process = subprocess.run(
-            ['./check_systemd.py', '-s', 'test1.service', '-e',
+            ['./check_systemd.py', '-u', 'test1.service', '-e',
              'test2.service'],
             encoding='utf-8',
             stderr=subprocess.PIPE
@@ -114,7 +114,7 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 2)
         self.assertIn(
             'error: argument -e/--exclude: not allowed with argument '
-            '-s/--service',
+            '-u/--unit',
             process.stderr,
         )
 
@@ -141,10 +141,10 @@ class TestSubprocess(unittest.TestCase):
             'SYSTEMD CRITICAL - test.service: failed | failed_units=1\n'
         )
 
-    def test_option_service_ok(self):
+    def test_option_unit_ok(self):
         with AddBin('bin/is_active/active'):
             process = subprocess.run(
-                ['./check_systemd.py', '-s', 'test.service'],
+                ['./check_systemd.py', '-u', 'test.service'],
                 encoding='utf-8',
                 stdout=subprocess.PIPE
             )
@@ -154,10 +154,10 @@ class TestSubprocess(unittest.TestCase):
             'SYSTEMD OK - test.service: active\n'
         )
 
-    def test_option_service_failed(self):
+    def test_option_unit_failed(self):
         with AddBin('bin/is_active/failed'):
             process = subprocess.run(
-                ['./check_systemd.py', '--service', 'test.service'],
+                ['./check_systemd.py', '--unit', 'test.service'],
                 encoding='utf-8',
                 stdout=subprocess.PIPE
             )
@@ -167,10 +167,10 @@ class TestSubprocess(unittest.TestCase):
             'SYSTEMD CRITICAL - test.service: failed | failed_units=1\n'
         )
 
-    def test_option_service_inactive(self):
+    def test_option_unit_inactive(self):
         with AddBin('bin/is_active/inactive'):
             process = subprocess.run(
-                ['./check_systemd.py', '--service', 'test.service'],
+                ['./check_systemd.py', '--unit', 'test.service'],
                 encoding='utf-8',
                 stdout=subprocess.PIPE
             )

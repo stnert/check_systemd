@@ -65,7 +65,7 @@ class ServiceStatus(nagiosplugin.Resource):
     name = 'SYSTEMD'
 
     def __init__(self, *args, **kwargs):
-        self.service = kwargs.pop('service')
+        self.unit = kwargs.pop('unit')
         self.failed_units = 0
         super(nagiosplugin.Resource, self).__init__(*args, **kwargs)
 
@@ -75,7 +75,7 @@ class ServiceStatus(nagiosplugin.Resource):
         # - inactive (by unkown unit file)
         # - failed
         try:
-            p = subprocess.Popen(['systemctl', 'is-active', self.service],
+            p = subprocess.Popen(['systemctl', 'is-active', self.unit],
                                  stderr=subprocess.PIPE,
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE)
@@ -92,7 +92,7 @@ class ServiceStatus(nagiosplugin.Resource):
                     yield nagiosplugin.Metric(name='failed_units',
                                               value=1,
                                               context='systemd')
-                yield nagiosplugin.Metric(name=self.service,
+                yield nagiosplugin.Metric(name=self.unit,
                                           value=active,
                                           context='systemd')
 
@@ -155,10 +155,10 @@ def main():
     )
 
     exclusive_group.add_argument(
-        '-s', '--service',
+        '-u', '--unit',
         type=str,
-        dest='service',
-        help='Name of the Service that is beeing tested'
+        dest='unit',
+        help='Name of the systemd unit that is beeing tested.'
     )
 
     parser.add_argument(
@@ -170,16 +170,17 @@ def main():
 
     args = parser.parse_args()
 
-    if args.service is None:
+    if args.unit:
         check = nagiosplugin.Check(
-            SystemdStatus(excludes=args.exclude),
+            ServiceStatus(unit=args.unit),
             SystemdContext(),
             SystemdSummary())
     else:
         check = nagiosplugin.Check(
-            ServiceStatus(service=args.service),
+            SystemdStatus(excludes=args.exclude),
             SystemdContext(),
             SystemdSummary())
+
     check.main(args.verbose)
 
 
