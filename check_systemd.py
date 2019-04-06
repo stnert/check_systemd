@@ -11,6 +11,8 @@ import argparse
 
 import nagiosplugin
 
+__version__ = '2.0.0'
+
 
 class SystemdStatus(nagiosplugin.Resource):
     """

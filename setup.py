@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
+import check_systemd
+
 setup(
     name='check_systemd',
     packages=find_packages(),
-    version='1.2.0',
+    version=check_systemd.__version__,
     scripts=['check_systemd.py'],
     install_requires=[
         'nagiosplugin>=1.2',
