@@ -67,6 +67,9 @@ class ServiceStatus(nagiosplugin.Resource):
 
     def probe(self):
         # Execute `systemctl is-active <service>` and get output
+        # - active
+        # - inactive (by unkown unit file)
+        # - failed
         try:
             p = subprocess.Popen(['systemctl', 'is-active', self.service],
                                  stderr=subprocess.PIPE,

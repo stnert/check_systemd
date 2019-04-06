@@ -135,6 +135,45 @@ class TestSubprocess(unittest.TestCase):
             'SYSTEMD CRITICAL - test.service: failed\n'
         )
 
+    def test_option_service_ok(self):
+        with AddBin('bin/is_active/active'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-s', 'test.service'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE
+            )
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - test.service: active\n'
+        )
+
+    def test_option_service_failed(self):
+        with AddBin('bin/is_active/failed'):
+            process = subprocess.run(
+                ['./check_systemd.py', '--service', 'test.service'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE
+            )
+        self.assertEqual(process.returncode, 2)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD CRITICAL - test.service: failed\n'
+        )
+
+    def test_option_service_inactive(self):
+        with AddBin('bin/is_active/inactive'):
+            process = subprocess.run(
+                ['./check_systemd.py', '--service', 'test.service'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE
+            )
+        self.assertEqual(process.returncode, 2)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD CRITICAL - test.service: inactive\n'
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
