@@ -3,10 +3,24 @@
 
 # check_systemd
 
-Simple and easy nagios check for systemd status.
+Nagios / Icinga monitoring plugin to check systemd for failed units.
 
-This Python script will report a degraded system to nagios and requires only the nagiosplugin library.
+This Python script will report a degraded system to Nagios / Icinage.
+It requires only the nagiosplugin library.
 
 You can also test a single service with -s parameter.
 
 Released under GNU GPLv2 License.
+
+
+## Project pages
+
+* https://github.com/Josef-Friedrich/check_systemd
+* https://exchange.icinga.com/joseffriedrich/check_systemd
+
+## Testing
+
+```
+pip3 install tox
+tox
+```

@@ -31,7 +31,8 @@ setup(
     install_requires=[
         'nagiosplugin>=1.2',
     ],
-    description='A simple nagios plugin that detects failed systemd units.',
+    description='Nagios / Icinga monitoring plugin to check systemd for '
+                'failed units.',
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     author='Josef Friedrich',
