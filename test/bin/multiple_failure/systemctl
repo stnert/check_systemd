@@ -1,0 +1,4 @@
+#! /bin/sh
+
+echo "test1.service loaded failed failed Test1 service
+test2.service loaded failed failed Test2 service"
