@@ -4,8 +4,9 @@ from setuptools import setup, find_packages
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
+
 def read(*parts):
-    with open(os.path.join(HERE, *parts), 'r') as fp:
+    with open(os.path.join(HERE, *parts), 'r', encoding='utf-8') as fp:
         return fp.read()
 
 
@@ -21,6 +22,7 @@ def find_version(*file_paths):
 
     raise RuntimeError("Unable to find version string.")
 
+
 setup(
     name='check_systemd',
     packages=find_packages(),
@@ -32,8 +34,8 @@ setup(
     description='A simple nagios plugin that detects failed systemd units.',
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
-    author='Andrea Briganti',
-    author_email='kbytesys@gmail.com',
+    author='Josef Friedrich',
+    author_email='josef@friedrich.rocks',
     url='https://github.com/Josef-Friedrich/check_systemd',
     keywords=['nagios', 'systemd'],
     license='GNU LGPL v2',
@@ -41,7 +43,8 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Environment :: Plugins',
         'Intended Audience :: System Administrators',
-        'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
+        'License :: OSI Approved :: GNU Lesser General Public License v2 '
+        '(LGPLv2)',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
@@ -49,5 +52,3 @@ setup(
         'Topic :: System :: Networking :: Monitoring'
     ],
 )
-
-
