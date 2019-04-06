@@ -37,17 +37,25 @@ class SystemdStatus(nagiosplugin.Resource):
         if stderr:
             raise nagiosplugin.CheckError(stderr)
 
+        # The --exclude option causes that all is ok, but there are some lines
+        # in stdout.
         failed_units = 0
         if stdout:
+            # Output of `systemctl --failed --no-legend`:
+            # foobar.service loaded failed failed Description text
             for line in io.StringIO(stdout.decode('utf-8')):
                 split_line = line.split()
+                # foobar.service
                 unit = split_line[0]
+                # failed
                 active = split_line[2]
                 if unit not in self.excludes:
                     failed_units += 1
-                    yield nagiosplugin.Metric(unit, active, context='systemd')
+                    yield nagiosplugin.Metric(name=unit, value=active,
+                                              context='systemd')
         if failed_units == 0:
-            yield nagiosplugin.Metric('all', None, context='systemd')
+            yield nagiosplugin.Metric(name='all', value=None,
+                                      context='systemd')
 
 
 class ServiceStatus(nagiosplugin.Resource):
@@ -58,7 +66,7 @@ class ServiceStatus(nagiosplugin.Resource):
         super(nagiosplugin.Resource, self).__init__(*args, **kwargs)
 
     def probe(self):
-        # Execute systemctl is-active and get output
+        # Execute `systemctl is-active <service>` and get output
         try:
             p = subprocess.Popen(['systemctl', 'is-active', self.service],
                                  stderr=subprocess.PIPE,
@@ -72,7 +80,8 @@ class ServiceStatus(nagiosplugin.Resource):
             raise nagiosplugin.CheckError(stderr)
         if stdout:
             for line in io.StringIO(stdout.decode('utf-8')):
-                yield nagiosplugin.Metric(self.service, line.strip(),
+                yield nagiosplugin.Metric(name=self.service,
+                                          value=line.strip(),
                                           context='systemd')
 
 
