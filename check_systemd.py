@@ -53,6 +53,9 @@ class SystemdStatus(nagiosplugin.Resource):
                     failed_units += 1
                     yield nagiosplugin.Metric(name=unit, value=active,
                                               context='systemd')
+
+        yield nagiosplugin.Metric(name='failed_units', value=failed_units,
+                                  min=0, context='systemd')
         if failed_units == 0:
             yield nagiosplugin.Metric(name='all', value=None,
                                       context='systemd')
@@ -63,6 +66,7 @@ class ServiceStatus(nagiosplugin.Resource):
 
     def __init__(self, *args, **kwargs):
         self.service = kwargs.pop('service')
+        self.failed_units = 0
         super(nagiosplugin.Resource, self).__init__(*args, **kwargs)
 
     def probe(self):
@@ -83,8 +87,13 @@ class ServiceStatus(nagiosplugin.Resource):
             raise nagiosplugin.CheckError(stderr)
         if stdout:
             for line in io.StringIO(stdout.decode('utf-8')):
+                active = line.strip()
+                if active == 'failed':
+                    yield nagiosplugin.Metric(name='failed_units',
+                                              value=1,
+                                              context='systemd')
                 yield nagiosplugin.Metric(name=self.service,
-                                          value=line.strip(),
+                                          value=active,
                                           context='systemd')
 
 
@@ -102,15 +111,33 @@ class SystemdContext(nagiosplugin.Context):
         else:
             return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
 
+    def performance(self, metric, resource):
+        if metric.name == 'failed_units':
+            return nagiosplugin.Performance(label=metric.name,
+                                            value=metric.value)
+
 
 class SystemdSummary(nagiosplugin.Summary):
 
+    def ok(self, results):
+        for result in results.most_significant:
+            if 'failed_units' not in str(result):
+                return '{0}'.format(result)
+        return 'all'
+
     def problem(self, results):
-        return ', '.join(['{0}'.format(result)
-                         for result in results.most_significant])
+        show = []
+        for result in results.most_significant:
+            if 'failed_units' not in str(result):
+                show.append(result)
+        return ', '.join(['{0}'.format(result) for result in show])
 
     def verbose(self, results):
-        return ['{0}: {1}'.format(result.state, result) for result in results]
+        show = []
+        for result in results.most_significant:
+            if 'failed_units' not in str(result):
+                show.append(result)
+        return ['{0}: {1}'.format(result.state, result) for result in show]
 
 
 def main():
@@ -146,11 +173,14 @@ def main():
     if args.service is None:
         check = nagiosplugin.Check(
             SystemdStatus(excludes=args.exclude),
+            nagiosplugin.ScalarContext('failed_units', 1, 2,
+                                       fmt_metric='{value} failed logged in'),
             SystemdContext(),
             SystemdSummary())
     else:
         check = nagiosplugin.Check(
             ServiceStatus(service=args.service),
+
             SystemdContext(),
             SystemdSummary())
     check.main(args.verbose)

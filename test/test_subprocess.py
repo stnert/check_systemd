@@ -31,7 +31,7 @@ class TestSubprocess(unittest.TestCase):
                 stdout=subprocess.PIPE,
             )
         self.assertEqual(process.returncode, 0)
-        self.assertEqual(process.stdout, 'SYSTEMD OK - all\n')
+        self.assertEqual(process.stdout, 'SYSTEMD OK - all | failed_units=0\n')
 
     def test_ok_verbose(self):
         with AddBin('bin/ok'):
@@ -41,7 +41,9 @@ class TestSubprocess(unittest.TestCase):
                 stdout=subprocess.PIPE,
             )
         self.assertEqual(process.returncode, 0)
-        self.assertEqual(process.stdout, 'SYSTEMD OK - all\nok: all\n')
+        self.assertEqual(process.stdout,
+                         'SYSTEMD OK - all\nok: all\n'
+                         '| failed_units=0\n')
 
     def test_failure(self):
         with AddBin('bin/failure'):
@@ -52,7 +54,8 @@ class TestSubprocess(unittest.TestCase):
             )
         self.assertEqual(process.returncode, 2)
         self.assertEqual(process.stdout,
-                         'SYSTEMD CRITICAL - test.service: failed\n')
+                         'SYSTEMD CRITICAL - test.service: failed'
+                         ' | failed_units=1\n')
 
     def test_failure_verbose(self):
         with AddBin('bin/failure'):
@@ -66,6 +69,7 @@ class TestSubprocess(unittest.TestCase):
             process.stdout,
             'SYSTEMD CRITICAL - test.service: failed\n'
             'critical: test.service: failed\n'
+            '| failed_units=1\n'
         )
 
     def test_failure_multiple(self):
@@ -79,7 +83,8 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(
             process.stdout,
             'SYSTEMD CRITICAL - test1.service: failed, '
-            'test2.service: failed\n'
+            'test2.service: failed'
+            ' | failed_units=2\n'
         )
 
     def test_failure_multiple_verbose(self):
@@ -96,6 +101,7 @@ class TestSubprocess(unittest.TestCase):
             'test2.service: failed\n'
             'critical: test1.service: failed\n'
             'critical: test2.service: failed\n'
+            '| failed_units=2\n'
         )
 
     def test_exclusive_group(self):
@@ -120,7 +126,7 @@ class TestSubprocess(unittest.TestCase):
                 stdout=subprocess.PIPE
             )
         self.assertEqual(process.returncode, 0)
-        self.assertEqual(process.stdout, 'SYSTEMD OK - all\n')
+        self.assertEqual(process.stdout, 'SYSTEMD OK - all | failed_units=0\n')
 
     def test_option_exclude_unknown_service(self):
         with AddBin('bin/failure'):
@@ -132,7 +138,7 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 2)
         self.assertEqual(
             process.stdout,
-            'SYSTEMD CRITICAL - test.service: failed\n'
+            'SYSTEMD CRITICAL - test.service: failed | failed_units=1\n'
         )
 
     def test_option_service_ok(self):
@@ -158,7 +164,7 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 2)
         self.assertEqual(
             process.stdout,
-            'SYSTEMD CRITICAL - test.service: failed\n'
+            'SYSTEMD CRITICAL - test.service: failed | failed_units=1\n'
         )
 
     def test_option_service_inactive(self):
