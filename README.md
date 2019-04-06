@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Josef-Friedrich/check_systemd.svg?branch=master)](https://travis-ci.org/Josef-Friedrich/check_systemd)
+
 # check_systemd
 
 Simple and easy nagios check for systemd status.
