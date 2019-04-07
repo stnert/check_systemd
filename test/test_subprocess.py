@@ -256,6 +256,15 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 0)
         self.assertIn('check_systemd.py', process.stdout)
 
+    def test_entry_point(self):
+        process = subprocess.run(
+            ['check_systemd', '--help'],
+            encoding='utf-8',
+            stdout=subprocess.PIPE
+        )
+        self.assertEqual(process.returncode, 0)
+        self.assertIn('check_systemd', process.stdout)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -40,6 +40,7 @@ setup(
     url='https://github.com/Josef-Friedrich/check_systemd',
     keywords=['nagios', 'systemd'],
     license='GNU LGPL v2',
+    python_requires='>=3.6',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Plugins',
@@ -47,9 +48,14 @@ setup(
         'License :: OSI Approved :: GNU Lesser General Public License v2 '
         '(LGPLv2)',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
         'Operating System :: POSIX :: Linux',
         'Topic :: System :: Networking :: Monitoring'
     ],
+    entry_points={
+        'console_scripts': [
+            'check_systemd = check_systemd:main',
+        ],
+    },
 )
