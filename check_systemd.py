@@ -10,6 +10,7 @@ Copyright 2019 Josef Friedrich
 import io
 import subprocess
 import argparse
+import re
 
 import nagiosplugin
 from nagiosplugin import Metric
@@ -17,7 +18,7 @@ from nagiosplugin import Metric
 __version__ = '2.0.2'
 
 
-class SystemdStatus(nagiosplugin.Resource):
+class SystemdctlListUnitsResource(nagiosplugin.Resource):
     """
     :param list excludes: A list of systemd unit names.
     """
@@ -81,7 +82,32 @@ class SystemdStatus(nagiosplugin.Resource):
             yield Metric(name='all', value=None, context='unit')
 
 
-class ServiceStatus(nagiosplugin.Resource):
+class SystemdAnalyseResource(nagiosplugin.Resource):
+
+    name = 'SYSTEMD'
+
+    def probe(self):
+
+        try:
+            p = subprocess.Popen(['systemd-analyze'],
+                                 stderr=subprocess.PIPE,
+                                 stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE)
+            stdout, stderr = p.communicate()
+        except OSError as e:
+            raise nagiosplugin.CheckError(e)
+
+        if stderr:
+            raise nagiosplugin.CheckError(stderr)
+
+        if stdout:
+            match = re.search(r' = ([\d\.]+)s', stdout)
+
+        yield Metric(name='startup_time', value=float(match.group(1)),
+                     context='startup_time')
+
+
+class SystemctlIsActiveResource(nagiosplugin.Resource):
     name = 'SYSTEMD'
 
     def __init__(self, *args, **kwargs):
@@ -146,18 +172,18 @@ class SystemdSummary(nagiosplugin.Summary):
         return 'all'
 
     def problem(self, results):
-        show = []
+        summary = []
         for result in results.most_significant:
-            if isinstance(result.context, UnitContext):
-                show.append(result)
-        return ', '.join(['{0}'.format(result) for result in show])
+            if result.context.name in ['startup_time', 'unit']:
+                summary.append(result)
+        return ', '.join(['{0}'.format(result) for result in summary])
 
     def verbose(self, results):
-        show = []
+        summary = []
         for result in results.most_significant:
-            if isinstance(result.context, UnitContext):
-                show.append(result)
-        return ['{0}: {1}'.format(result.state, result) for result in show]
+            if result.context.name in ['startup_time', 'unit']:
+                summary.append('{0}: {1}'.format(result.state, result))
+        return summary
 
 
 def get_argparser():
@@ -168,6 +194,13 @@ def get_argparser():
 
     exclusive_group = parser.add_mutually_exclusive_group()
 
+    parser.add_argument(
+        '-c', '--critical',
+        metavar='SECONDS',
+        default=120,
+        help='Startup time in seconds to result in critical status.',
+    )
+
     exclusive_group.add_argument(
         '-e', '--exclude',
         metavar='UNIT',
@@ -175,21 +208,28 @@ def get_argparser():
         default=[],
         help='Exclude a systemd unit from the checks. This option can be '
              'applied multiple times. For example: -e mnt-data.mount -e '
-             'task.service'
+             'task.service.',
     )
 
     exclusive_group.add_argument(
         '-u', '--unit',
         type=str,
         dest='unit',
-        help='Name of the systemd unit that is beeing tested.'
+        help='Name of the systemd unit that is beeing tested.',
     )
 
     parser.add_argument(
         '-v', '--verbose',
         action='count',
         default=0,
-        help='Increase output verbosity (use up to 3 times)'
+        help='Increase output verbosity (use up to 3 times).'
+    )
+
+    parser.add_argument(
+        '-w', '--warning',
+        default=60,
+        metavar='SECONDS',
+        help='Startup time in seconds to result in warning status.',
     )
 
     return parser
@@ -199,14 +239,20 @@ def main():
     args = get_argparser().parse_args()
 
     if args.unit:
-        resource = ServiceStatus(unit=args.unit)
+        resource = SystemctlIsActiveResource(unit=args.unit)
     else:
-        resource = SystemdStatus(excludes=args.exclude)
+        resource = SystemdctlListUnitsResource(excludes=args.exclude)
 
     check = nagiosplugin.Check(
         resource,
+        SystemdAnalyseResource(),
         UnitContext(),
         PerformanceDataContext(),
+        nagiosplugin.ScalarContext(
+            name='startup_time',
+            warning=args.warning,
+            critical=args.critical,
+        ),
         SystemdSummary()
     )
 
