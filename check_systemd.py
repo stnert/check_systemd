@@ -163,9 +163,6 @@ class SystemctlIsActiveResource(nagiosplugin.Resource):
         if stdout:
             for line in io.StringIO(stdout.decode('utf-8')):
                 active = line.strip()
-                if active == 'failed':
-                    yield Metric(name='units_failed', value=1,
-                                 context='performance_data')
                 yield Metric(name=self.unit, value=active, context='unit')
 
 
@@ -275,24 +272,28 @@ def get_argparser():
 def main():
     args = get_argparser().parse_args()
 
-    if args.unit:
-        resource = SystemctlIsActiveResource(unit=args.unit)
-    else:
-        resource = SystemdctlListUnitsResource(excludes=args.exclude)
+    objects = []
 
-    check = nagiosplugin.Check(
-        resource,
-        SystemdAnalyseResource(),
+    if args.unit:
+        objects.append(SystemctlIsActiveResource(unit=args.unit))
+    else:
+        objects += [
+            SystemdctlListUnitsResource(excludes=args.exclude),
+            PerformanceDataContext(),
+            SystemdAnalyseResource(),
+        ]
+
+    objects += [
         UnitContext(),
-        PerformanceDataContext(),
         nagiosplugin.ScalarContext(
             name='startup_time',
             warning=args.warning,
             critical=args.critical,
         ),
         SystemdSummary()
-    )
+    ]
 
+    check = nagiosplugin.Check(*objects)
     check.main(args.verbose)
 
 

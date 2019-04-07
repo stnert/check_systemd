@@ -206,8 +206,7 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 0)
         self.assertEqual(
             process.stdout,
-            'SYSTEMD OK - test.service: active '
-            '| startup_time=12.154;60;120\n'
+            'SYSTEMD OK - test.service: active\n'
         )
 
     def test_option_unit_failed(self):
@@ -220,8 +219,7 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 2)
         self.assertEqual(
             process.stdout,
-            'SYSTEMD CRITICAL - test.service: failed '
-            '| startup_time=12.154;60;120 units_failed=1\n'
+            'SYSTEMD CRITICAL - test.service: failed\n'
         )
 
     def test_option_unit_inactive(self):
@@ -234,8 +232,7 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 2)
         self.assertEqual(
             process.stdout,
-            'SYSTEMD CRITICAL - test.service: inactive '
-            '| startup_time=12.154;60;120\n'
+            'SYSTEMD CRITICAL - test.service: inactive\n'
         )
 
     def test_option_version(self):
