@@ -265,6 +265,7 @@ def get_argparser():
     return parser
 
 
+@nagiosplugin.guarded
 def main():
     args = get_argparser().parse_args()
 
