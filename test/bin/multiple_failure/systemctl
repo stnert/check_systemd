@@ -1,4 +1,5 @@
 #! /bin/sh
 
-echo "test1.service loaded failed failed Test1 service
-test2.service loaded failed failed Test2 service"
+echo "rtkit-daemon.service                                                                                    loaded    failed   running   RealtimeKit Scheduling Policy Service
+setvtrgb.service                                                                                        loaded    active   exited    Set console scheme
+smartd.service                                                                                          masked    failed dead      smartd.service"
