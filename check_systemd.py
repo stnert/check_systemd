@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 You can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation, either version 2
@@ -52,7 +53,6 @@ class SystemdStatus(nagiosplugin.Resource):
             # Output of `systemctl list-units --all --no-legend`:
             # UNIT           LOAD   ACTIVE SUB     JOB   DESCRIPTION
             # foobar.service loaded active waiting       Description text
-
             count_units = 0
             for line in io.StringIO(stdout.decode('utf-8')):
                 split_line = line.split()
@@ -109,12 +109,9 @@ class ServiceStatus(nagiosplugin.Resource):
             for line in io.StringIO(stdout.decode('utf-8')):
                 active = line.strip()
                 if active == 'failed':
-                    yield nagiosplugin.Metric(name='failed_units',
-                                              value=1,
-                                              context='performance_data')
-                yield nagiosplugin.Metric(name=self.unit,
-                                          value=active,
-                                          context='unit')
+                    yield Metric(name='failed_units', value=1,
+                                 context='performance_data')
+                yield Metric(name=self.unit, value=active, context='unit')
 
 
 class UnitContext(nagiosplugin.Context):
