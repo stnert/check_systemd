@@ -28,6 +28,11 @@ class SystemdctlListUnitsResource(nagiosplugin.Resource):
         self.excludes = excludes
 
     def probe(self):
+        """Query system state and return metrics.
+
+        :return: generator that emits
+          :class:`~nagiosplugin.metric.Metric` objects
+        """
         # We don’t use `systemctl --failed --no-legend`, because we want to
         # collect performance data of all units.
         try:
@@ -113,7 +118,11 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
     name = 'SYSTEMD'
 
     def probe(self):
+        """Query system state and return metrics.
 
+        :return: generator that emits
+          :class:`~nagiosplugin.metric.Metric` objects
+        """
         try:
             p = subprocess.Popen(['systemd-analyze'],
                                  stderr=subprocess.PIPE,
@@ -138,6 +147,7 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
 
 
 class SystemctlIsActiveResource(nagiosplugin.Resource):
+
     name = 'SYSTEMD'
 
     def __init__(self, *args, **kwargs):
@@ -145,6 +155,11 @@ class SystemctlIsActiveResource(nagiosplugin.Resource):
         super(nagiosplugin.Resource, self).__init__(*args, **kwargs)
 
     def probe(self):
+        """Query system state and return metrics.
+
+        :return: generator that emits
+          :class:`~nagiosplugin.metric.Metric` objects
+        """
         # Execute `systemctl is-active <service>` and get output
         # - active
         # - inactive (by unkown unit file)
@@ -172,6 +187,13 @@ class UnitContext(nagiosplugin.Context):
         super(UnitContext, self).__init__('unit')
 
     def evaluate(self, metric, resource):
+        """Determines state of a given metric.
+
+        :param metric: associated metric that is to be evaluated
+        :param resource: resource that produced the associated metric
+            (may optionally be consulted)
+        :returns: :class:`~.result.Result`
+        """
         hint = '%s: %s' % (metric.name, metric.value) \
             if metric.value else metric.name
         if metric.value and metric.value != 'active':
@@ -187,18 +209,37 @@ class PerformanceDataContext(nagiosplugin.Context):
         super(PerformanceDataContext, self).__init__('performance_data')
 
     def performance(self, metric, resource):
+        """Derives performance data from a given metric.
+
+        :param metric: associated metric from which performance data are
+            derived
+        :param resource: resource that produced the associated metric
+            (may optionally be consulted)
+
+        :returns: :class:`Perfdata` object
+        """
         return nagiosplugin.Performance(label=metric.name, value=metric.value)
 
 
 class SystemdSummary(nagiosplugin.Summary):
 
     def ok(self, results):
+        """Formats status line when overall state is ok.
+
+        :param results: :class:`~nagiosplugin.result.Results` container
+        :returns: status line
+        """
         for result in results.most_significant:
             if isinstance(result.context, UnitContext):
                 return '{0}'.format(result)
         return 'all'
 
     def problem(self, results):
+        """Formats status line when overall state is not ok.
+
+        :param results: :class:`~.result.Results` container
+        :returns: status line
+        """
         summary = []
         for result in results.most_significant:
             if result.context.name in ['startup_time', 'unit']:
@@ -206,6 +247,11 @@ class SystemdSummary(nagiosplugin.Summary):
         return ', '.join(['{0}'.format(result) for result in summary])
 
     def verbose(self, results):
+        """Provides extra lines if verbose plugin execution is requested.
+
+        :param results: :class:`~.result.Results` container
+        :returns: list of strings
+        """
         summary = []
         for result in results.most_significant:
             if result.context.name in ['startup_time', 'unit']:
