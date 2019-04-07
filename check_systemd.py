@@ -256,6 +256,12 @@ def get_argparser():
     )
 
     parser.add_argument(
+        '-V', '--version',
+        action='version',
+        version='%(prog)s {}'.format(__version__),
+    )
+
+    parser.add_argument(
         '-w', '--warning',
         default=60,
         metavar='SECONDS',

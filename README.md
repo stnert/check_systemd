@@ -13,7 +13,7 @@ You can also test a single service with -s parameter.
 Released under GNU GPLv2 License.
 
 ```
-usage: nosetests [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-v] [-w SECONDS]
+usage: nosetests [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-v] [-V] [-w SECONDS]
 
 Nagios / Icinga monitoring plugin to check systemd for failed units.
 
@@ -27,6 +27,7 @@ optional arguments:
                         data.mount -e task.service.
   -u UNIT, --unit UNIT  Name of the systemd unit that is beeing tested.
   -v, --verbose         Increase output verbosity (use up to 3 times).
+  -V, --version         show program's version number and exit
   -w SECONDS, --warning SECONDS
                         Startup time in seconds to result in warning status.
 

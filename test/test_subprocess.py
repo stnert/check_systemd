@@ -238,6 +238,24 @@ class TestSubprocess(unittest.TestCase):
             '| startup_time=12.154;60;120\n'
         )
 
+    def test_option_version(self):
+        process = subprocess.run(
+            ['./check_systemd.py', '--version'],
+            encoding='utf-8',
+            stdout=subprocess.PIPE
+        )
+        self.assertEqual(process.returncode, 0)
+        self.assertIn('check_systemd.py', process.stdout)
+
+    def test_option_help(self):
+        process = subprocess.run(
+            ['./check_systemd.py', '--help'],
+            encoding='utf-8',
+            stdout=subprocess.PIPE
+        )
+        self.assertEqual(process.returncode, 0)
+        self.assertIn('check_systemd.py', process.stdout)
+
 
 if __name__ == '__main__':
     unittest.main()
