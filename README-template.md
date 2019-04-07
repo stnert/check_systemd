@@ -12,6 +12,14 @@ You can also test a single service with -s parameter.
 
 Released under GNU GPLv2 License.
 
+## Installation
+
+```
+pip3 install check_systemd
+```
+
+## Command line interface
+
 ```
 {{ argparse }}
 ```
