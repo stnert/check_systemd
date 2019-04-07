@@ -1,2 +1,3 @@
 include LICENSE
 prune test
+prune systemd_source_code
