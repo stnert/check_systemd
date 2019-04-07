@@ -82,6 +82,32 @@ class SystemdctlListUnitsResource(nagiosplugin.Resource):
             yield Metric(name='all', value=None, context='unit')
 
 
+def format_timespan_to_seconds(fmt_timespan):
+    """Convert a timespan format string into secondes.
+
+    :param str fmt_timespan: for example `2.345s` or `3min 45.234s`
+
+    :return: The seconds
+    :rtype: float
+    """
+    seconds = {
+        'y': 365 * 24 * 60 * 60,
+        'month': 30 * 24 * 60 * 60,
+        'w': 7 * 24 * 60 * 60,
+        'd': 24 * 60 * 60,
+        'h': 60 * 60,
+        'min': 60,
+        's': 1,
+    }
+    result = 0
+    for span in fmt_timespan.split():
+        match = re.search(r'([\d\.]+)([a-z]+)', span)
+        value = match.group(1)
+        unit = match.group(2)
+        result += float(value) * seconds[unit]
+    return round(float(result), 3)
+
+
 class SystemdAnalyseResource(nagiosplugin.Resource):
 
     name = 'SYSTEMD'
@@ -101,9 +127,13 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
             raise nagiosplugin.CheckError(stderr)
 
         if stdout:
-            match = re.search(r' = ([\d\.]+)s', stdout)
+            # Second line:
+            # graphical.target reached after 1min 2.154s in userspace
+            match = re.search(r'reached after (.+) in userspace',
+                              stdout.decode('utf-8'))
 
-        yield Metric(name='startup_time', value=float(match.group(1)),
+        yield Metric(name='startup_time',
+                     value=format_timespan_to_seconds(match.group(1)),
                      context='startup_time')
 
 
