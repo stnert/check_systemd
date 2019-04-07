@@ -184,7 +184,7 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 2)
         self.assertEqual(
             process.stdout,
-            'SYSTEMD CRITICAL - test.service: failed | failed_units=1\n'
+            'SYSTEMD CRITICAL - test.service: failed | units_failed=1\n'
         )
 
     def test_option_unit_inactive(self):

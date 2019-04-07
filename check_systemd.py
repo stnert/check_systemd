@@ -86,7 +86,6 @@ class ServiceStatus(nagiosplugin.Resource):
 
     def __init__(self, *args, **kwargs):
         self.unit = kwargs.pop('unit')
-        self.failed_units = 0
         super(nagiosplugin.Resource, self).__init__(*args, **kwargs)
 
     def probe(self):
@@ -109,7 +108,7 @@ class ServiceStatus(nagiosplugin.Resource):
             for line in io.StringIO(stdout.decode('utf-8')):
                 active = line.strip()
                 if active == 'failed':
-                    yield Metric(name='failed_units', value=1,
+                    yield Metric(name='units_failed', value=1,
                                  context='performance_data')
                 yield Metric(name=self.unit, value=active, context='unit')
 
