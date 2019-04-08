@@ -136,10 +136,18 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
             raise nagiosplugin.CheckError(stderr)
 
         if stdout:
+            stdout = stdout.decode('utf-8')
+            # First line:
+            # Startup finished in 1.672s (kernel) + 21.378s (userspace) =
+            # 23.050s
+
+            # On raspian no second line
             # Second line:
             # graphical.target reached after 1min 2.154s in userspace
-            match = re.search(r'reached after (.+) in userspace',
-                              stdout.decode('utf-8'))
+            match = re.search(r'reached after (.+) in userspace', stdout)
+
+            if not match:
+                match = re.search(r' = (.+)\n', stdout)
 
         yield Metric(name='startup_time',
                      value=format_timespan_to_seconds(match.group(1)),

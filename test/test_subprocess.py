@@ -98,7 +98,7 @@ class TestSubprocess(unittest.TestCase):
         self.assertEqual(
             process.stdout,
             'SYSTEMD CRITICAL - rtkit-daemon.service: failed, smartd.service: '
-            'failed | count_units=3 startup_time=12.154;60;120 '
+            'failed | count_units=3 startup_time=46.292;60;120 '
             'units_activating=0 units_active=1 units_failed=2 '
             'units_inactive=0\n'
         )
@@ -117,7 +117,7 @@ class TestSubprocess(unittest.TestCase):
             'smartd.service: failed\n'
             'critical: rtkit-daemon.service: failed\n'
             'critical: smartd.service: failed\n'
-            '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
+            '| count_units=3 startup_time=46.292;60;120 units_activating=0 '
             'units_active=1 units_failed=2 units_inactive=0\n'
         )
 

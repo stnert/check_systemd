@@ -11,6 +11,7 @@ class TestUnit(unittest.TestCase):
         self.assertEqual(_to_sec('1min 1s'), 61)
         self.assertEqual(_to_sec('1min 1.123s'), 61.123)
         self.assertEqual(_to_sec('1min 2.15s'), 62.15)
+        self.assertEqual(_to_sec('34min 46.292s'), 2086.292)
 
 
 if __name__ == '__main__':
