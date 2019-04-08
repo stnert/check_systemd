@@ -23,6 +23,9 @@ pip3 install check_systemd
 ```
 usage: nosetests [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-v] [-V] [-w SECONDS]
 
+Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
+Copyright (c) 2019 Josef Friedrich <josef@friedrich.rocks>
+
 Nagios / Icinga monitoring plugin to check systemd for failed units.
 
 optional arguments:
@@ -38,6 +41,14 @@ optional arguments:
   -V, --version         show program's version number and exit
   -w SECONDS, --warning SECONDS
                         Startup time in seconds to result in warning status.
+
+Performance data:
+  - count_units
+  - startup_time
+  - units_activating
+  - units_active
+  - units_failed
+  - units_inactive
 
 ```
 

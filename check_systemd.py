@@ -15,7 +15,7 @@ import re
 import nagiosplugin
 from nagiosplugin import Metric
 
-__version__ = '2.0.3'
+__version__ = '2.0.4'
 
 
 class SystemdctlListUnitsResource(nagiosplugin.Resource):
@@ -269,8 +269,20 @@ class SystemdSummary(nagiosplugin.Summary):
 
 def get_argparser():
     parser = argparse.ArgumentParser(
-        description='Nagios / Icinga monitoring plugin to check systemd for '
-                    'failed units.'
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=  # noqa: E251
+        'Copyright (c) 2014-18 Andrea Briganti a.k.a \'Kbyte\' <kbytesys@gmail.com>\n'  # noqa: E501
+        'Copyright (c) 2019 Josef Friedrich <josef@friedrich.rocks>\n'
+        '\n'
+        'Nagios / Icinga monitoring plugin to check systemd for failed units.\n',  # noqa: E501
+        epilog=  # noqa: E251
+        'Performance data:\n'
+        '  - count_units\n'
+        '  - startup_time\n'
+        '  - units_activating\n'
+        '  - units_active\n'
+        '  - units_failed\n'
+        '  - units_inactive\n',
     )
 
     exclusive_group = parser.add_mutually_exclusive_group()
