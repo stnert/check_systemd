@@ -5,7 +5,7 @@
 
 Nagios / Icinga monitoring plugin to check systemd for failed units.
 
-This Python script will report a degraded system to Nagios / Icinage.
+This Python script will report a degraded system to Nagios / Icinga.
 It requires only the nagiosplugin library.
 
 You can also test a single service with -s parameter.
@@ -28,6 +28,7 @@ pip3 install check_systemd
 
 * https://github.com/Josef-Friedrich/check_systemd
 * https://exchange.icinga.com/joseffriedrich/check_systemd
+* https://exchange.nagios.org/directory/Plugins/System-Metrics/Processes/check_systemd
 
 ## Testing
 
