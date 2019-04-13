@@ -149,9 +149,10 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
             if not match:
                 match = re.search(r' = (.+)\n', stdout)
 
-        yield Metric(name='startup_time',
-                     value=format_timespan_to_seconds(match.group(1)),
-                     context='startup_time')
+            if match:
+                yield Metric(name='startup_time',
+                             value=format_timespan_to_seconds(match.group(1)),
+                             context='startup_time')
 
 
 class SystemctlIsActiveResource(nagiosplugin.Resource):
