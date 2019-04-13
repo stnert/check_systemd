@@ -15,7 +15,7 @@ import re
 import nagiosplugin
 from nagiosplugin import Metric
 
-__version__ = '2.0.4'
+__version__ = '2.0.6'
 
 
 class SystemdctlListUnitsResource(nagiosplugin.Resource):
@@ -149,6 +149,8 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
             if not match:
                 match = re.search(r' = (.+)\n', stdout)
 
+            # Output when boot process is not finished:
+            # Bootup is not yet finished. Please try again later.
             if match:
                 yield Metric(name='startup_time',
                              value=format_timespan_to_seconds(match.group(1)),
