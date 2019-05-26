@@ -21,7 +21,7 @@ class AddBin(object):
         os.environ['PATH'] = self.old_path
 
 
-class TestSubprocess(unittest.TestCase):
+class TestOk(unittest.TestCase):
 
     def test_ok(self):
         with AddBin('bin/ok'):
@@ -55,6 +55,9 @@ class TestSubprocess(unittest.TestCase):
             'units_active=275 units_failed=0 units_inactive=111\n'
         )
 
+
+class TestFailure(unittest.TestCase):
+
     def test_failure(self):
         with AddBin('bin/failure'):
             process = subprocess.run(
@@ -86,6 +89,9 @@ class TestSubprocess(unittest.TestCase):
             '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
             'units_active=1 units_failed=1 units_inactive=1\n'
         )
+
+
+class TestMultipleFailure(unittest.TestCase):
 
     def test_failure_multiple(self):
         with AddBin('bin/multiple_failure'):
@@ -120,6 +126,9 @@ class TestSubprocess(unittest.TestCase):
             '| count_units=3 startup_time=46.292;60;120 units_activating=0 '
             'units_active=1 units_failed=2 units_inactive=0\n'
         )
+
+
+class TestCli(unittest.TestCase):
 
     def test_exclusive_group(self):
         process = subprocess.run(
@@ -196,6 +205,36 @@ class TestSubprocess(unittest.TestCase):
             'units_inactive=1\n'
         )
 
+    def test_option_version(self):
+        process = subprocess.run(
+            ['./check_systemd.py', '--version'],
+            encoding='utf-8',
+            stdout=subprocess.PIPE
+        )
+        self.assertEqual(process.returncode, 0)
+        self.assertIn('check_systemd.py', process.stdout)
+
+    def test_option_help(self):
+        process = subprocess.run(
+            ['./check_systemd.py', '--help'],
+            encoding='utf-8',
+            stdout=subprocess.PIPE
+        )
+        self.assertEqual(process.returncode, 0)
+        self.assertIn('check_systemd.py', process.stdout)
+
+    def test_entry_point(self):
+        process = subprocess.run(
+            ['check_systemd', '--help'],
+            encoding='utf-8',
+            stdout=subprocess.PIPE
+        )
+        self.assertEqual(process.returncode, 0)
+        self.assertIn('check_systemd', process.stdout)
+
+
+class TestOptionUnit(unittest.TestCase):
+
     def test_option_unit_ok(self):
         with AddBin('bin/is_active/active'):
             process = subprocess.run(
@@ -235,32 +274,39 @@ class TestSubprocess(unittest.TestCase):
             'SYSTEMD CRITICAL - test.service: inactive\n'
         )
 
-    def test_option_version(self):
-        process = subprocess.run(
-            ['./check_systemd.py', '--version'],
-            encoding='utf-8',
-            stdout=subprocess.PIPE
-        )
-        self.assertEqual(process.returncode, 0)
-        self.assertIn('check_systemd.py', process.stdout)
 
-    def test_option_help(self):
-        process = subprocess.run(
-            ['./check_systemd.py', '--help'],
-            encoding='utf-8',
-            stdout=subprocess.PIPE
-        )
-        self.assertEqual(process.returncode, 0)
-        self.assertIn('check_systemd.py', process.stdout)
+class TestBootupNotFinished(unittest.TestCase):
 
-    def test_entry_point(self):
-        process = subprocess.run(
-            ['check_systemd', '--help'],
-            encoding='utf-8',
-            stdout=subprocess.PIPE
-        )
+    def test_bootup_not_finished(self):
+        with AddBin('bin/bootup_not_finished'):
+            process = subprocess.run(
+                ['./check_systemd.py'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
         self.assertEqual(process.returncode, 0)
-        self.assertIn('check_systemd', process.stdout)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - all '
+            '| count_units=386 units_activating=0 '
+            'units_active=275 units_failed=0 units_inactive=111\n'
+        )
+
+    def test_bootup_not_finished_verbose(self):
+        with AddBin('bin/bootup_not_finished'):
+            process = subprocess.run(
+                ['./check_systemd.py', '--verbose'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - all\n'
+            'ok: all\n'
+            '| count_units=386 units_activating=0 '
+            'units_active=275 units_failed=0 units_inactive=111\n'
+        )
 
 
 if __name__ == '__main__':

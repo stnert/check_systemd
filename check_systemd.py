@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 You can redistribute it and/or modify it under the terms of the GNU General
@@ -15,7 +15,7 @@ import re
 import nagiosplugin
 from nagiosplugin import Metric
 
-__version__ = '2.0.6'
+__version__ = '2.0.7'
 
 
 class SystemdctlListUnitsResource(nagiosplugin.Resource):
