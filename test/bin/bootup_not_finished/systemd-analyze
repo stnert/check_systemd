@@ -1,3 +1,5 @@
 #! /bin/sh
 
 echo "Bootup is not yet finished. Please try again later."
+
+exit 1
