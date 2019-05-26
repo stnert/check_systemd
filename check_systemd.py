@@ -349,8 +349,13 @@ def main():
         objects += [
             SystemdctlListUnitsResource(excludes=args.exclude),
             PerformanceDataContext(),
-            SystemdAnalyseResource(),
+
         ]
+        analyse = subprocess.run(['systemd-analyze'], stderr=subprocess.PIPE,
+                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        # systemd-analyze: boot not finshed exists with 1
+        if analyse.returncode == 0:
+            objects.append(SystemdAnalyseResource())
 
     objects += [
         UnitContext(),
