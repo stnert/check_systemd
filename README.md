@@ -57,7 +57,7 @@ Performance data:
 
 * https://github.com/Josef-Friedrich/check_systemd
 * https://exchange.icinga.com/joseffriedrich/check_systemd
-* https://exchange.nagios.org/directory/Plugins/System-Metrics/Processes/check_systemd
+* https://exchange.nagios.org/directory/Plugins/System-Metrics/Processes/check_systemd/details
 
 ## Testing
 
