@@ -311,7 +311,7 @@ def get_argparser():
         '-u', '--unit',
         type=str,
         dest='unit',
-        help='Name of the systemd unit that is beeing tested.',
+        help='Name of the systemd unit that is being tested.',
     )
 
     parser.add_argument(
