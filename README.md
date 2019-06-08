@@ -21,7 +21,8 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: nosetests [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-v] [-V] [-w SECONDS]
+usage: check_systemd [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-v] [-V]
+                     [-w SECONDS]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
 Copyright (c) 2019 Josef Friedrich <josef@friedrich.rocks>
@@ -36,7 +37,7 @@ optional arguments:
                         Exclude a systemd unit from the checks. This option
                         can be applied multiple times. For example: -e mnt-
                         data.mount -e task.service.
-  -u UNIT, --unit UNIT  Name of the systemd unit that is beeing tested.
+  -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit
   -w SECONDS, --warning SECONDS
