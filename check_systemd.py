@@ -103,6 +103,7 @@ def format_timespan_to_seconds(fmt_timespan):
         'h': 60 * 60,
         'min': 60,
         's': 1,
+        'ms': 0.001,
     }
     result = 0
     for span in fmt_timespan.split():
