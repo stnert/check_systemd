@@ -33,8 +33,7 @@ optional arguments:
   -c SECONDS, --critical SECONDS
                         Startup time in seconds to result in critical status.
   -e UNIT, --exclude UNIT
-                        Exclude a systemd unit from the checks. This option can be applied multiple times. For example: -e mnt-data.mount
-                        -e task.service.
+                        Exclude a systemd unit from the checks. This option can be applied multiple times. For example: -e mnt-data.mount -e task.service.
   -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit

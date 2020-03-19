@@ -66,8 +66,15 @@ class SystemdctlListUnitsResource(nagiosplugin.Resource):
                 unit = split_line[0]
                 # failed
                 active = split_line[2]
-                # Only count not excludes units.
+                # Only count not excluded units.
                 if unit not in self.excludes:
+                    # Quick fix:
+                    # Issue on Arch: “not-found” in column ACTIVE
+                    # maybe cli table output changed on newer versions of
+                    # systemd?
+                    # maybe .split() is not working correctly?
+                    if active not in units:
+                        units[active] = []
                     units[active].append(unit)
                     count_units += 1
 
@@ -338,7 +345,6 @@ def get_argparser():
     return parser
 
 
-@nagiosplugin.guarded
 def main():
     args = get_argparser().parse_args()
 
