@@ -5,7 +5,7 @@ You can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation, either version 2
 of the License.
 Copyright 2014-18 Andrea Briganti a.k.a 'Kbyte'
-Copyright 2019 Josef Friedrich
+Copyright 2019-20 Josef Friedrich
 """
 import io
 import subprocess
@@ -15,7 +15,7 @@ import re
 import nagiosplugin
 from nagiosplugin import Metric
 
-__version__ = '2.0.9'
+__version__ = '2.0.11'
 
 
 class SystemdctlListUnitsResource(nagiosplugin.Resource):

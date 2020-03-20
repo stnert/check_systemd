@@ -33,6 +33,18 @@ pip3 install check_systemd
 ## Testing
 
 ```
+pyenv install 3.7.6
+pyenv install 3.8.1
+pyenv local 3.7.6 3.8.1
 pip3 install tox
 tox
+```
+
+# Deploying
+
+Edit version number in check_systemd.py (without `v`)
+
+```
+git tag v2.0.11
+git push --tags
 ```
