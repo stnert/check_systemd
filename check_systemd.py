@@ -4,8 +4,7 @@
 You can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation, either version 2
 of the License.
-Copyright 2014-18 Andrea Briganti a.k.a 'Kbyte'
-Copyright 2019-20 Josef Friedrich
+Copyright see argparse help text.
 """
 import io
 import subprocess
@@ -283,7 +282,7 @@ def get_argparser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=  # noqa: E251
         'Copyright (c) 2014-18 Andrea Briganti a.k.a \'Kbyte\' <kbytesys@gmail.com>\n'  # noqa: E501
-        'Copyright (c) 2019 Josef Friedrich <josef@friedrich.rocks>\n'
+        'Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>\n'
         '\n'
         'Nagios / Icinga monitoring plugin to check systemd for failed units.\n',  # noqa: E501
         epilog=  # noqa: E251

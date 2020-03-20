@@ -24,7 +24,7 @@ pip3 install check_systemd
 usage: check_systemd [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-v] [-V] [-w SECONDS]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
-Copyright (c) 2019 Josef Friedrich <josef@friedrich.rocks>
+Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
 
 Nagios / Icinga monitoring plugin to check systemd for failed units.
 
@@ -60,6 +60,9 @@ Performance data:
 ## Testing
 
 ```
+pyenv install 3.7.6
+pyenv install 3.8.1
+pyenv local 3.7.6 3.8.1
 pip3 install tox
 tox
 ```
