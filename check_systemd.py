@@ -26,9 +26,9 @@ class SystemdctlListUnitsResource(nagiosplugin.Resource):
     def __init__(self, excludes=[]):
         self.excludes = excludes
 
-    def re_match(self,unit):
+    def re_match(self, unit):
         for exclude in self.excludes:
-            if re.match(exclude,unit):
+            if re.match(exclude, unit):
                 return(True)
         return(False)
 
