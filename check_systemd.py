@@ -26,6 +26,12 @@ class SystemdctlListUnitsResource(nagiosplugin.Resource):
     def __init__(self, excludes=[]):
         self.excludes = excludes
 
+    def re_match(self,unit):
+        for exclude in self.excludes:
+            if re.match(exclude,unit):
+                return(True)
+        return(False)
+
     def probe(self):
         """Query system state and return metrics.
 
@@ -66,7 +72,7 @@ class SystemdctlListUnitsResource(nagiosplugin.Resource):
                 # failed
                 active = split_line[2]
                 # Only count not excluded units.
-                if unit not in self.excludes:
+                if not self.re_match(unit):
                     # Quick fix:
                     # Issue on Arch: “not-found” in column ACTIVE
                     # maybe cli table output changed on newer versions of
@@ -78,7 +84,7 @@ class SystemdctlListUnitsResource(nagiosplugin.Resource):
                     count_units += 1
 
             for unit in units['failed']:
-                if unit not in self.excludes:
+                if not self.re_match(unit):
                     yield Metric(name=unit, value='failed', context='unit')
 
             for active, unit_names in units.items():
