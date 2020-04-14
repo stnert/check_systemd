@@ -176,7 +176,7 @@ class SystemctlIsActiveResource(nagiosplugin.Resource):
 
     def __init__(self, *args, **kwargs):
         self.unit = kwargs.pop('unit')
-        super(nagiosplugin.Resource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def probe(self):
         """Query system state and return metrics.
