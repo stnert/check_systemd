@@ -37,8 +37,9 @@ optional arguments:
   -c SECONDS, --critical SECONDS
                         Startup time in seconds to result in critical status.
   -e UNIT, --exclude UNIT
-                        Exclude a systemd unit from the checks. This option can be applied multiple times. For example: -e mnt-data.mount -e
-                        task.service.
+                        Exclude a systemd unit from the checks. This option can be applied multiple times, for example: -e mnt-data.mount -e
+                        task.service. Regular expressions can be used to exclude multiple units at once, for example: -e 'user@\d+\.service'. For
+                        more informations see the Python documentation about regular expressions (https://docs.python.org/3/library/re.html).
   -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit

@@ -14,7 +14,7 @@ import re
 import nagiosplugin
 from nagiosplugin import Metric
 
-__version__ = '2.0.11'
+__version__ = '2.1.0'
 
 
 class SystemdctlListUnitsResource(nagiosplugin.Resource):
@@ -316,8 +316,13 @@ def get_argparser():
         action='append',
         default=[],
         help='Exclude a systemd unit from the checks. This option can be '
-             'applied multiple times. For example: -e mnt-data.mount -e '
-             'task.service.',
+             'applied multiple times, for example: -e mnt-data.mount -e '
+             'task.service. Regular expressions can be used to exclude '
+             'multiple units at once, for example: '
+             '-e \'user@\\d+\\.service\'. '
+             'For more informations see the Python documentation about '
+             'regular expressions '
+             '(https://docs.python.org/3/library/re.html).',
     )
 
     exclusive_group.add_argument(

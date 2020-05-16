@@ -1,0 +1,7 @@
+#! /bin/sh
+
+echo "rtkit-daemon.service                                                                                    loaded    inactive   running   RealtimeKit Scheduling Policy Service
+setvtrgb.service                                                                                        loaded    active   exited    Set console scheme
+user@123.service                                                                                        loaded    failed   failed    User Manager for UID 123
+user@234.service                                                                                        loaded    failed   failed    User Manager for UID 234
+user@345.service                                                                                        loaded    failed   failed    User Manager for UID 345"

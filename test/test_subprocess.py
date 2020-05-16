@@ -205,6 +205,38 @@ class TestCli(unittest.TestCase):
             'units_inactive=1\n'
         )
 
+    def test_option_exclude_regexp(self):
+        with AddBin('bin/regexp_excludes'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-e', 'user@\\d+\\.service'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE
+            )
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - all | count_units=2 '
+            'startup_time=12.154;60;120 '
+            'units_activating=0 units_active=1 units_failed=0 '
+            'units_inactive=1\n'
+        )
+
+    def test_option_exclude_regexp_dot(self):
+        with AddBin('bin/regexp_excludes'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-e', '.*'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE
+            )
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - all | count_units=0 '
+            'startup_time=12.154;60;120 '
+            'units_activating=0 units_active=0 units_failed=0 '
+            'units_inactive=0\n'
+        )
+
     def test_option_version(self):
         process = subprocess.run(
             ['./check_systemd.py', '--version'],
