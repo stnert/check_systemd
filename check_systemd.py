@@ -102,17 +102,29 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
 def format_timespan_to_seconds(fmt_timespan):
     """Convert a timespan format string into secondes.
 
-    :param str fmt_timespan: for example `2.345s` or `3min 45.234s`
+    https://github.com/systemd/systemd/blob/master/src/basic/time-util.c#L357
+
+    :param str fmt_timespan: for example `2.345s` or `3min 45.234s` or
+      `34min left` or `2 months 8 days`
 
     :return: The seconds
     :rtype: float
     """
+    for replacement in [
+        ['years', 'y'],
+        ['months', 'month'],
+        ['weeks', 'w'],
+        ['days', 'd'],
+    ]:
+        fmt_timespan = fmt_timespan.replace(
+            ' ' + replacement[0], replacement[1]
+        )
     seconds = {
-        'y': 365 * 24 * 60 * 60,
-        'month': 30 * 24 * 60 * 60,
-        'w': 7 * 24 * 60 * 60,
-        'd': 24 * 60 * 60,
-        'h': 60 * 60,
+        'y': 31536000,  # 365 * 24 * 60 * 60
+        'month': 2592000,  # 30 * 24 * 60 * 60
+        'w': 604800,  # 7 * 24 * 60 * 60
+        'd': 86400,  # 24 * 60 * 60
+        'h': 3600,  # 60 * 60
         'min': 60,
         's': 1,
         'ms': 0.001,
@@ -120,9 +132,10 @@ def format_timespan_to_seconds(fmt_timespan):
     result = 0
     for span in fmt_timespan.split():
         match = re.search(r'([\d\.]+)([a-z]+)', span)
-        value = match.group(1)
-        unit = match.group(2)
-        result += float(value) * seconds[unit]
+        if match:
+            value = match.group(1)
+            unit = match.group(2)
+            result += float(value) * seconds[unit]
     return round(float(result), 3)
 
 
@@ -175,6 +188,11 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
     detected: dead / inactive timers.
     """
 
+    def __init__(self, *args, **kwargs):
+        self.warning = kwargs.pop('warning')
+        self.critical = kwargs.pop('critical')
+        super().__init__(*args, **kwargs)
+
     name = 'SYSTEMD'
 
     column_names = [
@@ -196,7 +214,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
         boundaries = self.column_boundaries[
             self.column_names.index(column_name)
         ]
-        return row[boundaries[0]:boundaries[1]]
+        return row[boundaries[0]:boundaries[1]].strip()
 
     def probe(self):
         """
@@ -226,16 +244,31 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
         if stdout:
             lines = stdout.decode('utf-8').splitlines()
             table_heading = lines[0]
-            # Remove the first line because it is the header.
-            # Remove the two last lines: empty line + "XX timers listed."
-            # table_body = lines[1:-2]
             self.column_boundaries = self.detect_column_boundaries(
                 table_heading
             )
-            # for row in table_body:
-            #     print(self.get_column_text(row, 'UNIT'))
+            # Remove the first line because it is the header.
+            # Remove the two last lines: empty line + "XX timers listed."
+            table_body = lines[1:-2]
 
-        yield Metric(name='default', value=True)
+            state = nagiosplugin.Ok
+
+            for row in table_body:
+                next_date_time = self.get_column_text(row, 'NEXT')
+                if next_date_time == 'n/a':
+                    passed = format_timespan_to_seconds(
+                        self.get_column_text(row, 'PASSED')
+                    )
+                    if passed >= self.critical:
+                        state = nagiosplugin.Critical
+                    elif passed >= self.warning:
+                        state = nagiosplugin.Warn
+
+                yield Metric(
+                    name=self.get_column_text(row, 'UNIT'),
+                    value=state,
+                    context='dead_timers'
+                )
 
 
 class SystemctlIsActiveResource(nagiosplugin.Resource):
@@ -295,6 +328,27 @@ class UnitContext(nagiosplugin.Context):
                                    hint=hint)
         else:
             return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
+
+
+class DeadTimersContext(nagiosplugin.Context):
+
+    def __init__(self):
+        super(DeadTimersContext, self).__init__('dead_timers')
+
+    def evaluate(self, metric, resource):
+        """Determines state of a given metric.
+
+        :param metric: associated metric that is to be evaluated
+        :param resource: resource that produced the associated metric
+            (may optionally be consulted)
+        :returns: :class:`~.result.Result`
+        """
+        if not metric.value:
+            return self.result_cls(nagiosplugin.Critical, metric=metric,
+                                   hint=metric.name)
+        else:
+            return self.result_cls(nagiosplugin.Ok, metric=metric,
+                                   hint=metric.name)
 
 
 class PerformanceDataContext(nagiosplugin.Context):
@@ -410,10 +464,19 @@ def get_argparser():
     )
 
     parser.add_argument(
-        '--dead-timers-critical',
+        '-W', '--dead-timers-warning',
+        type=float,
+        default=60 * 60 * 24 * 6,
+        help='Time ago in seconds for dead / inactive timers to trigger a '
+             'warning state (by default 6 days).'
+    )
+
+    parser.add_argument(
+        '-C', '--dead-timers-critical',
         type=float,
         default=60 * 60 * 24 * 7,
-        help='Critical time ago in seconds for dead / inactive timers.'
+        help='Time ago in seconds for dead / inactive timers to trigger a '
+             'critical state (by default 7 days).'
     )
 
     parser.add_argument(
@@ -445,7 +508,13 @@ def main():
     objects = []
 
     if args.dead_timers:
-        objects.append(SystemctlListTimersResource())
+        objects += [
+            SystemctlListTimersResource(
+                warning=args.dead_timers_warning,
+                critical=args.dead_timers_critical,
+            ),
+            DeadTimersContext()
+        ]
 
     if args.unit:
         objects.append(SystemctlIsActiveResource(unit=args.unit))

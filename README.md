@@ -26,8 +26,8 @@ pip3 install check_systemd
 
 ```
 usage: check_systemd [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-t]
-                     [--dead-timers-critical DEAD_TIMERS_CRITICAL] [-v] [-V]
-                     [-w SECONDS]
+                     [-W DEAD_TIMERS_WARNING] [-C DEAD_TIMERS_CRITICAL] [-v]
+                     [-V] [-w SECONDS]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
 Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
@@ -48,8 +48,12 @@ optional arguments:
                         (https://docs.python.org/3/library/re.html).
   -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
   -t, --dead-timers     Check for dead / inactive timers.
-  --dead-timers-critical DEAD_TIMERS_CRITICAL
-                        Critical time ago in seconds for dead / inactive timers.
+  -W DEAD_TIMERS_WARNING, --dead-timers-warning DEAD_TIMERS_WARNING
+                        Time ago in seconds for dead / inactive timers to
+                        trigger a warning state (by default 6 days).
+  -C DEAD_TIMERS_CRITICAL, --dead-timers-critical DEAD_TIMERS_CRITICAL
+                        Time ago in seconds for dead / inactive timers to
+                        trigger a critical state (by default 7 days).
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit
   -w SECONDS, --warning SECONDS
