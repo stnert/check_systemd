@@ -354,7 +354,7 @@ class SystemdSummary(nagiosplugin.Summary):
 def get_argparser():
     parser = argparse.ArgumentParser(
         prog='check_systemd',  # To get the right command name in the README.
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(prog, width=80),  # noqa: E501
         description=  # noqa: E251
         'Copyright (c) 2014-18 Andrea Briganti a.k.a \'Kbyte\' <kbytesys@gmail.com>\n'  # noqa: E501
         'Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>\n'

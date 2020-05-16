@@ -25,7 +25,9 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: check_systemd [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-t] [--dead-timers-critical DEAD_TIMERS_CRITICAL] [-v] [-V] [-w SECONDS]
+usage: check_systemd [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-t]
+                     [--dead-timers-critical DEAD_TIMERS_CRITICAL] [-v] [-V]
+                     [-w SECONDS]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
 Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
@@ -37,8 +39,13 @@ optional arguments:
   -c SECONDS, --critical SECONDS
                         Startup time in seconds to result in critical status.
   -e UNIT, --exclude UNIT
-                        Exclude a systemd unit from the checks. This option can be applied multiple times, for example: -e mnt-data.mount -e task.service. Regular expressions can be used to exclude multiple
-                        units at once, for example: -e 'user@\d+\.service'. For more informations see the Python documentation about regular expressions (https://docs.python.org/3/library/re.html).
+                        Exclude a systemd unit from the checks. This option can
+                        be applied multiple times, for example: -e mnt-
+                        data.mount -e task.service. Regular expressions can be
+                        used to exclude multiple units at once, for example: -e
+                        'user@\d+\.service'. For more informations see the
+                        Python documentation about regular expressions
+                        (https://docs.python.org/3/library/re.html).
   -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
   -t, --dead-timers     Check for dead / inactive timers.
   --dead-timers-critical DEAD_TIMERS_CRITICAL
