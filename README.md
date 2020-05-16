@@ -25,7 +25,7 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: nosetests [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-v] [-V] [-w SECONDS]
+usage: check_systemd [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-v] [-V] [-w SECONDS]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
 Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
