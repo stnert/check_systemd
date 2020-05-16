@@ -12,7 +12,7 @@ This Python script will report a degraded system to your monitoring solution.
 It requires only the
 [nagiosplugin](https://nagiosplugin.readthedocs.io/en/stable) library.
 
-You can also test a single service with the `-s` parameter.
+You can also test a single service with the `-u, --unit` parameter.
 
 Released under GNU GPLv2 License.
 
