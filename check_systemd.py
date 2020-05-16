@@ -17,7 +17,7 @@ from nagiosplugin import Metric
 __version__ = '2.1.0'
 
 
-class SystemdctlListUnitsResource(nagiosplugin.Resource):
+class SystemctlListUnitsResource(nagiosplugin.Resource):
     """
     :param list excludes: A list of systemd unit names.
     """
@@ -286,8 +286,10 @@ class UnitContext(nagiosplugin.Context):
             (may optionally be consulted)
         :returns: :class:`~.result.Result`
         """
-        hint = '%s: %s' % (metric.name, metric.value) \
-            if metric.value else metric.name
+        if metric.value:
+            hint = '{}: {}'.format(metric.name, metric.value)
+        else:
+            hint = metric.name
         if metric.value and metric.value != 'active':
             return self.result_cls(nagiosplugin.Critical, metric=metric,
                                    hint=hint)
@@ -449,7 +451,7 @@ def main():
         objects.append(SystemctlIsActiveResource(unit=args.unit))
     else:
         objects += [
-            SystemdctlListUnitsResource(excludes=args.exclude),
+            SystemctlListUnitsResource(excludes=args.exclude),
             PerformanceDataContext(),
         ]
         analyse = subprocess.run(['systemd-analyze'], stderr=subprocess.PIPE,
