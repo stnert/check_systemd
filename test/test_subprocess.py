@@ -244,7 +244,7 @@ class TestCli(unittest.TestCase):
             stdout=subprocess.PIPE
         )
         self.assertEqual(process.returncode, 0)
-        self.assertIn('check_systemd.py', process.stdout)
+        self.assertIn('check_systemd', process.stdout)
 
     def test_option_help(self):
         process = subprocess.run(
@@ -253,7 +253,7 @@ class TestCli(unittest.TestCase):
             stdout=subprocess.PIPE
         )
         self.assertEqual(process.returncode, 0)
-        self.assertIn('check_systemd.py', process.stdout)
+        self.assertIn('check_systemd', process.stdout)
 
     def test_entry_point(self):
         process = subprocess.run(
