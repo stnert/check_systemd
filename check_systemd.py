@@ -170,6 +170,74 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
                              context='startup_time')
 
 
+class SystemctlListTimersResource(nagiosplugin.Resource):
+    """There is one type of systemd "degradation" which is normally not
+    detected: dead / inactive timers.
+    """
+
+    name = 'SYSTEMD'
+
+    column_names = [
+      'NEXT', 'LEFT', 'LAST', 'PASSED', 'UNIT', 'ACTIVATES'
+    ]
+
+    column_boundaries = None
+
+    def detect_column_boundaries(self, heading):
+        boundaries = []
+        previous_column_start = 0
+        for column_title in self.column_names[1:]:
+            next_column_start = heading.index(column_title)
+            boundaries.append([previous_column_start, next_column_start])
+            previous_column_start = next_column_start
+        return boundaries
+
+    def get_column_text(self, row, column_name):
+        boundaries = self.column_boundaries[
+            self.column_names.index(column_name)
+        ]
+        return row[boundaries[0]:boundaries[1]]
+
+    def probe(self):
+        """
+        :return: generator that emits
+          :class:`~nagiosplugin.metric.Metric` objects
+        """
+        try:
+            p = subprocess.Popen(['systemctl', '--all', 'list-timers'],
+                                 stderr=subprocess.PIPE,
+                                 stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE)
+            stdout, stderr = p.communicate()
+        except OSError as e:
+            raise nagiosplugin.CheckError(e)
+
+        if stderr:
+            raise nagiosplugin.CheckError(stderr)
+
+        # NEXT                          LEFT
+        # Sat 2020-05-16 15:11:15 CEST  34min left
+
+        # LAST                          PASSED
+        # Sat 2020-05-16 14:31:56 CEST  4min 20s ago
+
+        # UNIT             ACTIVATES
+        # apt-daily.timer  apt-daily.service
+        if stdout:
+            lines = stdout.decode('utf-8').splitlines()
+            table_heading = lines[0]
+            # Remove the first line because it is the header.
+            # Remove the two last lines: empty line + "XX timers listed."
+            # table_body = lines[1:-2]
+            self.column_boundaries = self.detect_column_boundaries(
+                table_heading
+            )
+            # for row in table_body:
+            #     print(self.get_column_text(row, 'UNIT'))
+
+        yield Metric(name='default', value=True)
+
+
 class SystemctlIsActiveResource(nagiosplugin.Resource):
 
     name = 'SYSTEMD'
@@ -333,6 +401,19 @@ def get_argparser():
     )
 
     parser.add_argument(
+        '-t', '--dead-timers',
+        action='store_true',
+        help='Check for dead / inactive timers.'
+    )
+
+    parser.add_argument(
+        '--dead-timers-critical',
+        type=float,
+        default=60 * 60 * 24 * 7,
+        help='Critical time ago in seconds for dead / inactive timers.'
+    )
+
+    parser.add_argument(
         '-v', '--verbose',
         action='count',
         default=0,
@@ -360,17 +441,19 @@ def main():
 
     objects = []
 
+    if args.dead_timers:
+        objects.append(SystemctlListTimersResource())
+
     if args.unit:
         objects.append(SystemctlIsActiveResource(unit=args.unit))
     else:
         objects += [
             SystemdctlListUnitsResource(excludes=args.exclude),
             PerformanceDataContext(),
-
         ]
         analyse = subprocess.run(['systemd-analyze'], stderr=subprocess.PIPE,
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        # systemd-analyze: boot not finshed exists with 1
+        # systemd-analyze: boot not finshed exits with 1
         if analyse.returncode == 0:
             objects.append(SystemdAnalyseResource())
 
