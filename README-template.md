@@ -36,25 +36,25 @@ pip3 install check_systemd
 
 ## Behind the scenes
 
-To detect failed units the monitorings scripts runs:
+To detect failed units this monitoring script runs:
 
 ```sh
 systemctl list-units --all --no-legend
 ```
 
-To get startup time:
+To get the startup time it executes:
 
 ```sh
 systemd-analyze
 ```
 
-`-u, --unit`:
+To check a specific  unit (`-u, --unit`) this command is executed:
 
 ```sh
 systemctl is-active <unit-name>
 ```
 
-To find dead timers:
+To find dead timers this plugin launches:
 
 ```sh
 systemctl list-timers --all
