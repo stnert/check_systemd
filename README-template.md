@@ -34,6 +34,32 @@ pip3 install check_systemd
 * https://exchange.icinga.com/joseffriedrich/check_systemd
 * https://exchange.nagios.org/directory/Plugins/System-Metrics/Processes/check_systemd/details
 
+## Behind the scenes
+
+To detect failed units the monitorings scripts runs:
+
+```sh
+systemctl list-units --all --no-legend
+```
+
+To get startup time:
+
+```sh
+systemd-analyze
+```
+
+`-u, --unit`:
+
+```sh
+systemctl is-active <unit-name>
+```
+
+To find dead timers:
+
+```sh
+systemctl list-timers --all
+```
+
 ## Testing
 
 ```

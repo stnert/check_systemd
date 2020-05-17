@@ -1,5 +1,0 @@
-#! /bin/sh
-
-echo "NEXT                          LEFT     LAST                          PASSED              UNIT                         ACTIVATES
-Sat 2020-05-16 23:34:57 CEST  20h left Fri 2020-05-15 23:34:57 CEST  3h 39min ago        systemd-tmpfiles-clean.timer systemd-tmpfiles-clean.service
-n/a                           n/a      Thu 2020-03-12 03:09:01 CET   2 months 4 days ago phpsessionclean.timer        phpsessionclean.service"

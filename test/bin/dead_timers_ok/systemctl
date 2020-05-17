@@ -1,4 +1,15 @@
-NEXT                          LEFT                  LAST                          PASSED               UNIT                                                                                          ACTIVATES
+#! /bin/sh
+
+case $@ in
+	'list-units --all --no-legend')
+		echo "sockets.target                                                                                          loaded    active   active    Sockets
+sound.target                                                                                            loaded    active   active    Sound Card
+swap.target                                                                                             loaded    active   active    Swap";
+		exit 0
+		;;
+
+	'list-timers --all')
+		echo "NEXT                          LEFT                  LAST                          PASSED               UNIT                                                                                          ACTIVATES
 Sat 2020-05-16 14:36:18 CEST  2s left               Sat 2020-05-16 14:33:56 CEST  2min 20s ago         dyndns-update-script_nnas_dev-eno1_ipvboth.timer                                              dyndns-update-script_nnas_dev-eno1_ipvboth.service
 Sat 2020-05-16 14:36:31 CEST  14s left              Sat 2020-05-16 14:34:31 CEST  1min 45s ago         dyndns-update-script_nuernberg_dev-eno1_ipv4.timer                                            dyndns-update-script_nuernberg_dev-eno1_ipv4.service
 Sat 2020-05-16 14:36:33 CEST  17s left              n/a                           n/a                  hblock.timer                                                                                  hblock.service
@@ -36,4 +47,8 @@ n/a                           n/a                   Sat 2020-05-16 14:31:56 CEST
 n/a                           n/a                   n/a                           n/a                  zfs-snapshot-recursive.timer
 n/a                           n/a                   n/a                           n/a                  zpool-scrub.timer
 
-80 timers listed.
+80 timers listed.";
+		exit 0
+		;;
+
+esac

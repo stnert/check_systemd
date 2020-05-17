@@ -222,7 +222,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
           :class:`~nagiosplugin.metric.Metric` objects
         """
         try:
-            p = subprocess.Popen(['systemctl', '--all', 'list-timers'],
+            p = subprocess.Popen(['systemctl', 'list-timers', '--all'],
                                  stderr=subprocess.PIPE,
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE)
@@ -251,10 +251,11 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
             # Remove the two last lines: empty line + "XX timers listed."
             table_body = lines[1:-2]
 
-            state = nagiosplugin.Ok
+            state = nagiosplugin.Ok  # ok
 
             for row in table_body:
                 next_date_time = self.get_column_text(row, 'NEXT')
+
                 if next_date_time == 'n/a':
                     passed = format_timespan_to_seconds(
                         self.get_column_text(row, 'PASSED')
@@ -263,9 +264,9 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
                         state = nagiosplugin.Critical
                     elif passed >= self.warning:
                         state = nagiosplugin.Warn
-
+                unit = self.get_column_text(row, 'UNIT')
                 yield Metric(
-                    name=self.get_column_text(row, 'UNIT'),
+                    name=unit,
                     value=state,
                     context='dead_timers'
                 )
@@ -343,12 +344,7 @@ class DeadTimersContext(nagiosplugin.Context):
             (may optionally be consulted)
         :returns: :class:`~.result.Result`
         """
-        if not metric.value:
-            return self.result_cls(nagiosplugin.Critical, metric=metric,
-                                   hint=metric.name)
-        else:
-            return self.result_cls(nagiosplugin.Ok, metric=metric,
-                                   hint=metric.name)
+        return self.result_cls(metric.value, metric=metric, hint=metric.name)
 
 
 class PerformanceDataContext(nagiosplugin.Context):
@@ -390,7 +386,7 @@ class SystemdSummary(nagiosplugin.Summary):
         """
         summary = []
         for result in results.most_significant:
-            if result.context.name in ['startup_time', 'unit']:
+            if result.context.name in ['startup_time', 'unit', 'dead_timers']:
                 summary.append(result)
         return ', '.join(['{0}'.format(result) for result in summary])
 
@@ -402,7 +398,7 @@ class SystemdSummary(nagiosplugin.Summary):
         """
         summary = []
         for result in results.most_significant:
-            if result.context.name in ['startup_time', 'unit']:
+            if result.context.name in ['startup_time', 'unit', 'dead_timers']:
                 summary.append('{0}: {1}'.format(result.state, result))
         return summary
 
@@ -432,7 +428,7 @@ def get_argparser():
         '-c', '--critical',
         metavar='SECONDS',
         default=120,
-        help='Startup time in seconds to result in critical status.',
+        help='Startup time in seconds to result in a critical status.',
     )
 
     exclusive_group.add_argument(
@@ -460,11 +456,20 @@ def get_argparser():
     parser.add_argument(
         '-t', '--dead-timers',
         action='store_true',
-        help='Check for dead / inactive timers.'
+        help='Detect dead / inactive timers. See the corresponding options '
+             '\'-W, --dead-timer-warning\' and '
+             '\'-C, --dead-timers-critical\'. '
+             'Dead timers are detected by parsing the output of '
+             '\'systemctl list-timers\'. '
+             'Dead timer rows displaying \'n/a\' in the NEXT and LEFT'
+             'columns and the time span in the column PASSED exceeds the '
+             'values specified with the options \'-W, --dead-timer-warning\' '
+             'and \'-C, --dead-timers-critical\'.'
     )
 
     parser.add_argument(
         '-W', '--dead-timers-warning',
+        metavar='SECONDS',
         type=float,
         default=60 * 60 * 24 * 6,
         help='Time ago in seconds for dead / inactive timers to trigger a '
@@ -473,6 +478,7 @@ def get_argparser():
 
     parser.add_argument(
         '-C', '--dead-timers-critical',
+        metavar='SECONDS',
         type=float,
         default=60 * 60 * 24 * 7,
         help='Time ago in seconds for dead / inactive timers to trigger a '
@@ -496,7 +502,7 @@ def get_argparser():
         '-w', '--warning',
         default=60,
         metavar='SECONDS',
-        help='Startup time in seconds to result in warning status.',
+        help='Startup time in seconds to result in a warning status.',
     )
 
     return parser

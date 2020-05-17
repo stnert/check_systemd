@@ -341,5 +341,78 @@ class TestBootupNotFinished(unittest.TestCase):
         )
 
 
+class TestDeadTimers(unittest.TestCase):
+
+    def test_dead_timers_1(self):
+        with AddBin('bin/dead_timers_1'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 2)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD CRITICAL - phpsessionclean.timer '
+            '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
+            'units_active=3 units_failed=0 units_inactive=0\n'
+        )
+
+    def test_dead_timers_2(self):
+        with AddBin('bin/dead_timers_2'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 2)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD CRITICAL - dfm-auto-jf.timer, '
+            'rsync_nrasp_serverway-etc-letsencrypt_etc-letsencrypt.timer '
+            '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
+            'units_active=3 units_failed=0 units_inactive=0\n'
+        )
+
+    def test_dead_timers_2_ok(self):
+        with AddBin('bin/dead_timers_2'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t', '-W', '2764801', '-C', '2764802'],
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 0)
+
+    def test_dead_timers_2_warning(self):
+        with AddBin('bin/dead_timers_2'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t', '-W', '2764799', '-C', '2764802'],
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 1)
+
+    def test_dead_timers_2_warning_equal(self):
+        with AddBin('bin/dead_timers_2'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t', '-W', '2764800', '-C', '2764802'],
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 1)
+
+    def test_dead_timers_ok(self):
+        with AddBin('bin/dead_timers_ok'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - all '
+            '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
+            'units_active=3 units_failed=0 units_inactive=0\n'
+        )
+
+
 if __name__ == '__main__':
     unittest.main()
