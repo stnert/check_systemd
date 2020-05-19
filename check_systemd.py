@@ -188,7 +188,8 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
     detected: dead / inactive timers.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, excludes=[], *args, **kwargs):
+        self.excludes = excludes
         self.warning = kwargs.pop('warning')
         self.critical = kwargs.pop('critical')
         super().__init__(*args, **kwargs)
@@ -200,6 +201,12 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
     ]
 
     column_boundaries = None
+
+    def re_match(self, unit):
+        for exclude in self.excludes:
+            if re.match(exclude, unit):
+                return(True)
+        return(False)
 
     def detect_column_boundaries(self, heading):
         boundaries = []
@@ -254,6 +261,9 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
             state = nagiosplugin.Ok  # ok
 
             for row in table_body:
+                unit = self.get_column_text(row, 'UNIT')
+                if self.re_match(unit):
+                    continue
                 next_date_time = self.get_column_text(row, 'NEXT')
 
                 if next_date_time == 'n/a':
@@ -264,7 +274,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
                         state = nagiosplugin.Critical
                     elif passed >= self.warning:
                         state = nagiosplugin.Warn
-                unit = self.get_column_text(row, 'UNIT')
+
                 yield Metric(
                     name=unit,
                     value=state,
@@ -528,6 +538,7 @@ def main():
     if args.dead_timers:
         objects += [
             SystemctlListTimersResource(
+                excludes=args.exclude,
                 warning=args.dead_timers_warning,
                 critical=args.dead_timers_critical,
             ),

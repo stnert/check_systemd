@@ -24,7 +24,7 @@ Sun 2020-05-17 00:00:00 CEST  12h left      Sat 2020-05-16 00:00:00 CEST  11h ag
 Sun 2020-05-17 00:00:00 CEST  12h left      Sat 2020-05-16 00:00:00 CEST  11h ago             oh-my-zsh_root.timer                                        oh-my-zsh_root.service
 Sun 2020-05-17 06:23:17 CEST  18h left      Sat 2020-05-16 06:16:55 CEST  5h 8min ago         apt-daily-upgrade.timer                                     apt-daily-upgrade.service
 n/a                           n/a           Tue 2020-04-07 05:49:00 CEST  1 months 1 days ago dfm-auto-jf.timer                                           dfm-auto-jf.service
-n/a                           n/a           Tue 2020-04-07 04:17:32 CEST  1 months 2 days ago rsync_nrasp_serverway-etc-letsencrypt_etc-letsencrypt.timer rsync_nrasp_serverway-etc-letsencrypt_etc-letsencrypt.service
+n/a                           n/a           Tue 2020-04-07 04:17:32 CEST  1 months 2 days ago rsync.timer                                                 rsync.service
 
 15 timers listed.";
 		exit 0

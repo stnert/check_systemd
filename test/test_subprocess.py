@@ -393,7 +393,7 @@ class TestDeadTimers(unittest.TestCase):
         self.assertEqual(
             process.stdout,
             'SYSTEMD CRITICAL - dfm-auto-jf.timer, '
-            'rsync_nrasp_serverway-etc-letsencrypt_etc-letsencrypt.timer '
+            'rsync.timer '
             '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
             'units_active=3 units_failed=0 units_inactive=0\n'
         )
@@ -436,6 +436,41 @@ class TestDeadTimers(unittest.TestCase):
             '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
             'units_active=3 units_failed=0 units_inactive=0\n'
         )
+
+    def test_dead_timers_exclude(self):
+        with AddBin('bin/dead_timers_2'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t', '-e', 'dfm-auto-jf.timer'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 2)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD CRITICAL - rsync.timer '
+            '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
+            'units_active=3 units_failed=0 units_inactive=0\n'
+        )
+
+    def test_dead_timers_exclude_multiple(self):
+        with AddBin('bin/dead_timers_2'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t',
+                 '-e', 'dfm-auto-jf.timer',
+                 '-e', 'rsync.timer'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 0)
+
+    def test_dead_timers_exclude_regexp(self):
+        with AddBin('bin/dead_timers_2'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-t', '-e', '.*timer'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 0)
 
 
 if __name__ == '__main__':

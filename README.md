@@ -48,7 +48,7 @@ optional arguments:
                         Don’t check the startup time. Using this option the
                         options '-w, --warning' and '-c, --critical' have no
                         effect. Performance data about the startup time is
-                        collected, but no critical, warning etc. state are
+                        collected, but no critical, warning etc. states are
                         triggered.
   -w SECONDS, --warning SECONDS
                         Startup time in seconds to result in a warning status.
