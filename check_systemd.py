@@ -447,17 +447,29 @@ def get_argparser():
     )
 
     parser.add_argument(
+        '-n', '--no-startup-time',
+        action='store_true',
+        default=False,
+        help='Don’t check the startup time. Using this option the options '
+             '\'-w, --warning\' and \'-c, --critical\' have no effect. '
+             'Performance data about the startup time is collected, but '
+             'no critical, warning etc. states are triggered.',
+    )
+
+    parser.add_argument(
         '-w', '--warning',
         default=60,
         metavar='SECONDS',
-        help='Startup time in seconds to result in a warning status.',
+        help='Startup time in seconds to result in a warning status. The'
+             'default is 60 seconds.',
     )
 
     parser.add_argument(
         '-c', '--critical',
         metavar='SECONDS',
         default=120,
-        help='Startup time in seconds to result in a critical status.',
+        help='Startup time in seconds to result in a critical status. The'
+             'default is 120 seconds.',
     )
 
     parser.add_argument(
@@ -529,21 +541,35 @@ def main():
             SystemctlListUnitsResource(excludes=args.exclude),
             PerformanceDataContext(),
         ]
-        analyse = subprocess.run(['systemd-analyze'], stderr=subprocess.PIPE,
-                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        analyse = subprocess.run(
+            ['systemd-analyze'],
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE
+        )
         # systemd-analyze: boot not finshed exits with 1
         if analyse.returncode == 0:
             objects.append(SystemdAnalyseResource())
 
     objects += [
         UnitContext(),
-        nagiosplugin.ScalarContext(
-            name='startup_time',
-            warning=args.warning,
-            critical=args.critical,
-        ),
         SystemdSummary()
     ]
+
+    if not args.no_startup_time:
+        objects.append(
+            nagiosplugin.ScalarContext(
+                name='startup_time',
+                warning=args.warning,
+                critical=args.critical,
+            )
+        )
+    else:
+        objects.append(
+            nagiosplugin.ScalarContext(
+                name='startup_time'
+            )
+        )
 
     check = nagiosplugin.Check(*objects)
     check.main(args.verbose)

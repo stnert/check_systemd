@@ -25,8 +25,8 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: check_systemd [-h] [-u UNIT | -e UNIT] [-w SECONDS] [-c SECONDS] [-t]
-                     [-W SECONDS] [-C SECONDS] [-v] [-V]
+usage: check_systemd [-h] [-u UNIT | -e UNIT] [-n] [-w SECONDS] [-c SECONDS]
+                     [-t] [-W SECONDS] [-C SECONDS] [-v] [-V]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
 Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
@@ -44,10 +44,18 @@ optional arguments:
                         'user@\d+\.service'. For more informations see the
                         Python documentation about regular expressions
                         (https://docs.python.org/3/library/re.html).
+  -n, --no-startup-time
+                        Don’t check the startup time. Using this option the
+                        options '-w, --warning' and '-c, --critical' have no
+                        effect. Performance data about the startup time is
+                        collected, but no critical, warning etc. state are
+                        triggered.
   -w SECONDS, --warning SECONDS
                         Startup time in seconds to result in a warning status.
+                        Thedefault is 60 seconds.
   -c SECONDS, --critical SECONDS
                         Startup time in seconds to result in a critical status.
+                        Thedefault is 120 seconds.
   -t, --dead-timers     Detect dead / inactive timers. See the corresponding
                         options '-W, --dead-timer-warning' and '-C, --dead-
                         timers-critical'. Dead timers are detected by parsing

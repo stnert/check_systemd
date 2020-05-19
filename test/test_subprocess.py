@@ -174,6 +174,30 @@ class TestCli(unittest.TestCase):
             'units_active=275 units_failed=0 units_inactive=111\n'
         )
 
+    def test_option_no_startup_time_long(self):
+        with AddBin('bin/ok'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-c', '1', '--no-startup-time'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE
+            )
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - all | '
+            'count_units=386 startup_time=12.154 units_activating=0 '
+            'units_active=275 units_failed=0 units_inactive=111\n'
+        )
+
+    def test_option_no_startup_time_short(self):
+        with AddBin('bin/ok'):
+            process = subprocess.run(
+                ['./check_systemd.py', '-c', '1', '-n'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE
+            )
+        self.assertEqual(process.returncode, 0)
+
     def test_option_exclude_known_service(self):
         with AddBin('bin/failure'):
             process = subprocess.run(
