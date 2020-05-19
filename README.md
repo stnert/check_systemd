@@ -25,8 +25,8 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: check_systemd [-h] [-c SECONDS] [-e UNIT | -u UNIT] [-t] [-W SECONDS]
-                     [-C SECONDS] [-v] [-V] [-w SECONDS]
+usage: check_systemd [-h] [-u UNIT | -e UNIT] [-w SECONDS] [-c SECONDS] [-t]
+                     [-W SECONDS] [-C SECONDS] [-v] [-V]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
 Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
@@ -35,8 +35,7 @@ Nagios / Icinga monitoring plugin to check systemd for failed units.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -c SECONDS, --critical SECONDS
-                        Startup time in seconds to result in a critical status.
+  -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
   -e UNIT, --exclude UNIT
                         Exclude a systemd unit from the checks. This option can
                         be applied multiple times, for example: -e mnt-
@@ -45,7 +44,10 @@ optional arguments:
                         'user@\d+\.service'. For more informations see the
                         Python documentation about regular expressions
                         (https://docs.python.org/3/library/re.html).
-  -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
+  -w SECONDS, --warning SECONDS
+                        Startup time in seconds to result in a warning status.
+  -c SECONDS, --critical SECONDS
+                        Startup time in seconds to result in a critical status.
   -t, --dead-timers     Detect dead / inactive timers. See the corresponding
                         options '-W, --dead-timer-warning' and '-C, --dead-
                         timers-critical'. Dead timers are detected by parsing
@@ -62,8 +64,6 @@ optional arguments:
                         trigger a critical state (by default 7 days).
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit
-  -w SECONDS, --warning SECONDS
-                        Startup time in seconds to result in a warning status.
 
 Performance data:
   - count_units

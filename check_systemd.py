@@ -424,11 +424,11 @@ def get_argparser():
 
     exclusive_group = parser.add_mutually_exclusive_group()
 
-    parser.add_argument(
-        '-c', '--critical',
-        metavar='SECONDS',
-        default=120,
-        help='Startup time in seconds to result in a critical status.',
+    exclusive_group.add_argument(
+        '-u', '--unit',
+        type=str,
+        dest='unit',
+        help='Name of the systemd unit that is being tested.',
     )
 
     exclusive_group.add_argument(
@@ -446,11 +446,18 @@ def get_argparser():
              '(https://docs.python.org/3/library/re.html).',
     )
 
-    exclusive_group.add_argument(
-        '-u', '--unit',
-        type=str,
-        dest='unit',
-        help='Name of the systemd unit that is being tested.',
+    parser.add_argument(
+        '-w', '--warning',
+        default=60,
+        metavar='SECONDS',
+        help='Startup time in seconds to result in a warning status.',
+    )
+
+    parser.add_argument(
+        '-c', '--critical',
+        metavar='SECONDS',
+        default=120,
+        help='Startup time in seconds to result in a critical status.',
     )
 
     parser.add_argument(
@@ -496,13 +503,6 @@ def get_argparser():
         '-V', '--version',
         action='version',
         version='%(prog)s {}'.format(__version__),
-    )
-
-    parser.add_argument(
-        '-w', '--warning',
-        default=60,
-        metavar='SECONDS',
-        help='Startup time in seconds to result in a warning status.',
     )
 
     return parser
