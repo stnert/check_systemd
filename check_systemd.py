@@ -267,13 +267,19 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
                 next_date_time = self.get_column_text(row, 'NEXT')
 
                 if next_date_time == 'n/a':
-                    passed = format_timespan_to_seconds(
-                        self.get_column_text(row, 'PASSED')
-                    )
-                    if passed >= self.critical:
+                    passed_text = self.get_column_text(row, 'PASSED')
+
+                    if passed_text == 'n/a':
                         state = nagiosplugin.Critical
-                    elif passed >= self.warning:
-                        state = nagiosplugin.Warn
+                    else:
+                        passed = format_timespan_to_seconds(
+                            passed_text
+                        )
+
+                        if passed_text == 'n/a' or passed >= self.critical:
+                            state = nagiosplugin.Critical
+                        elif passed >= self.warning:
+                            state = nagiosplugin.Warn
 
                 yield Metric(
                     name=unit,

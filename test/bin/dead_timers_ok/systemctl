@@ -10,44 +10,13 @@ swap.target                                                                     
 
 	'list-timers --all')
 		echo "NEXT                          LEFT                  LAST                          PASSED               UNIT                                                                                          ACTIVATES
-Sat 2020-05-16 14:36:18 CEST  2s left               Sat 2020-05-16 14:33:56 CEST  2min 20s ago         dyndns-update-script_nnas_dev-eno1_ipvboth.timer                                              dyndns-update-script_nnas_dev-eno1_ipvboth.service
-Sat 2020-05-16 14:36:31 CEST  14s left              Sat 2020-05-16 14:34:31 CEST  1min 45s ago         dyndns-update-script_nuernberg_dev-eno1_ipv4.timer                                            dyndns-update-script_nuernberg_dev-eno1_ipv4.service
-Sat 2020-05-16 14:36:33 CEST  17s left              n/a                           n/a                  hblock.timer                                                                                  hblock.service
+                                                                             hblock.service
 Sat 2020-05-16 14:37:33 CEST  1min 16s left         Sat 2020-05-16 14:32:27 CEST  3min 49s ago         update-motd.timer                                                                             update-motd.service
-Sat 2020-05-16 14:37:35 CEST  1min 19s left         n/a                           n/a                  unattended-upgrades-frequent.timer                                                            unattended-upgrades-frequent.service
-Sat 2020-05-16 14:37:52 CEST  1min 35s left         n/a                           n/a                  documents.timer                                                                               documents.service
-Sat 2020-05-16 14:40:25 CEST  4min 8s left          n/a                           n/a                  git-anonymous.timer                                                                           git-anonymous.service
-Sat 2020-05-16 14:46:15 CEST  9min left             n/a                           n/a                  systemd-tmpfiles-clean.timer                                                                  systemd-tmpfiles-clean.service
 Sat 2020-05-16 14:50:58 CEST  14min left            Sat 2020-05-16 14:31:56 CEST  4min 20s ago         rsync_nnas_data-shares-jf-maps_wnas-data-shares-jf-maps.timer                                 rsync_nnas_data-shares-jf-maps_wnas-data-shares-jf-maps.service
 Sat 2020-05-16 15:03:13 CEST  26min left            Sat 2020-05-16 14:31:56 CEST  4min 20s ago         anacron.timer                                                                                 anacron.service
 Sat 2020-05-16 15:11:15 CEST  34min left            Sat 2020-05-16 14:31:56 CEST  4min 20s ago         apt-daily.timer                                                                               apt-daily.service
-Sat 2020-05-16 15:35:41 CEST  59min left            Sat 2020-05-16 14:34:59 CEST  1min 17s ago         dfm-auto-root.timer                                                                           dfm-auto-root.service
-Sat 2020-05-16 15:40:00 CEST  1h 3min left          Sat 2020-05-16 14:35:26 CEST  50s ago              dfm-auto-jf.timer                                                                             dfm-auto-jf.service
-Sat 2020-05-16 18:00:00 CEST  3h 23min left         n/a                           n/a                  turn-off.timer                                                                                turn-off.service
-Sun 2020-05-17 00:00:00 CEST  9h left               Sat 2020-05-16 09:03:27 CEST  5h 32min ago         oh-my-zsh_jf.timer                                                                            oh-my-zsh_jf.service
-Sun 2020-05-17 00:00:00 CEST  9h left               Sat 2020-05-16 09:03:27 CEST  5h 32min ago         oh-my-zsh_root.timer                                                                          oh-my-zsh_root.service
-Sun 2020-05-17 00:00:00 CEST  9h left               Sat 2020-05-16 09:03:27 CEST  5h 32min ago         zfs-auto-snapshot_daily.timer                                                                 zfs-auto-snapshot_daily.service
-Sun 2020-05-17 02:31:56 CEST  11h left              n/a                           n/a                  uptime-limiter.timer                                                                          uptime-limiter.service
-Sun 2020-05-17 06:19:31 CEST  15h left              Sat 2020-05-16 09:03:27 CEST  5h 32min ago         apt-daily-upgrade.timer                                                                       apt-daily-upgrade.service
-Mon 2020-05-18 00:00:00 CEST  1 day 9h left         Mon 2020-05-11 09:03:34 CEST  5 days ago           fstrim.timer                                                                                  fstrim.service
-Mon 2020-05-18 00:00:00 CEST  1 day 9h left         Mon 2020-05-11 09:03:34 CEST  5 days ago           zfs-auto-snapshot_weekly.timer                                                                zfs-auto-snapshot_weekly.service
-Mon 2020-06-01 00:00:00 CEST  2 weeks 1 days left   Fri 2020-05-01 09:03:33 CEST  2 weeks 1 days ago   zfs-auto-snapshot_monthly.timer                                                               zfs-auto-snapshot_monthly.service
-Wed 2020-07-01 00:00:00 CEST  1 months 14 days left Wed 2020-04-01 09:03:47 CEST  1 months 14 days ago zpool-scrub-exec.timer                                                                        zpool-scrub-exec.service
-n/a                           n/a                   n/a                           n/a                  motd-news.timer
-n/a                           n/a                   Sat 2020-05-16 14:34:17 CEST  1min 59s ago         nsca-localhost.timer                                                                          nsca-localhost.service
-n/a                           n/a                   n/a                           n/a                  rsync-from-netcup.timer
-n/a                           n/a                   n/a                           n/a                  rsync-from-uberspace.timer
-n/a                           n/a                   n/a                           n/a                  rsync-school-to-wnas.timer
-n/a                           n/a                   n/a                           n/a                  rsync-to-lnas.timer
-n/a                           n/a                   n/a                           n/a                  rsync-to-wnas.timer
-n/a                           n/a                   Sat 2020-05-16 14:32:57 CEST  3min 19s ago         ureadahead-stop.timer                                                                         ureadahead-stop.service
-n/a                           n/a                   Sat 2020-05-16 14:33:20 CEST  2min 56s ago         wnas-startup.timer                                                                            wnas-startup.service
-n/a                           n/a                   Sat 2020-05-16 14:31:56 CEST  4min 20s ago         zfs-auto-snapshot_frequent.timer                                                              zfs-auto-snapshot_frequent.service
-n/a                           n/a                   Sat 2020-05-16 14:31:56 CEST  4min 20s ago         zfs-auto-snapshot_hourly.timer                                                                zfs-auto-snapshot_hourly.service
-n/a                           n/a                   n/a                           n/a                  zfs-snapshot-recursive.timer
-n/a                           n/a                   n/a                           n/a                  zpool-scrub.timer
 
-80 timers listed.";
+5 timers listed.";
 		exit 0
 		;;
 
