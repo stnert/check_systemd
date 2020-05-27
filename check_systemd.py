@@ -14,7 +14,7 @@ import re
 import nagiosplugin
 from nagiosplugin import Metric
 
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
 
 class SystemctlListUnitsResource(nagiosplugin.Resource):
