@@ -473,5 +473,24 @@ class TestDeadTimers(unittest.TestCase):
         self.assertEqual(process.returncode, 0)
 
 
+class TestVersion246(unittest.TestCase):
+
+    def test_version_246(self):
+        with AddBin('bin/version_246'):
+            process = subprocess.run(
+                ['./check_systemd.py'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE,
+            )
+        self.assertEqual(process.returncode, 0)
+
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - all | \'units_not-found\'=27 count_units=339 '
+            'startup_time=12.154;60;120 units_activating=0 units_active=263 '
+            'units_failed=0 units_inactive=47 units_loaded=1 units_masked=1\n'
+        )
+
+
 if __name__ == '__main__':
     unittest.main()

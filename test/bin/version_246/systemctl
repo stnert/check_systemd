@@ -1,0 +1,341 @@
+#! /bin/sh
+
+echo "dev-block-254:0.device                                                                                         loaded    active   plugged   /dev/block/254:0
+  dev-block-254:1.device                                                                                         loaded    active   plugged   /dev/block/254:1
+  dev-disk-by\x2did-ata\x2dHITACHI_HTS723232A7A364_E3834563K5NVSN.device                                         loaded    active   plugged   HITACHI_HTS723232A7A364
+  dev-disk-by\x2did-ata\x2dHITACHI_HTS723232A7A364_E3834563K5NVSN\x2dpart1.device                                loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  dev-disk-by\x2did-ata\x2dHITACHI_HTS723232A7A364_E3834563K5NVSN\x2dpart2.device                                loaded    active   plugged   HITACHI_HTS723232A7A364 2
+  dev-disk-by\x2did-ata\x2dHITACHI_HTS723232A7A364_E3834563K5NVSN\x2dpart4.device                                loaded    active   plugged   HITACHI_HTS723232A7A364 4
+  dev-disk-by\x2did-ata\x2dTOSHIBA_MQ01ABD100_Z6M7P2Q0T.device                                                   loaded    active   plugged   TOSHIBA_MQ01ABD100
+  dev-disk-by\x2did-ata\x2dTOSHIBA_MQ01ABD100_Z6M7P2Q0T\x2dpart1.device                                          loaded    active   plugged   TOSHIBA_MQ01ABD100 1
+  dev-disk-by\x2did-dm\x2dname\x2dcleartera.device                                                               loaded    active   plugged   /dev/disk/by-id/dm-name-cleartera
+  dev-disk-by\x2did-dm\x2dname\x2dcleartext.device                                                               loaded    active   plugged   /dev/disk/by-id/dm-name-cleartext
+  dev-disk-by\x2did-dm\x2dname\x2dlvm\x2droot.device                                                             loaded    active   plugged   /dev/disk/by-id/dm-name-lvm-root
+  dev-disk-by\x2did-dm\x2dname\x2dlvm\x2dswap.device                                                             loaded    active   plugged   /dev/disk/by-id/dm-name-lvm-swap
+  dev-disk-by\x2did-dm\x2dname\x2dteradisk\x2darchive.device                                                     loaded    active   plugged   /dev/disk/by-id/dm-name-teradisk-archive
+  dev-disk-by\x2did-dm\x2dname\x2dteradisk\x2droot\x2d\x2dmirror.device                                          loaded    active   plugged   /dev/disk/by-id/dm-name-teradisk-root--mirror
+  dev-disk-by\x2did-dm\x2duuid\x2dCRYPT\x2dLUKS1\x2dfc78a5931403454294b5a12bd668726d\x2dcleartext.device         loaded    active   plugged   /dev/disk/by-id/dm-uuid-CRYPT-LUKS1-fc78a5931403454294b5a12bd668726d-cleartext
+  dev-disk-by\x2did-dm\x2duuid\x2dCRYPT\x2dLUKS2\x2d90a57b32d83d45ada696d054f442cc4b\x2dcleartera.device         loaded    active   plugged   /dev/disk/by-id/dm-uuid-CRYPT-LUKS2-90a57b32d83d45ada696d054f442cc4b-cleartera
+  dev-disk-by\x2did-dm\x2duuid\x2dLVM\x2d8n8ccXWKi0IXDGaz6FWiJegeVk4056Bidkjto74u7XIcfmwSqykRL6ZDqgWbLlid.device loaded    active   plugged   /dev/disk/by-id/dm-uuid-LVM-8n8ccXWKi0IXDGaz6FWiJegeVk4056Bidkjto74u7XIcfmwSqykRL6ZDqgWbLlid
+  dev-disk-by\x2did-dm\x2duuid\x2dLVM\x2d8n8ccXWKi0IXDGaz6FWiJegeVk4056BiuK6cAvrVBMHRbOxIuoMMHpNQzaNNt5aH.device loaded    active   plugged   /dev/disk/by-id/dm-uuid-LVM-8n8ccXWKi0IXDGaz6FWiJegeVk4056BiuK6cAvrVBMHRbOxIuoMMHpNQzaNNt5aH
+  dev-disk-by\x2did-dm\x2duuid\x2dLVM\x2dOcI4YLGWmw1IljsHTC2U2SVsay4GYYfWAajqhctTQol4FzKCyPdkRJvsAxJaZgmd.device loaded    active   plugged   /dev/disk/by-id/dm-uuid-LVM-OcI4YLGWmw1IljsHTC2U2SVsay4GYYfWAajqhctTQol4FzKCyPdkRJvsAxJaZgmd
+  dev-disk-by\x2did-dm\x2duuid\x2dLVM\x2dOcI4YLGWmw1IljsHTC2U2SVsay4GYYfWkszJfX4DjIxOLR9TOPZtOaukQzW2zZ2f.device loaded    active   plugged   /dev/disk/by-id/dm-uuid-LVM-OcI4YLGWmw1IljsHTC2U2SVsay4GYYfWkszJfX4DjIxOLR9TOPZtOaukQzW2zZ2f
+  dev-disk-by\x2did-lvm\x2dpv\x2duuid\x2dcy3zIM\x2dqNKi\x2dEmnR\x2dTLV6\x2dFPsB\x2dTlOF\x2dLJt6g5.device         loaded    active   plugged   /dev/disk/by-id/lvm-pv-uuid-cy3zIM-qNKi-EmnR-TLV6-FPsB-TlOF-LJt6g5
+  dev-disk-by\x2did-lvm\x2dpv\x2duuid\x2dkZk45h\x2djp6P\x2dYI7W\x2dyQjp\x2dzlOa\x2dYusA\x2dA9349g.device         loaded    active   plugged   /dev/disk/by-id/lvm-pv-uuid-kZk45h-jp6P-YI7W-yQjp-zlOa-YusA-A9349g
+  dev-disk-by\x2did-wwn\x2d0x50000397724881e9.device                                                             loaded    active   plugged   TOSHIBA_MQ01ABD100
+  dev-disk-by\x2did-wwn\x2d0x50000397724881e9\x2dpart1.device                                                    loaded    active   plugged   TOSHIBA_MQ01ABD100 1
+  dev-disk-by\x2did-wwn\x2d0x5000cca61decdaaf.device                                                             loaded    active   plugged   HITACHI_HTS723232A7A364
+  dev-disk-by\x2did-wwn\x2d0x5000cca61decdaaf\x2dpart1.device                                                    loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  dev-disk-by\x2did-wwn\x2d0x5000cca61decdaaf\x2dpart2.device                                                    loaded    active   plugged   HITACHI_HTS723232A7A364 2
+  dev-disk-by\x2did-wwn\x2d0x5000cca61decdaaf\x2dpart4.device                                                    loaded    active   plugged   HITACHI_HTS723232A7A364 4
+  dev-disk-by\x2dlabel-R\xc3\xa9serv\xc3\xa9\x5cx20au\x5cx20syst\xc3\xa8me.device                                loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  dev-disk-by\x2dpartuuid-50afadcc\x2d6ce4\x2d4b4f\x2da592\x2dc5a2b240e579.device                                loaded    active   plugged   TOSHIBA_MQ01ABD100 1
+  dev-disk-by\x2dpartuuid-94f13043\x2d01.device                                                                  loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  dev-disk-by\x2dpartuuid-94f13043\x2d02.device                                                                  loaded    active   plugged   HITACHI_HTS723232A7A364 2
+  dev-disk-by\x2dpartuuid-94f13043\x2d04.device                                                                  loaded    active   plugged   HITACHI_HTS723232A7A364 4
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d1.0.device                                                   loaded    active   plugged   HITACHI_HTS723232A7A364
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d1.0\x2dpart1.device                                          loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d1.0\x2dpart2.device                                          loaded    active   plugged   HITACHI_HTS723232A7A364 2
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d1.0\x2dpart4.device                                          loaded    active   plugged   HITACHI_HTS723232A7A364 4
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d1.device                                                     loaded    active   plugged   HITACHI_HTS723232A7A364
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d1\x2dpart1.device                                            loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d1\x2dpart2.device                                            loaded    active   plugged   HITACHI_HTS723232A7A364 2
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d1\x2dpart4.device                                            loaded    active   plugged   HITACHI_HTS723232A7A364 4
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d2.0.device                                                   loaded    active   plugged   TOSHIBA_MQ01ABD100
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d2.0\x2dpart1.device                                          loaded    active   plugged   TOSHIBA_MQ01ABD100 1
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d2.device                                                     loaded    active   plugged   TOSHIBA_MQ01ABD100
+  dev-disk-by\x2dpath-pci\x2d0000:00:1f.2\x2data\x2d2\x2dpart1.device                                            loaded    active   plugged   TOSHIBA_MQ01ABD100 1
+  dev-disk-by\x2duuid-1881f70f\x2dfbf5\x2d4044\x2dbfe8\x2dd7a6300c6818.device                                    loaded    active   plugged   /dev/disk/by-uuid/1881f70f-fbf5-4044-bfe8-d7a6300c6818
+  dev-disk-by\x2duuid-50A020EFA020DCEA.device                                                                    loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  dev-disk-by\x2duuid-680b789b\x2d3bd6\x2d4b1c\x2d89e9\x2d660035df92dc.device                                    loaded    active   plugged   /dev/disk/by-uuid/680b789b-3bd6-4b1c-89e9-660035df92dc
+  dev-disk-by\x2duuid-882C22A02C228970.device                                                                    loaded    active   plugged   HITACHI_HTS723232A7A364 2
+  dev-disk-by\x2duuid-90a57b32\x2dd83d\x2d45ad\x2da696\x2dd054f442cc4b.device                                    loaded    active   plugged   TOSHIBA_MQ01ABD100 1
+  dev-disk-by\x2duuid-d996bd3a\x2dc6fe\x2d4455\x2d9726\x2d2171e0ad8c6c.device                                    loaded    active   plugged   /dev/disk/by-uuid/d996bd3a-c6fe-4455-9726-2171e0ad8c6c
+  dev-disk-by\x2duuid-fc78a593\x2d1403\x2d4542\x2d94b5\x2da12bd668726d.device                                    loaded    active   plugged   HITACHI_HTS723232A7A364 4
+  dev-dm\x2d0.device                                                                                             loaded    active   plugged   /dev/dm-0
+  dev-dm\x2d1.device                                                                                             loaded    active   plugged   /dev/dm-1
+  dev-dm\x2d2.device                                                                                             loaded    active   plugged   /dev/dm-2
+  dev-dm\x2d3.device                                                                                             loaded    active   plugged   /dev/dm-3
+  dev-dm\x2d4.device                                                                                             loaded    active   plugged   /dev/dm-4
+  dev-dm\x2d5.device                                                                                             loaded    active   plugged   /dev/dm-5
+  dev-input-mice.device                                                                                          loaded    active   plugged   /dev/input/mice
+  dev-lvm-root.device                                                                                            loaded    active   plugged   /dev/lvm/root
+  dev-lvm-swap.device                                                                                            loaded    active   plugged   /dev/lvm/swap
+  dev-mapper-cleartera.device                                                                                    loaded    active   plugged   /dev/mapper/cleartera
+  dev-mapper-cleartext.device                                                                                    loaded    active   plugged   /dev/mapper/cleartext
+  dev-mapper-lvm\x2droot.device                                                                                  loaded    active   plugged   /dev/mapper/lvm-root
+  dev-mapper-lvm\x2dswap.device                                                                                  loaded    active   plugged   /dev/mapper/lvm-swap
+  dev-mapper-teradisk\x2darchive.device                                                                          loaded    active   plugged   /dev/mapper/teradisk-archive
+  dev-mapper-teradisk\x2droot\x2d\x2dmirror.device                                                               loaded    active   plugged   /dev/mapper/teradisk-root--mirror
+  dev-net-tun.device                                                                                             loaded    active   plugged   /dev/net/tun
+  dev-ram0.device                                                                                                loaded    active   plugged   /dev/ram0
+  dev-ram1.device                                                                                                loaded    active   plugged   /dev/ram1
+  dev-ram10.device                                                                                               loaded    active   plugged   /dev/ram10
+  dev-ram11.device                                                                                               loaded    active   plugged   /dev/ram11
+  dev-ram12.device                                                                                               loaded    active   plugged   /dev/ram12
+  dev-ram13.device                                                                                               loaded    active   plugged   /dev/ram13
+  dev-ram14.device                                                                                               loaded    active   plugged   /dev/ram14
+  dev-ram15.device                                                                                               loaded    active   plugged   /dev/ram15
+  dev-ram2.device                                                                                                loaded    active   plugged   /dev/ram2
+  dev-ram3.device                                                                                                loaded    active   plugged   /dev/ram3
+  dev-ram4.device                                                                                                loaded    active   plugged   /dev/ram4
+  dev-ram5.device                                                                                                loaded    active   plugged   /dev/ram5
+  dev-ram6.device                                                                                                loaded    active   plugged   /dev/ram6
+  dev-ram7.device                                                                                                loaded    active   plugged   /dev/ram7
+  dev-ram8.device                                                                                                loaded    active   plugged   /dev/ram8
+  dev-ram9.device                                                                                                loaded    active   plugged   /dev/ram9
+  dev-rfkill.device                                                                                              loaded    active   plugged   /dev/rfkill
+  dev-sda.device                                                                                                 loaded    active   plugged   TOSHIBA_MQ01ABD100
+  dev-sda1.device                                                                                                loaded    active   plugged   TOSHIBA_MQ01ABD100 1
+  dev-sdb.device                                                                                                 loaded    active   plugged   HITACHI_HTS723232A7A364
+  dev-sdb1.device                                                                                                loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  dev-sdb2.device                                                                                                loaded    active   plugged   HITACHI_HTS723232A7A364 2
+  dev-sdb4.device                                                                                                loaded    active   plugged   HITACHI_HTS723232A7A364 4
+  dev-teradisk-archive.device                                                                                    loaded    active   plugged   /dev/teradisk/archive
+  dev-teradisk-root\x2dmirror.device                                                                             loaded    active   plugged   /dev/teradisk/root-mirror
+  dev-ttyS0.device                                                                                               loaded    active   plugged   /dev/ttyS0
+  dev-ttyS1.device                                                                                               loaded    active   plugged   /dev/ttyS1
+  dev-ttyS2.device                                                                                               loaded    active   plugged   /dev/ttyS2
+  dev-ttyS3.device                                                                                               loaded    active   plugged   /dev/ttyS3
+  dev-zram0.device                                                                                               loaded    active   plugged   /dev/zram0
+  sys-devices-pci0000:00-0000:00:02.0-backlight-acpi_video0.device                                               loaded    active   plugged   /sys/devices/pci0000:00/0000:00:02.0/backlight/acpi_video0
+  sys-devices-pci0000:00-0000:00:02.0-drm-card0-card0\x2dLVDS\x2d1-intel_backlight.device                        loaded    active   plugged   /sys/devices/pci0000:00/0000:00:02.0/drm/card0/card0-LVDS-1/intel_backlight
+  sys-devices-pci0000:00-0000:00:19.0-net-enp0s25.device                                                         loaded    active   plugged   82579LM Gigabit Network Connection (Lewisville) (ThinkPad T520)
+  sys-devices-pci0000:00-0000:00:1b.0-sound-card0.device                                                         loaded    active   plugged   6 Series/C200 Series Chipset Family High Definition Audio Controller
+  sys-devices-pci0000:00-0000:00:1c.1-0000:03:00.0-net-wlp3s0.device                                             loaded    active   plugged   Centrino Advanced-N 6205 [Taylor Peak] (Centrino Advanced-N 6205 (802.11a/b/g/n))
+  sys-devices-pci0000:00-0000:00:1f.2-ata1-host0-target0:0:0-0:0:0:0-block-sdb-sdb1.device                       loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
+  sys-devices-pci0000:00-0000:00:1f.2-ata1-host0-target0:0:0-0:0:0:0-block-sdb-sdb2.device                       loaded    active   plugged   HITACHI_HTS723232A7A364 2
+  sys-devices-pci0000:00-0000:00:1f.2-ata1-host0-target0:0:0-0:0:0:0-block-sdb-sdb4.device                       loaded    active   plugged   HITACHI_HTS723232A7A364 4
+  sys-devices-pci0000:00-0000:00:1f.2-ata1-host0-target0:0:0-0:0:0:0-block-sdb.device                            loaded    active   plugged   HITACHI_HTS723232A7A364
+  sys-devices-pci0000:00-0000:00:1f.2-ata2-host1-target1:0:0-1:0:0:0-block-sda-sda1.device                       loaded    active   plugged   TOSHIBA_MQ01ABD100 1
+  sys-devices-pci0000:00-0000:00:1f.2-ata2-host1-target1:0:0-1:0:0:0-block-sda.device                            loaded    active   plugged   TOSHIBA_MQ01ABD100
+  sys-devices-platform-serial8250-tty-ttyS0.device                                                               loaded    active   plugged   /sys/devices/platform/serial8250/tty/ttyS0
+  sys-devices-platform-serial8250-tty-ttyS1.device                                                               loaded    active   plugged   /sys/devices/platform/serial8250/tty/ttyS1
+  sys-devices-platform-serial8250-tty-ttyS2.device                                                               loaded    active   plugged   /sys/devices/platform/serial8250/tty/ttyS2
+  sys-devices-platform-serial8250-tty-ttyS3.device                                                               loaded    active   plugged   /sys/devices/platform/serial8250/tty/ttyS3
+  sys-devices-virtual-block-dm\x2d0.device                                                                       loaded    active   plugged   /sys/devices/virtual/block/dm-0
+  sys-devices-virtual-block-dm\x2d1.device                                                                       loaded    active   plugged   /sys/devices/virtual/block/dm-1
+  sys-devices-virtual-block-dm\x2d2.device                                                                       loaded    active   plugged   /sys/devices/virtual/block/dm-2
+  sys-devices-virtual-block-dm\x2d3.device                                                                       loaded    active   plugged   /sys/devices/virtual/block/dm-3
+  sys-devices-virtual-block-dm\x2d4.device                                                                       loaded    active   plugged   /sys/devices/virtual/block/dm-4
+  sys-devices-virtual-block-dm\x2d5.device                                                                       loaded    active   plugged   /sys/devices/virtual/block/dm-5
+  sys-devices-virtual-block-ram0.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram0
+  sys-devices-virtual-block-ram1.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram1
+  sys-devices-virtual-block-ram10.device                                                                         loaded    active   plugged   /sys/devices/virtual/block/ram10
+  sys-devices-virtual-block-ram11.device                                                                         loaded    active   plugged   /sys/devices/virtual/block/ram11
+  sys-devices-virtual-block-ram12.device                                                                         loaded    active   plugged   /sys/devices/virtual/block/ram12
+  sys-devices-virtual-block-ram13.device                                                                         loaded    active   plugged   /sys/devices/virtual/block/ram13
+  sys-devices-virtual-block-ram14.device                                                                         loaded    active   plugged   /sys/devices/virtual/block/ram14
+  sys-devices-virtual-block-ram15.device                                                                         loaded    active   plugged   /sys/devices/virtual/block/ram15
+  sys-devices-virtual-block-ram2.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram2
+  sys-devices-virtual-block-ram3.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram3
+  sys-devices-virtual-block-ram4.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram4
+  sys-devices-virtual-block-ram5.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram5
+  sys-devices-virtual-block-ram6.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram6
+  sys-devices-virtual-block-ram7.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram7
+  sys-devices-virtual-block-ram8.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram8
+  sys-devices-virtual-block-ram9.device                                                                          loaded    active   plugged   /sys/devices/virtual/block/ram9
+  sys-devices-virtual-block-zram0.device                                                                         loaded    active   plugged   /sys/devices/virtual/block/zram0
+  sys-devices-virtual-input-mice.device                                                                          loaded    active   plugged   /sys/devices/virtual/input/mice
+  sys-devices-virtual-misc-rfkill.device                                                                         loaded    active   plugged   /sys/devices/virtual/misc/rfkill
+  sys-devices-virtual-misc-tun.device                                                                            loaded    active   plugged   /sys/devices/virtual/misc/tun
+  sys-module-fuse.device                                                                                         loaded    active   plugged   /sys/module/fuse
+  sys-module-tun.device                                                                                          loaded    active   plugged   /sys/module/tun
+  sys-subsystem-net-devices-enp0s25.device                                                                       loaded    active   plugged   82579LM Gigabit Network Connection (Lewisville) (ThinkPad T520)
+  sys-subsystem-net-devices-wlp3s0.device                                                                        loaded    active   plugged   Centrino Advanced-N 6205 [Taylor Peak] (Centrino Advanced-N 6205 (802.11a/b/g/n))
+  -.mount                                                                                                        loaded    active   mounted   Root Mount
+  archive.mount                                                                                                  loaded    active   mounted   /archive
+  boot.mount                                                                                                     loaded    active   mounted   /boot
+  dev-hugepages.mount                                                                                            loaded    active   mounted   Huge Pages File System
+  dev-mqueue.mount                                                                                               loaded    active   mounted   POSIX Message Queue File System
+  nix-store.mount                                                                                                loaded    active   mounted   /nix/store
+  run-keys.mount                                                                                                 loaded    active   mounted   /run/keys
+  run-user-1000-gvfs.mount                                                                                       loaded    active   mounted   /run/user/1000/gvfs
+  run-user-1000.mount                                                                                            loaded    active   mounted   /run/user/1000
+  run-wrappers.mount                                                                                             loaded    active   mounted   /run/wrappers
+  sys-fs-fuse-connections.mount                                                                                  loaded    active   mounted   FUSE Control File System
+  sys-kernel-config.mount                                                                                        loaded    inactive dead      Kernel Configuration File System
+  sys-kernel-debug-tracing.mount                                                                                 loaded    active   mounted   /sys/kernel/debug/tracing
+  sys-kernel-debug.mount                                                                                         loaded    active   mounted   Kernel Debug File System
+● tmp.mount                                                                                                      not-found inactive dead      tmp.mount
+  systemd-ask-password-console.path                                                                              loaded    inactive dead      Dispatch Password Requests to Console Directory Watch
+  systemd-ask-password-plymouth.path                                                                             loaded    active   running   Forward Password Requests to Plymouth Directory Watch
+  systemd-ask-password-wall.path                                                                                 loaded    active   waiting   Forward Password Requests to Wall Directory Watch
+  init.scope                                                                                                     loaded    active   running   System and Service Manager
+  session-2.scope                                                                                                loaded    active   running   Session 2 of user symphorien
+  accounts-daemon.service                                                                                        loaded    active   running   Accounts Service
+● acpid.service                                                                                                  not-found inactive dead      acpid.service
+  alsa-store.service                                                                                             loaded    active   exited    Store Sound Card State
+  audit.service                                                                                                  loaded    active   exited    Kernel Auditing
+● auditd.service                                                                                                 not-found inactive dead      auditd.service
+  batterycheck.service                                                                                           loaded    inactive dead      Hibernate on low battery
+  borgbackup-job-nlaptop.service                                                                                 loaded    inactive dead      BorgBackup job nlaptop
+  btrbk-home.service                                                                                             loaded    inactive dead      Takes BTRFS snapshots and maintains retention policies.
+  btrbk-remote.service                                                                                           loaded    inactive dead      Takes BTRFS snapshots and maintains retention policies.
+  btrfs-autobalance.service                                                                                      loaded    inactive dead      keep some unallocated space on root btrfs
+● btrfs-defrag.service                                                                                           not-found inactive dead      btrfs-defrag.service
+● btrfs-scrub-.service                                                                                           not-found inactive dead      btrfs-scrub-.service
+  cups.service                                                                                                   loaded    active   running   CUPS Scheduler
+  dbus.service                                                                                                   loaded    active   running   D-Bus System Message Bus
+  display-manager.service                                                                                        loaded    active   running   X11 Server
+  earlyoom.service                                                                                               loaded    active   running   Early OOM Daemon for Linux
+  emergency.service                                                                                              loaded    inactive dead      Emergency Shell
+● fcoe.service                                                                                                   not-found inactive dead      fcoe.service
+  firewall.service                                                                                               loaded    active   exited    Firewall
+  getty@tty1.service                                                                                             loaded    active   running   Getty on tty1
+  getty@tty7.service                                                                                             loaded    inactive dead      Getty on tty7
+  gpm.service                                                                                                    loaded    active   running   Console Mouse Daemon
+  hdapsd@sda.service                                                                                             loaded    active   running   hdapsd hard drive active protection system daemon - sda
+  hdapsd@sdb.service                                                                                             loaded    active   running   hdapsd hard drive active protection system daemon - sdb
+● iscsi.service                                                                                                  not-found inactive dead      iscsi.service
+  kmod-static-nodes.service                                                                                      loaded    active   exited    Create list of static device nodes for the current kernel
+  lvm2-activation-early.service                                                                                  loaded    inactive dead      LVM direct activation of logical volumes
+  lvm2-activation-net.service                                                                                    loaded    inactive dead      LVM direct activation of logical volumes
+  lvm2-activation.service                                                                                        loaded    inactive dead      LVM direct activation of logical volumes
+  lvm2-pvscan@254:0.service                                                                                      loaded    active   exited    LVM event activation on device 254:0
+  lvm2-pvscan@254:1.service                                                                                      loaded    active   exited    LVM event activation on device 254:1
+● modprobe@drm.service                                                                                           not-found inactive dead      modprobe@drm.service
+  network-local-commands.service                                                                                 loaded    active   exited    Extra networking commands.
+  network-really-online.service                                                                                  loaded    inactive dead      wait network to be really online
+  network-setup.service                                                                                          loaded    active   exited    Networking Setup
+  NetworkManager-dispatcher.service                                                                              loaded    inactive dead      Network Manager Script Dispatcher Service
+  NetworkManager-wait-online.service                                                                             loaded    active   exited    Network Manager Wait Online
+  NetworkManager.service                                                                                         loaded    active   running   Network Manager
+  nix-daemon.service                                                                                             loaded    active   running   Nix Daemon
+● nixos-upgrade.service                                                                                          not-found inactive dead      nixos-upgrade.service
+● nm-wait-online.service                                                                                         loaded    failed   failed    wait for network manager to connect to something
+● openvswitch.service                                                                                            not-found inactive dead      openvswitch.service
+  plymouth-quit-wait.service                                                                                     loaded    inactive dead      Hold until boot process finishes up
+  plymouth-quit.service                                                                                          loaded    inactive dead      Terminate Plymouth Boot Screen
+  plymouth-read-write.service                                                                                    loaded    inactive dead      Tell Plymouth To Write Out Runtime Data
+  plymouth-start.service                                                                                         loaded    inactive dead      Show Plymouth Boot Screen
+  polkit.service                                                                                                 loaded    active   running   Authorization Manager
+  post-resume.service                                                                                            loaded    inactive dead      Post-Resume Actions
+  powertop.service                                                                                               loaded    active   exited    Powertop tunings
+  pre-sleep.service                                                                                              loaded    inactive dead      Pre-Sleep Actions
+● rbdmap.service                                                                                                 not-found inactive dead      rbdmap.service
+● rc-local.service                                                                                               not-found inactive dead      rc-local.service
+  rescue.service                                                                                                 loaded    inactive dead      Rescue Shell
+  resolvconf.service                                                                                             loaded    active   exited    resolvconf update
+  rtkit-daemon.service                                                                                           loaded    active   running   RealtimeKit Scheduling Policy Service
+  save-hwclock.service                                                                                           loaded    inactive dead      Save Hardware Clock
+  sshd.service                                                                                                   loaded    active   running   SSH Daemon
+● sssd.service                                                                                                   not-found inactive dead      sssd.service
+● syslog.service                                                                                                 not-found inactive dead      syslog.service
+  systemd-ask-password-console.service                                                                           loaded    inactive dead      Dispatch Password Requests to Console
+  systemd-ask-password-plymouth.service                                                                          loaded    active   running   Forward Password Requests to Plymouth
+  systemd-ask-password-wall.service                                                                              loaded    inactive dead      Forward Password Requests to Wall
+  systemd-backlight@backlight:acpi_video0.service                                                                loaded    active   exited    Load/Save Screen Backlight Brightness of backlight:acpi_video0
+  systemd-backlight@backlight:intel_backlight.service                                                            loaded    active   exited    Load/Save Screen Backlight Brightness of backlight:intel_backlight
+  systemd-fsck-root.service                                                                                      loaded    inactive dead      File System Check on Root Device
+  systemd-fsck@dev-disk-by\x2duuid-680b789b\x2d3bd6\x2d4b1c\x2d89e9\x2d660035df92dc.service                      loaded    active   exited    File System Check on /dev/disk/by-uuid/680b789b-3bd6-4b1c-89e9-660035df92dc
+  systemd-hibernate.service                                                                                      loaded    inactive dead      Hibernate
+● systemd-hwdb-update.service                                                                                    not-found inactive dead      systemd-hwdb-update.service
+  systemd-hybrid-sleep.service                                                                                   loaded    inactive dead      Hybrid Suspend+Hibernate
+  systemd-journal-catalog-update.service                                                                         loaded    inactive dead      Rebuild Journal Catalog
+  systemd-journal-flush.service                                                                                  loaded    active   exited    Flush Journal to Persistent Storage
+  systemd-journald.service                                                                                       loaded    active   running   Journal Service
+  systemd-logind.service                                                                                         loaded    active   running   User Login Management
+  systemd-machined.service                                                                                       loaded    inactive dead      Virtual Machine and Container Registration Service
+  systemd-modules-load.service                                                                                   loaded    active   exited    Load Kernel Modules
+● systemd-quotacheck.service                                                                                     not-found inactive dead      systemd-quotacheck.service
+  systemd-random-seed.service                                                                                    loaded    active   exited    Load/Save Random Seed
+  systemd-remount-fs.service                                                                                     loaded    active   exited    Remount Root and Kernel File Systems
+  systemd-suspend.service                                                                                        loaded    inactive dead      Suspend
+  systemd-sysctl.service                                                                                         loaded    active   exited    Apply Kernel Variables
+● systemd-sysusers.service                                                                                       not-found inactive dead      systemd-sysusers.service
+  systemd-timesyncd.service                                                                                      loaded    active   running   Network Time Synchronization
+  systemd-tmpfiles-clean.service                                                                                 loaded    inactive dead      Cleanup of Temporary Directories
+  systemd-tmpfiles-setup-dev.service                                                                             loaded    active   exited    Create Static Device Nodes in /dev
+  systemd-tmpfiles-setup.service                                                                                 loaded    active   exited    Create Volatile Files and Directories
+  systemd-udev-settle.service                                                                                    loaded    active   exited    Wait for udev To Complete Device Initialization
+  systemd-udev-trigger.service                                                                                   loaded    active   exited    Coldplug All udev Devices
+  systemd-udevd.service                                                                                          loaded    active   running   Rule-based Manager for Device Events and Files
+  systemd-update-done.service                                                                                    loaded    inactive dead      Update is Completed
+  systemd-update-utmp.service                                                                                    loaded    active   exited    Update UTMP about System Boot/Shutdown
+  systemd-user-sessions.service                                                                                  loaded    active   exited    Permit User Sessions
+  systemd-vconsole-setup.service                                                                                 loaded    inactive dead      Setup Virtual Console
+  thinkfan.service                                                                                               loaded    active   running   Thinkfan
+  tlp-sleep.service                                                                                              loaded    inactive dead      TLP suspend/resume
+  tlp.service                                                                                                    loaded    active   exited    TLP system startup/shutdown
+  udisks2.service                                                                                                loaded    active   running   Disk Manager
+● update-locatedb.service                                                                                        not-found inactive dead      update-locatedb.service
+  upower.service                                                                                                 loaded    active   running   Daemon for power management
+  user-runtime-dir@1000.service                                                                                  loaded    active   exited    User Runtime Directory /run/user/1000
+  user@1000.service                                                                                              loaded    active   running   User Manager for UID 1000
+  wpa_supplicant.service                                                                                         loaded    active   running   WPA supplicant
+  zram-init-zram0.service                                                                                        loaded    active   exited    Init swap on zram-based device zram0
+  zram-reloader.service                                                                                          loaded    active   exited    Reload zram kernel module when number of devices changes
+  -.slice                                                                                                        loaded    active   active    Root Slice
+  machine.slice                                                                                                  loaded    inactive dead      Virtual Machine and Container Slice
+  system-getty.slice                                                                                             loaded    active   active    system-getty.slice
+  system-hdapsd.slice                                                                                            loaded    active   active    system-hdapsd.slice
+  system-lvm2\x2dpvscan.slice                                                                                    loaded    active   active    system-lvm2\x2dpvscan.slice
+  system-systemd\x2dbacklight.slice                                                                              loaded    active   active    system-systemd\x2dbacklight.slice
+  system-systemd\x2dcoredump.slice                                                                               loaded    active   active    system-systemd\x2dcoredump.slice
+  system-systemd\x2dfsck.slice                                                                                   loaded    active   active    system-systemd\x2dfsck.slice
+  system.slice                                                                                                   loaded    active   active    System Slice
+  user-1000.slice                                                                                                loaded    active   active    user-1000.slice
+  user-78.slice                                                                                                  loaded    active   active    user-78.slice
+  user.slice                                                                                                     loaded    active   active    User and Session Slice
+  cups.socket                                                                                                    loaded    active   running   CUPS Scheduler
+  dbus.socket                                                                                                    loaded    active   running   D-Bus System Message Bus Socket
+  nix-daemon.socket                                                                                              loaded    active   running   Nix Daemon Socket
+  syslog.socket                                                                                                  loaded    inactive dead      Syslog Socket
+  systemd-coredump.socket                                                                                        loaded    active   listening Process Core Dump Socket
+  systemd-journald-audit.socket                                                                                  loaded    active   running   Journal Audit Socket
+  systemd-journald-dev-log.socket                                                                                loaded    active   running   Journal Socket (/dev/log)
+  systemd-journald.socket                                                                                        loaded    active   running   Journal Socket
+● systemd-rfkill.socket                                                                                          masked    inactive dead      systemd-rfkill.socket
+  systemd-udevd-control.socket                                                                                   loaded    active   running   udev Control Socket
+  systemd-udevd-kernel.socket                                                                                    loaded    active   running   udev Kernel Socket
+  dev-zram0.swap                                                                                                 loaded    active   active    /dev/zram0
+  basic.target                                                                                                   loaded    active   active    Basic System
+● blockdev@dev-disk-by\x2duuid-1881f70f\x2dfbf5\x2d4044\x2dbfe8\x2dd7a6300c6818.target                           not-found inactive dead      blockdev@dev-disk-by\x2duuid-1881f70f\x2dfbf5\x2d4044\x2dbfe8\x2dd7a6300c6818.target
+● blockdev@dev-disk-by\x2duuid-680b789b\x2d3bd6\x2d4b1c\x2d89e9\x2d660035df92dc.target                           not-found inactive dead      blockdev@dev-disk-by\x2duuid-680b789b\x2d3bd6\x2d4b1c\x2d89e9\x2d660035df92dc.target
+● blockdev@dev-disk-by\x2duuid-d996bd3a\x2dc6fe\x2d4455\x2d9726\x2d2171e0ad8c6c.target                           not-found inactive dead      blockdev@dev-disk-by\x2duuid-d996bd3a\x2dc6fe\x2d4455\x2d9726\x2d2171e0ad8c6c.target
+● blockdev@dev-dm\x2d3.target                                                                                    not-found inactive dead      blockdev@dev-dm\x2d3.target
+● blockdev@dev-mapper-lvm\x2dswap.target                                                                         not-found inactive dead      blockdev@dev-mapper-lvm\x2dswap.target
+● blockdev@dev-mapper-teradisk\x2darchive.target                                                                 not-found inactive dead      blockdev@dev-mapper-teradisk\x2darchive.target
+● blockdev@dev-zram0.target                                                                                      not-found inactive dead      blockdev@dev-zram0.target
+  cryptsetup.target                                                                                              loaded    active   active    Local Encrypted Volumes
+  emergency.target                                                                                               loaded    inactive dead      Emergency Mode
+  getty-pre.target                                                                                               loaded    inactive dead      Login Prompts (Pre)
+  getty.target                                                                                                   loaded    active   active    Login Prompts
+  graphical.target                                                                                               loaded    active   active    Graphical Interface
+  hibernate.target                                                                                               loaded    inactive dead      Hibernate
+  hybrid-sleep.target                                                                                            loaded    inactive dead      Hybrid Suspend+Hibernate
+● initrd-switch-root.target                                                                                      not-found inactive dead      initrd-switch-root.target
+  local-fs-pre.target                                                                                            loaded    active   active    Local File Systems (Pre)
+  local-fs.target                                                                                                loaded    active   active    Local File Systems
+  machines.target                                                                                                loaded    active   active    Containers
+  multi-user.target                                                                                              loaded    active   active    Multi-User System
+  network-interfaces.target                                                                                      loaded    active   active    All Network Interfaces (deprecated)
+  network-online.target                                                                                          loaded    active   active    Network is Online
+  network-pre.target                                                                                             loaded    active   active    Network (Pre)
+  network.target                                                                                                 loaded    active   active    Network
+  nss-lookup.target                                                                                              loaded    active   active    Host and Network Name Lookups
+  nss-user-lookup.target                                                                                         loaded    active   active    User and Group Name Lookups
+  paths.target                                                                                                   loaded    active   active    Paths
+  post-resume.target                                                                                             loaded    inactive dead      Post-Resume Actions
+  remote-fs-pre.target                                                                                           loaded    inactive dead      Remote File Systems (Pre)
+  remote-fs.target                                                                                               loaded    active   active    Remote File Systems
+  rescue.target                                                                                                  loaded    inactive dead      Rescue Mode
+  shutdown.target                                                                                                loaded    inactive dead      Shutdown
+  sleep.target                                                                                                   loaded    inactive dead      Sleep
+  slices.target                                                                                                  loaded    active   active    Slices
+  sockets.target                                                                                                 loaded    active   active    Sockets
+  sound.target                                                                                                   loaded    active   active    Sound Card
+  suspend.target                                                                                                 loaded    inactive dead      Suspend
+  swap.target                                                                                                    loaded    active   active    Swap
+  sysinit.target                                                                                                 loaded    active   active    System Initialization
+● time-set.target                                                                                                not-found inactive dead      time-set.target
+  time-sync.target                                                                                               loaded    active   active    System Time Synchronized
+  timers.target                                                                                                  loaded    active   active    Timers
+  umount.target                                                                                                  loaded    inactive dead      Unmount All Filesystems
+  batterycheck.timer                                                                                             loaded    active   waiting   Update timer for locate database
+  borgbackup-job-nlaptop.timer                                                                                   loaded    active   waiting   borgbackup-job-nlaptop.timer
+  btrbk-home.timer                                                                                               loaded    active   waiting   Timer to take BTRFS snapshots and maintain retention policies.
+  btrbk-remote.timer                                                                                             loaded    active   waiting   Timer to take BTRFS snapshots and maintain retention policies.
+  btrfs-autobalance.timer                                                                                        loaded    active   waiting   btrfs-autobalance.timer
+  systemd-tmpfiles-clean.timer                                                                                   loaded    active   waiting   Daily Cleanup of Temporary Directories"
