@@ -1,6 +1,7 @@
 #! /bin/sh
 
-echo "dev-block-254:0.device                                                                                         loaded    active   plugged   /dev/block/254:0
+echo "  UNIT                                                                                                           LOAD      ACTIVE   SUB       DESCRIPTION
+  dev-block-254:0.device                                                                                         loaded    active   plugged   /dev/block/254:0
   dev-block-254:1.device                                                                                         loaded    active   plugged   /dev/block/254:1
   dev-disk-by\x2did-ata\x2dHITACHI_HTS723232A7A364_E3834563K5NVSN.device                                         loaded    active   plugged   HITACHI_HTS723232A7A364
   dev-disk-by\x2did-ata\x2dHITACHI_HTS723232A7A364_E3834563K5NVSN\x2dpart1.device                                loaded    active   plugged   HITACHI_HTS723232A7A364 Réservé_au_système
@@ -338,4 +339,11 @@ echo "dev-block-254:0.device                                                    
   btrbk-home.timer                                                                                               loaded    active   waiting   Timer to take BTRFS snapshots and maintain retention policies.
   btrbk-remote.timer                                                                                             loaded    active   waiting   Timer to take BTRFS snapshots and maintain retention policies.
   btrfs-autobalance.timer                                                                                        loaded    active   waiting   btrfs-autobalance.timer
-  systemd-tmpfiles-clean.timer                                                                                   loaded    active   waiting   Daily Cleanup of Temporary Directories"
+  systemd-tmpfiles-clean.timer                                                                                   loaded    active   waiting   Daily Cleanup of Temporary Directories
+
+LOAD   = Reflects whether the unit definition was properly loaded.
+ACTIVE = The high-level unit activation state, i.e. generalization of SUB.
+SUB    = The low-level unit activation state, values depend on unit type.
+
+xxx loaded units listed. Pass --all to see loaded but inactive units, too.
+To show all installed unit files use 'systemctl list-unit-files'."

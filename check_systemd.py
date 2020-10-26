@@ -41,9 +41,8 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
         # We don’t use `systemctl --failed --no-legend`, because we want to
         # collect performance data of all units.
         try:
-            # p = subprocess.Popen(['./test/bin/version_246/systemctl', 'list-units', '--all',  # noqa: E501
-            p = subprocess.Popen(['systemctl', 'list-units', '--all',
-                                  '--no-legend'],
+            # p = subprocess.Popen(['./test/bin/ok/systemctl', 'list-units', '--all'],  # noqa: E501
+            p = subprocess.Popen(['systemctl', 'list-units', '--all'],
                                  stderr=subprocess.PIPE,
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE)
@@ -62,16 +61,32 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
             'inactive': [],
         }
         if stdout:
-            # Output of `systemctl list-units --all --no-legend`:
+            lines = stdout.decode('utf-8').splitlines()
+            table_heading = lines[0]
+
+            # Remove the first line because it is the header.
+
+            # Remove the  last seven lines:
+
+            # empty line
+            # LOAD   = Reflects whether the unit definition...
+            # ACTIVE = The high-level unit activation state...
+            # SUB    = The low-level unit activation state...
+            # empty line
+            # xxx loaded units listed. Pass --all to see ...
+            # To show all installed unit files use...
+            table_body = lines[1:-7]
+            table_parser = TableParser(table_heading)
+            # Output of `systemctl list-units --all:
             # UNIT           LOAD   ACTIVE SUB     JOB   DESCRIPTION
             # foobar.service loaded active waiting       Description text
             count_units = 0
-            for line in io.StringIO(stdout.decode('utf-8')):
-                split_line = line.split()
+            for line in table_body:
                 # foobar.service
-                unit = split_line[0]
+                unit = table_parser.get_column_text(line, 'UNIT')
                 # failed
-                active = split_line[2]
+                active = table_parser.get_column_text(line, 'ACTIVE')
+
                 # Only count not excluded units.
                 if not self.re_match(unit):
                     # Quick fix:

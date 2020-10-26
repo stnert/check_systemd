@@ -94,7 +94,7 @@ Performance data:
 To detect failed units this monitoring script runs:
 
 ```sh
-systemctl list-units --all --no-legend
+systemctl list-units --all
 ```
 
 To get the startup time it executes:
@@ -118,9 +118,9 @@ systemctl list-timers --all
 ## Testing
 
 ```
-pyenv install 3.7.6
-pyenv install 3.8.1
-pyenv local 3.7.6 3.8.1
+pyenv install 3.6.12
+pyenv install 3.7.9
+pyenv local 3.6.12 3.7.9
 pip3 install tox
 tox
 ```

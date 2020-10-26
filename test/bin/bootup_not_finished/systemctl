@@ -1,6 +1,7 @@
 #! /bin/sh
 
-echo "mnt-nas.automount                                                                                       loaded    active   waiting   Automount nnas
+echo "UNIT                                                                                                    LOAD      ACTIVE   SUB       DESCRIPTION
+mnt-nas.automount                                                                                       loaded    active   waiting   Automount nnas
 proc-sys-fs-binfmt_misc.automount                                                                       loaded    active   waiting   Arbitrary Executable File Formats File System Automount Point
 dev-disk-by\x2did-nvme\x2deui.0025385771b00e60.device                                                   loaded    active   plugged   Samsung SSD 960 EVO 250GB
 dev-disk-by\x2did-nvme\x2deui.0025385771b00e60\x2dpart1.device                                          loaded    active   plugged   Samsung SSD 960 EVO 250GB EFI\x20System\x20Partition
@@ -385,4 +386,11 @@ snapd.snap-repair.timer                                                         
 systemd-tmpfiles-clean.timer                                                                            loaded    active   waiting   Daily Cleanup of Temporary Directories
 unattended-upgrades-frequent.timer                                                                      loaded    active   waiting   unattended-upgrades
 update-motd.timer                                                                                       loaded    active   waiting   Run update-motd and generate /var/run/motd
-ureadahead-stop.timer                                                                                   loaded    active   elapsed   Stop ureadahead data collection 45s after completed startup"
+ureadahead-stop.timer                                                                                   loaded    active   elapsed   Stop ureadahead data collection 45s after completed startup
+
+LOAD   = Reflects whether the unit definition was properly loaded.
+ACTIVE = The high-level unit activation state, i.e. generalization of SUB.
+SUB    = The low-level unit activation state, values depend on unit type.
+
+xxx loaded units listed. Pass --all to see loaded but inactive units, too.
+To show all installed unit files use 'systemctl list-unit-files'."
