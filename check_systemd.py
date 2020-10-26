@@ -41,6 +41,7 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
         # We don’t use `systemctl --failed --no-legend`, because we want to
         # collect performance data of all units.
         try:
+            # p = subprocess.Popen(['./test/bin/version_246/systemctl', 'list-units', '--all',  # noqa: E501
             p = subprocess.Popen(['systemctl', 'list-units', '--all',
                                   '--no-legend'],
                                  stderr=subprocess.PIPE,
@@ -181,6 +182,33 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
                 yield Metric(name='startup_time',
                              value=format_timespan_to_seconds(match.group(1)),
                              context='startup_time')
+
+
+class TableParser(nagiosplugin.Resource):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    column_names = [
+      'NEXT', 'LEFT', 'LAST', 'PASSED', 'UNIT', 'ACTIVATES'
+    ]
+
+    column_boundaries = None
+
+    def detect_column_boundaries(self, heading):
+        boundaries = []
+        previous_column_start = 0
+        for column_title in self.column_names[1:]:
+            next_column_start = heading.index(column_title)
+            boundaries.append([previous_column_start, next_column_start])
+            previous_column_start = next_column_start
+        return boundaries
+
+    def get_column_text(self, row, column_name):
+        boundaries = self.column_boundaries[
+            self.column_names.index(column_name)
+        ]
+        return row[boundaries[0]:boundaries[1]].strip()
 
 
 class SystemctlListTimersResource(nagiosplugin.Resource):
