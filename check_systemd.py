@@ -184,31 +184,35 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
                              context='startup_time')
 
 
-class TableParser(nagiosplugin.Resource):
+class TableParser:
+    """A parser for the various table outputs of different systemd commands."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, heading_row):
+        """
+        :param str heading_row: A row with column titles.
+        """
+        self.heading_row = heading_row
 
-    column_names = [
-      'NEXT', 'LEFT', 'LAST', 'PASSED', 'UNIT', 'ACTIVATES'
-    ]
+    def detect_column_boundaries(self, column_title):
+        """
+        :param str column_title: The title of the column, for example UNIT,
+        ACTIVE. The column title must be included in the heading row.
+        """
+        match = re.search(re.compile(column_title + r'\s*'), self.heading_row)
+        return [match.start(), match.end()]
 
-    column_boundaries = None
+    def get_column_text(self, row, column_title):
+        """Get the text of a certain column, that is specified by the column
+        title. Leading and trailing whitespaces are removed.
 
-    def detect_column_boundaries(self, heading):
-        boundaries = []
-        previous_column_start = 0
-        for column_title in self.column_names[1:]:
-            next_column_start = heading.index(column_title)
-            boundaries.append([previous_column_start, next_column_start])
-            previous_column_start = next_column_start
-        return boundaries
-
-    def get_column_text(self, row, column_name):
-        boundaries = self.column_boundaries[
-            self.column_names.index(column_name)
-        ]
-        return row[boundaries[0]:boundaries[1]].strip()
+        :param str row: The current row of the table to extract a certain
+          column.
+        :param str column_title: The title of the column, for example UNIT,
+          ACTIVE. The column title must be included in the heading row.
+        """
+        boundaries = self.detect_column_boundaries(column_title)
+        column = row[boundaries[0]:boundaries[1]]
+        return column.strip()
 
 
 class SystemctlListTimersResource(nagiosplugin.Resource):
