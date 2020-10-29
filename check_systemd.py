@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
 """
-You can redistribute it and/or modify it under the terms of the GNU General
-Public License as published by the Free Software Foundation, either version 2
-of the License.
-Copyright see argparse help text.
+A Nagios / Icinga monitoring plugin to check systemd.
 """
 import io
 import subprocess
@@ -474,7 +471,7 @@ def get_argparser():
         'Copyright (c) 2014-18 Andrea Briganti a.k.a \'Kbyte\' <kbytesys@gmail.com>\n'  # noqa: E501
         'Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>\n'
         '\n'
-        'Nagios / Icinga monitoring plugin to check systemd for failed units.\n',  # noqa: E501
+        'Nagios / Icinga monitoring plugin to check systemd.\n',  # noqa: E501
         epilog=  # noqa: E251
         'Performance data:\n'
         '  - count_units\n'

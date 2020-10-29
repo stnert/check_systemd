@@ -14,8 +14,6 @@ It requires only the
 
 You can also test a single service with the `-u, --unit` parameter.
 
-Released under GNU GPLv2 License.
-
 ## Installation
 
 ```

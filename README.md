@@ -14,8 +14,6 @@ It requires only the
 
 You can also test a single service with the `-u, --unit` parameter.
 
-Released under GNU GPLv2 License.
-
 ## Installation
 
 ```
@@ -31,7 +29,7 @@ usage: check_systemd [-h] [-u UNIT | -e UNIT] [-n] [-w SECONDS] [-c SECONDS]
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
 Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
 
-Nagios / Icinga monitoring plugin to check systemd for failed units.
+Nagios / Icinga monitoring plugin to check systemd.
 
 optional arguments:
   -h, --help            show this help message and exit
