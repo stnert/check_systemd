@@ -1,4 +1,10 @@
-#!/usr/bin/python3
+#! /usr/bin/python3
+
+"""
+A little script to explore the D-Bus API of systemd.
+"""
+
+from colors import color
 
 # https://raw.githubusercontent.com/pengutronix/monitoring-check-systemd-service/master/check-systemd-service
 
@@ -12,13 +18,31 @@ except ImportError as e:
 
 # https://www.freedesktop.org/wiki/Software/systemd/dbus/
 
-dbus = DBusProxy.new_for_bus_sync(BusType.SYSTEM,
-                                  0,
-                                  None,
+dbus = DBusProxy.new_for_bus_sync(BusType.SYSTEM, 0, None,
                                   'org.freedesktop.systemd1',
                                   '/org/freedesktop/systemd1',
-                                  'org.freedesktop.systemd1.Manager',
-                                  None)
+                                  'org.freedesktop.systemd1.Manager', None)
+
+
+def load_unit(unit_name):
+    try:
+        loaded_unit = dbus.LoadUnit('(s)', unit_name)
+    except Exception as e:
+        raise e
+
+    return DBusProxy.new_for_bus_sync(BusType.SYSTEM,
+                                      0, None, 'org.freedesktop.systemd1',
+                                      loaded_unit,
+                                      'org.freedesktop.systemd1.Unit', None)
+
+
+def get_unit_property(unit, property_name):
+    """
+    :param unit:
+    https://www.freedesktop.org/wiki/Software/systemd/dbus/#unitobjects
+    """
+    return unit.get_cached_property(property_name).unpack()
+
 
 print(dbus.get_name())
 # org.freedesktop.systemd1
@@ -79,31 +103,55 @@ print(dbus.get_cached_property('Version'))
 # more unit names loaded than actual units behind them. The array consists of
 # structures with the following elements:
 
-# The sub state (a more fine-grained version of the active state that is
-# specific to the unit type, which the active state is not)
 
-# A unit that is being followed in its state by this unit, if there is any,
-# otherwise the empty string.
+def print_unit_structure(description, value):
+    """Print a value of the structure returned by ListUnits()"""
+    print("{}: {}".format(color(description, fg='green'),
+                          color(value, fg='yellow')))
 
-# The unit object path
 
-# If there is a job queued for the job unit the numeric job id, 0 otherwise
+def print_unit_property(dbus_unit, property_name):
+    """Print a property of the dbus unit object"""
+    print("{}: {}".format(color(property_name, fg='blue'),
+                          get_unit_property(dbus_unit, property_name)))
 
-# The job type as string
-
-# The job object path
 
 # ('time-set.target', 'System Time Set', 'loaded', 'active', 'active', '',
 # '/org/freedesktop/systemd1/unit/time_2dset_2etarget', 0, '', '/')
-for (name, description, load, active, _, _, _, _, _, _) in dbus.ListUnits():
+for (name, description, load, active, sub_state, followed_unit, object_path,
+     job_id, job_type, job_object_path) in dbus.ListUnits():
+    print('\n{}\n'.format(color(name, fg='red')))
+
     # The primary unit name as string
-    print("\nPrimary unit name: {}".format(name))
+    print_unit_structure("Primary unit name", name)
 
     # The human readable description string
-    print("Human readable description: {}".format(description))
+    print_unit_structure("Human readable description", description)
 
     # The load state (i.e. whether the unit file has been loaded successfully)
-    print("The load state: {}".format(load))
+    print_unit_structure("The load state", load)
 
     # The active state (i.e. whether the unit is currently started or not)
-    print("The active state: {}".format(active))
+    print_unit_structure("The active state", active)
+
+    # The sub state (a more fine-grained version of the active state that is
+    # specific to the unit type, which the active state is not)
+    print_unit_structure("The sub state", sub_state)
+
+    # A unit that is being followed in its state by this unit, if there is any,
+    # otherwise the empty string.
+    print_unit_structure("The followed unit", followed_unit)
+
+    print_unit_structure("The unit object path", object_path)
+
+    # If there is a job queued for the job unit the numeric job id, 0 otherwise
+    print_unit_structure("The numeric job id", job_id)
+
+    # The job type as string
+    print_unit_structure("The job type", job_type)
+
+    print_unit_structure("The job object path", job_object_path)
+
+    dbus_unit = load_unit(name)
+
+    print_unit_property(dbus_unit, 'ActiveState')
