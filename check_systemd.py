@@ -16,7 +16,7 @@ __version__ = '2.2.1'
 
 class SystemctlListUnitsResource(nagiosplugin.Resource):
     """
-    lol
+    Resource that calls `systemctl list-units --all` on the command line.
 
     :param list excludes: A list of systemd unit names.
     """
