@@ -1,12 +1,10 @@
 Welcome to check_systemd's documentation!
 =========================================
 
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-
-   source
+.. automodule:: check_systemd
+    :members:
+    :private-members:
+    :special-members:
 
 Indices and tables
 ==================

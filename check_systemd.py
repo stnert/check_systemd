@@ -1,7 +1,35 @@
 #!/usr/bin/env python3
 
 """
-A Nagios / Icinga monitoring plugin to check systemd.
+``check_system`` is a Nagios / Icinga monitoring plugin to check systemd.
+
+This plugin is based on a Python package named `nagiosplugin
+<https://pypi.org/project/nagiosplugin/>`_. ``nagiosplugin`` has a fine-grained
+class model to separate concerns. A Nagios / Icinga plugin need to perform
+three steps: data `acquisition`, `evaluation` and `presentation`.
+``nagiosplugin`` provides for this three steps three classes: ``Resource``,
+``Context``, ``Summary``. ``check_systemd`` extends this three model classes in
+the following subclasses:
+
+Acquisition (``Resource``)
+==========================
+
+* :class:`SystemctlIsActiveResource`
+* :class:`SystemctlListTimersResource`
+* :class:`SystemctlListUnitsResource`
+* :class:`SystemdAnalyseResource`
+
+Evaluation (``Context``)
+========================
+
+* :class:`DeadTimersContext`
+* :class:`PerformanceDataContext`
+* :class:`UnitContext`
+
+Presentation (``Summary``)
+==========================
+
+* :class:`SystemdSummary`
 """
 import io
 import subprocess
@@ -16,7 +44,8 @@ __version__ = '2.2.1'
 
 class SystemctlListUnitsResource(nagiosplugin.Resource):
     """
-    Resource that calls `systemctl list-units --all` on the command line.
+    Resource that calls ``systemctl list-units --all`` on the command line to
+    get informations about all systemd units.
 
     :param list excludes: A list of systemd unit names.
     """
@@ -155,6 +184,8 @@ def format_timespan_to_seconds(fmt_timespan):
 
 
 class SystemdAnalyseResource(nagiosplugin.Resource):
+    """Resource that calls ``systemd-analyze`` on the command line to get
+    informations about the startup time.."""
 
     name = 'SYSTEMD'
 
@@ -230,10 +261,14 @@ class TableParser:
 
 
 class SystemctlListTimersResource(nagiosplugin.Resource):
-    """There is one type of systemd "degradation" which is normally not
-    detected: dead / inactive timers.
     """
+    Resource that calls ``systemctl list-timers --all`` on the command line to
+    get informations about dead / inactive timers. There is one type of systemd
+    “degradation” which is normally not detected: dead / inactive timers.
 
+    :param list excludes: A list of systemd unit names to exclude from the
+      checks.
+    """
     def __init__(self, excludes=[], *args, **kwargs):
         self.excludes = excludes
         self.warning = kwargs.pop('warning')
@@ -335,7 +370,8 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
 
 
 class SystemctlIsActiveResource(nagiosplugin.Resource):
-    """Resource which calls `systemctl is-active <service>`."""
+    """Resource that calls ``systemctl is-active <service>`` on the command
+    line to get informations about one specifiy systemd unit."""
 
     name = 'SYSTEMD'
 
