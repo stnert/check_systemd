@@ -16,6 +16,8 @@ __version__ = '2.2.1'
 
 class SystemctlListUnitsResource(nagiosplugin.Resource):
     """
+    lol
+
     :param list excludes: A list of systemd unit names.
     """
     name = 'SYSTEMD'
@@ -208,7 +210,7 @@ class TableParser:
     def detect_column_boundaries(self, column_title):
         """
         :param str column_title: The title of the column, for example UNIT,
-        ACTIVE. The column title must be included in the heading row.
+          ACTIVE. The column title must be included in the heading row.
         """
         match = re.search(re.compile(column_title + r'\s*'), self.heading_row)
         return [match.start(), match.end()]
@@ -333,6 +335,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
 
 
 class SystemctlIsActiveResource(nagiosplugin.Resource):
+    """Resource which calls `systemctl is-active <service>`."""
 
     name = 'SYSTEMD'
 
@@ -581,6 +584,7 @@ def get_argparser():
 
 
 def main():
+    """The main function"""
     args = get_argparser().parse_args()
 
     objects = []
