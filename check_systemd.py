@@ -408,7 +408,8 @@ class SystemctlIsActiveResource(nagiosplugin.Resource):
 
 class UnitContext(nagiosplugin.Context):
 
-    def __init__(self):
+    def __init__(self, args):
+        self.args = args
         super(UnitContext, self).__init__('unit')
 
     def evaluate(self, metric, resource):
@@ -423,7 +424,15 @@ class UnitContext(nagiosplugin.Context):
             hint = '{}: {}'.format(metric.name, metric.value)
         else:
             hint = metric.name
-        if metric.value and metric.value != 'active':
+
+        # The option -u is not specifed
+        if not metric.value:
+            return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
+
+        if self.args.ignore_inactive_state and metric.value == 'failed':
+            return self.result_cls(nagiosplugin.Critical, metric=metric,
+                                   hint=hint)
+        elif not self.args.ignore_inactive_state and metric.value != 'active':
             return self.result_cls(nagiosplugin.Critical, metric=metric,
                                    hint=hint)
         else:
@@ -604,6 +613,15 @@ def get_argparser():
     )
 
     parser.add_argument(
+        '-i', '--ignore-inactive-state',
+        action='store_true',
+        help='Ignore an inactive state on a specific unit. Oneshot services '
+             'for example are only active while running and not enabled. '
+             'The rest of the time they are inactive. This option has only '
+             'an affect if it is used with the option -u.'
+    )
+
+    parser.add_argument(
         '-v', '--verbose',
         action='count',
         default=0,
@@ -653,7 +671,7 @@ def main():
             objects.append(SystemdAnalyseResource())
 
     objects += [
-        UnitContext(),
+        UnitContext(args),
         SystemdSummary()
     ]
 

@@ -24,7 +24,7 @@ pip3 install check_systemd
 
 ```
 usage: check_systemd [-h] [-u UNIT | -e UNIT] [-n] [-w SECONDS] [-c SECONDS]
-                     [-t] [-W SECONDS] [-C SECONDS] [-v] [-V]
+                     [-t] [-W SECONDS] [-C SECONDS] [-i] [-v] [-V]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
 Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
@@ -68,6 +68,12 @@ optional arguments:
   -C SECONDS, --dead-timers-critical SECONDS
                         Time ago in seconds for dead / inactive timers to
                         trigger a critical state (by default 7 days).
+  -i, --ignore-inactive-state
+                        Ignore an inactive state on a specific unit. Oneshot
+                        services for example are only active while running and
+                        not enabled. The rest of the time they are inactive.
+                        This option has only an affect if it is used with the
+                        option -u.
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit
 

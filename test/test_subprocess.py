@@ -330,6 +330,20 @@ class TestOptionUnit(unittest.TestCase):
             'SYSTEMD CRITICAL - test.service: inactive\n'
         )
 
+    def test_option_ignore_inactive_state(self):
+        with AddBin('bin/is_active/inactive'):
+            process = subprocess.run(
+                ['./check_systemd.py', '--unit', 'test.service',
+                 '--ignore-inactive-state'],
+                encoding='utf-8',
+                stdout=subprocess.PIPE
+            )
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(
+            process.stdout,
+            'SYSTEMD OK - test.service: inactive\n'
+        )
+
 
 class TestBootupNotFinished(unittest.TestCase):
 
