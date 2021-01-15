@@ -39,7 +39,7 @@ import re
 import nagiosplugin
 from nagiosplugin import Metric
 
-__version__ = '2.2.1'
+__version__ = '2.3.0'
 
 
 class SystemctlListUnitsResource(nagiosplugin.Resource):
@@ -517,7 +517,7 @@ def get_argparser():
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(prog, width=80),  # noqa: E501
         description=  # noqa: E251
         'Copyright (c) 2014-18 Andrea Briganti a.k.a \'Kbyte\' <kbytesys@gmail.com>\n'  # noqa: E501
-        'Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>\n'
+        'Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>\n'
         '\n'
         'Nagios / Icinga monitoring plugin to check systemd.\n',  # noqa: E501
         epilog=  # noqa: E251

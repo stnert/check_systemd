@@ -27,7 +27,7 @@ usage: check_systemd [-h] [-u UNIT | -e UNIT] [-n] [-w SECONDS] [-c SECONDS]
                      [-t] [-W SECONDS] [-C SECONDS] [-i] [-v] [-V]
 
 Copyright (c) 2014-18 Andrea Briganti a.k.a 'Kbyte' <kbytesys@gmail.com>
-Copyright (c) 2019-20 Josef Friedrich <josef@friedrich.rocks>
+Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>
 
 Nagios / Icinga monitoring plugin to check systemd.
 
