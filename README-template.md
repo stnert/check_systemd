@@ -58,6 +58,12 @@ To find dead timers this plugin launches:
 systemctl list-timers --all
 ```
 
+To learn how `systemd` produces the text output on the command line, it
+is worthwhile to take a look at  `systemd`’s source
+code. Files relevant for text output are:
+[basic/time-util.c](https://github.com/systemd/systemd/blob/main/src/basic/time-util.c),
+[analyze/analyze.c](https://github.com/systemd/systemd/blob/main/src/analyze/analyze.c).
+
 ## Testing
 
 ```
