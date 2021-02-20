@@ -20,6 +20,11 @@ You can also test a single service with the `-u, --unit` parameter.
 pip3 install check_systemd
 ```
 
+## Packages
+
+* Debian ([package](https://ftp-master.debian.org/new/monitoring-plugins-systemd_2.3.0+ds-1.html), [source code](https://salsa.debian.org/python-team/packages/monitoring-plugins-systemd/-/tree/debian/master/debian)): work in progress
+* NixOS ([package](https://search.nixos.org/packages?channel=unstable&query=check_systemd), [source code](https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/servers/monitoring/nagios/plugins/check_systemd.nix)): `nix-env -iA nixos.check_systemd`
+
 ## Command line interface
 
 ```
