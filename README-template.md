@@ -3,16 +3,14 @@
 
 # check_systemd
 
-`check_systemd` is a
-[Nagios](https://www.nagios.org) / [Icinga](https://icinga.com)
-monitoring plugin to check [systemd](https://systemd.io) for failed
-units.
-
-This Python script will report a degraded system to your monitoring solution.
-It requires only the
-[nagiosplugin](https://nagiosplugin.readthedocs.io/en/stable) library.
-
-You can also test a single service with the `-u, --unit` parameter.
+`check_systemd` is a [Nagios](https://www.nagios.org) /
+[Icinga](https://icinga.com) monitoring plugin to check
+[systemd](https://systemd.io). This Python script will report a degraded
+system to your monitoring solution. It can also be used to monitor
+individual systemd services (with the `-u, --unit` parameter) and timers
+units (with the `-t, --dead-timers` parameter). The only dependency the
+plugin needs is the Python library
+[nagiosplugin](https://nagiosplugin.readthedocs.io/en/stable).
 
 ## Installation
 
@@ -33,9 +31,9 @@ pip3 install check_systemd
 
 ## Project pages
 
-* https://github.com/Josef-Friedrich/check_systemd
-* https://exchange.icinga.com/joseffriedrich/check_systemd
-* https://exchange.nagios.org/directory/Plugins/System-Metrics/Processes/check_systemd/details
+* on [github.com](https://github.com/Josef-Friedrich/check_systemd)
+* on [icinga.com](https://exchange.icinga.com/joseffriedrich/check_systemd)
+* on [nagios.org](https://exchange.nagios.org/directory/Plugins/System-Metrics/Processes/check_systemd/details)
 
 ## Behind the scenes
 

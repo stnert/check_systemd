@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 
 """
-``check_system`` is a Nagios / Icinga monitoring plugin to check systemd.
+``check_system`` is a `Nagios <https://www.nagios.org>`_ / `Icinga
+<https://icinga.com>`_ monitoring plugin to check systemd. This Python script
+will report a degraded system to your monitoring solution. It can also be used
+to monitor individual systemd services (with the ``-u, --unit`` parameter) and
+timers units (with the ``-t, --dead-timers`` parameter).
+
+To lern more about the project, please visit the repository on `Github
+<https://github.com/Josef-Friedrich/check_systemd>`_.
 
 This plugin is based on a Python package named `nagiosplugin
 <https://pypi.org/project/nagiosplugin/>`_. ``nagiosplugin`` has a fine-grained
@@ -516,7 +523,7 @@ def get_argparser():
         prog='check_systemd',  # To get the right command name in the README.
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(prog, width=80),  # noqa: E501
         description=  # noqa: E251
-        'Copyright (c) 2014-18 Andrea Briganti a.k.a \'Kbyte\' <kbytesys@gmail.com>\n'  # noqa: E501
+        'Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>\n'
         'Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>\n'
         '\n'
         'Nagios / Icinga monitoring plugin to check systemd.\n',  # noqa: E501
