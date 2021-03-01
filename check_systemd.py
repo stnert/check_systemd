@@ -12,7 +12,7 @@ To lern more about the project, please visit the repository on `Github
 
 This plugin is based on a Python package named `nagiosplugin
 <https://pypi.org/project/nagiosplugin/>`_. ``nagiosplugin`` has a fine-grained
-class model to separate concerns. A Nagios / Icinga plugin need to perform
+class model to separate concerns. A Nagios / Icinga plugin must perform these
 three steps: data `acquisition`, `evaluation` and `presentation`.
 ``nagiosplugin`` provides for this three steps three classes: ``Resource``,
 ``Context``, ``Summary``. ``check_systemd`` extends this three model classes in
