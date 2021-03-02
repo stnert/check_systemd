@@ -1,8 +1,9 @@
 #! /usr/bin/python3
 
 """
-A work in progress rewrite of the plugin using dbus instead of parsing the cli
-output.
+Work in progress! Do not use this script at the moment! Use the file
+`check_systemd.py` instead. It is a rewrite of the plugin using D-Bus instead
+of parsing the CLI output.
 """
 
 import argparse
@@ -59,6 +60,32 @@ class SystemdUnitState:
 
     @property
     def loadstate(self):
+        """From the `D-Bus interface of systemd documentation
+        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
+
+        ``LoadState`` contains a state value that reflects whether the
+        configuration file of this unit has been loaded. The following states
+        are currently defined:
+
+        * loaded
+        * error
+        * masked.
+
+        ``loaded`` indicates that the configuration was successfully loaded.
+
+        ``error`` indicates that the configuration failed to load, the
+        ``LoadError`` field contains information about the cause of this
+        failure.
+
+        ``masked`` indicates that the unit is currently masked out (i.e.
+        symlinked to /dev/null or suchlike).
+
+        Note that the LoadState is fully orthogonal to the ActiveState (see
+        below) as units without valid loaded configuration might be active
+        (because configuration might have been reloaded at a time where a unit
+        was already active).
+
+        """
         return self.__get_dbus_property('LoadState')
 
 

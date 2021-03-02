@@ -6,6 +6,11 @@ Welcome to check_systemd's documentation!
     :private-members:
     :special-members:
 
+.. automodule:: ng
+    :members:
+    :private-members:
+    :special-members:
+
 Indices and tables
 ==================
 
