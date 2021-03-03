@@ -46,7 +46,7 @@ import re
 import nagiosplugin
 from nagiosplugin import Metric
 
-__version__ = '2.3.0'
+__version__ = '2.3.1'
 
 
 class SystemctlListUnitsResource(nagiosplugin.Resource):
@@ -425,6 +425,7 @@ class UnitContext(nagiosplugin.Context):
         :param metric: associated metric that is to be evaluated
         :param resource: resource that produced the associated metric
             (may optionally be consulted)
+
         :returns: :class:`~.result.Result`
         """
         if metric.value:
@@ -457,6 +458,7 @@ class DeadTimersContext(nagiosplugin.Context):
         :param metric: associated metric that is to be evaluated
         :param resource: resource that produced the associated metric
             (may optionally be consulted)
+
         :returns: :class:`~.result.Result`
         """
         return self.result_cls(metric.value, metric=metric, hint=metric.name)
@@ -481,6 +483,9 @@ class PerformanceDataContext(nagiosplugin.Context):
 
 
 class SystemdSummary(nagiosplugin.Summary):
+    """Format the different status lines. A subclass of `nagiosplugin.Summary
+    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/summary.py>`_.
+    """
 
     def ok(self, results):
         """Formats status line when overall state is ok.
@@ -497,6 +502,7 @@ class SystemdSummary(nagiosplugin.Summary):
         """Formats status line when overall state is not ok.
 
         :param results: :class:`~.result.Results` container
+
         :returns: status line
         """
         summary = []
@@ -509,6 +515,7 @@ class SystemdSummary(nagiosplugin.Summary):
         """Provides extra lines if verbose plugin execution is requested.
 
         :param results: :class:`~.result.Results` container
+
         :returns: list of strings
         """
         summary = []
@@ -645,13 +652,25 @@ def get_argparser():
 
 
 def main():
-    """The main function"""
+    """The main entry point of the monitoring plugin. First the command line
+    arguments are read into the variable ``args``. The configuration of this
+    ``args`` object decides which instances of the `Resource
+    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/resource.py>`_,
+    `Context
+    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/context.py>`_
+    and `Summary
+    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/summary.py>`_
+    subclasses are assembled in a list called ``tasks``. This list is passed
+    the main class of the ``nagiosplugin`` library: the `Check
+    <https://nagiosplugin.readthedocs.io/en/stable/api/core.html#nagiosplugin-check>`_
+    class.
+    """
     args = get_argparser().parse_args()
 
-    objects = []
+    tasks = []
 
     if args.dead_timers:
-        objects += [
+        tasks += [
             SystemctlListTimersResource(
                 excludes=args.exclude,
                 warning=args.dead_timers_warning,
@@ -661,9 +680,9 @@ def main():
         ]
 
     if args.unit:
-        objects.append(SystemctlIsActiveResource(unit=args.unit))
+        tasks.append(SystemctlIsActiveResource(unit=args.unit))
     else:
-        objects += [
+        tasks += [
             SystemctlListUnitsResource(excludes=args.exclude),
             PerformanceDataContext(),
         ]
@@ -675,15 +694,15 @@ def main():
         )
         # systemd-analyze: boot not finshed exits with 1
         if analyse.returncode == 0:
-            objects.append(SystemdAnalyseResource())
+            tasks.append(SystemdAnalyseResource())
 
-    objects += [
+    tasks += [
         UnitContext(args),
         SystemdSummary()
     ]
 
     if not args.no_startup_time:
-        objects.append(
+        tasks.append(
             nagiosplugin.ScalarContext(
                 name='startup_time',
                 warning=args.warning,
@@ -691,13 +710,13 @@ def main():
             )
         )
     else:
-        objects.append(
+        tasks.append(
             nagiosplugin.ScalarContext(
                 name='startup_time'
             )
         )
 
-    check = nagiosplugin.Check(*objects)
+    check = nagiosplugin.Check(*tasks)
     check.main(args.verbose)
 
 

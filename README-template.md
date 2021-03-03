@@ -79,9 +79,10 @@ tox
 
 ## Deploying
 
-Edit version number in check_systemd.py (without `v`)
+Edit the version number in check_systemd.py (without `v`). Use the `-s`
+option to sign the tag (required for the Debian package).
 
 ```
-git tag v2.0.11
+git tag -s v2.0.11
 git push --tags
 ```
