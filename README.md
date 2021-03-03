@@ -27,7 +27,7 @@ pip3 install check_systemd
 
 ```
 usage: check_systemd [-h] [-u UNIT | -e UNIT] [-n] [-w SECONDS] [-c SECONDS]
-                     [-t] [-W SECONDS] [-C SECONDS] [-i] [-v] [-V]
+                     [-t] [-W SECONDS] [-C SECONDS] [-i] [--dbus] [-v] [-V]
 
 Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>
 Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>
@@ -77,6 +77,10 @@ optional arguments:
                         not enabled. The rest of the time they are inactive.
                         This option has only an affect if it is used with the
                         option -u.
+  --dbus                Use the systemd’s D-Bus API instead of parsing the text
+                        output of various systemd related command line
+                        interfaces to monitor systemd. At the moment the D-Bus
+                        backend of this plugin is only partially implemented.
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit
 

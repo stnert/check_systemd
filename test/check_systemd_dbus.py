@@ -60,7 +60,7 @@ class DbusManager:
             raise e
 
 
-dbus_manager = DbusManager()
+dbus_manager = None
 """
 The systemd D-Bus API main entry point object, the so called “manager”.
 """
