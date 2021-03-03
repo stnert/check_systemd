@@ -54,6 +54,19 @@ data_source = 'dbus'
 of monitoring informations. It accepts the values ``dbus`` or ``cli``. It
 preferes the D-Bus source. """
 
+opts = None
+"""
+We make is variable global to be able to access the command line arguments
+everywhere in the plugin. In this variable the result of `parse_args()
+<https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.parse_args>`_
+is stored. It is an instance of the
+`argparse.Namespace
+<https://docs.python.org/3/library/argparse.html#argparse.Namespace>`_ class.
+This variable is initialized in the main function. The variable is
+intentionally not named ``args`` to avoid confusion with ``*args`` (Non-Keyword
+Arguments).
+"""
+
 try:
     # Look for gi https://pygobject.readthedocs.io/en/latest/index.html
     from gi.repository.Gio import DBusProxy, BusType
@@ -447,6 +460,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
     :param list excludes: A list of systemd unit names to exclude from the
       checks.
     """
+
     def __init__(self, excludes=[], *args, **kwargs):
         self.excludes = excludes
         self.warning = kwargs.pop('warning')
@@ -456,7 +470,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
     name = 'SYSTEMD'
 
     column_names = [
-      'NEXT', 'LEFT', 'LAST', 'PASSED', 'UNIT', 'ACTIVATES'
+        'NEXT', 'LEFT', 'LAST', 'PASSED', 'UNIT', 'ACTIVATES'
     ]
 
     column_boundaries = None
@@ -586,8 +600,7 @@ class SystemctlIsActiveResource(nagiosplugin.Resource):
 
 class UnitContext(nagiosplugin.Context):
 
-    def __init__(self, args):
-        self.args = args
+    def __init__(self):
         super(UnitContext, self).__init__('unit')
 
     def evaluate(self, metric, resource):
@@ -608,10 +621,10 @@ class UnitContext(nagiosplugin.Context):
         if not metric.value:
             return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
 
-        if self.args.ignore_inactive_state and metric.value == 'failed':
+        if opts.ignore_inactive_state and metric.value == 'failed':
             return self.result_cls(nagiosplugin.Critical, metric=metric,
                                    hint=hint)
-        elif not self.args.ignore_inactive_state and metric.value != 'active':
+        elif not opts.ignore_inactive_state and metric.value != 'active':
             return self.result_cls(nagiosplugin.Critical, metric=metric,
                                    hint=hint)
         else:
@@ -833,8 +846,8 @@ def get_argparser():
 
 def main():
     """The main entry point of the monitoring plugin. First the command line
-    arguments are read into the variable ``args``. The configuration of this
-    ``args`` object decides which instances of the `Resource
+    arguments are read into the variable ``opts``. The configuration of this
+    ``opts`` object decides which instances of the `Resource
     <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/resource.py>`_,
     `Context
     <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/context.py>`_
@@ -845,25 +858,26 @@ def main():
     <https://nagiosplugin.readthedocs.io/en/stable/api/core.html#nagiosplugin-check>`_
     class.
     """
-    args = get_argparser().parse_args()
+    global opts
+    opts = get_argparser().parse_args()
 
     tasks = []
 
-    if args.dead_timers:
+    if opts.dead_timers:
         tasks += [
             SystemctlListTimersResource(
-                excludes=args.exclude,
-                warning=args.dead_timers_warning,
-                critical=args.dead_timers_critical,
+                excludes=opts.exclude,
+                warning=opts.dead_timers_warning,
+                critical=opts.dead_timers_critical,
             ),
             DeadTimersContext()
         ]
 
-    if args.unit:
-        tasks.append(SystemctlIsActiveResource(unit=args.unit))
+    if opts.unit:
+        tasks.append(SystemctlIsActiveResource(unit=opts.unit))
     else:
         tasks += [
-            SystemctlListUnitsResource(excludes=args.exclude),
+            SystemctlListUnitsResource(excludes=opts.exclude),
             PerformanceDataContext(),
         ]
         analyse = subprocess.run(
@@ -877,16 +891,16 @@ def main():
             tasks.append(SystemdAnalyseResource())
 
     tasks += [
-        UnitContext(args),
+        UnitContext(),
         SystemdSummary()
     ]
 
-    if not args.no_startup_time:
+    if not opts.no_startup_time:
         tasks.append(
             nagiosplugin.ScalarContext(
                 name='startup_time',
-                warning=args.warning,
-                critical=args.critical,
+                warning=opts.warning,
+                critical=opts.critical,
             )
         )
     else:
@@ -897,7 +911,7 @@ def main():
         )
 
     check = nagiosplugin.Check(*tasks)
-    check.main(args.verbose)
+    check.main(opts.verbose)
 
 
 if __name__ == '__main__':
