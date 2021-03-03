@@ -37,6 +37,23 @@ Presentation (``Summary``)
 ==========================
 
 * :class:`SystemdSummary`
+
+
+metric context names
+====================
+
+* performance_data
+* unit
+* dead_timers
+
+
+Naming scheme for the classes
+=============================
+
+* data source: ``Dbus|Cli`` +
+* Custom name: ``CustomName`` +
+* inherited class model: ``Resource|Context|Summary``
+
 """
 import io
 import subprocess
@@ -233,6 +250,21 @@ class DbusUnitState:
         return self.__get_dbus_property('LoadState')
 
 
+class DbusUnitResource(nagiosplugin.Resource):
+    """Get informations about one specific systemd unit."""
+
+    name = 'SYSTEMD'
+
+    def __init__(self, *args, **kwargs):
+        self.unit = kwargs.pop('unit')
+        super().__init__(*args, **kwargs)
+
+    def probe(self):
+        unit_state = DbusUnitState(self.unit)
+        return Metric(name=self.unit, value=unit_state.active_state,
+                      context='unit')
+
+
 class SystemctlListUnitsResource(nagiosplugin.Resource):
     """
     Resource that calls ``systemctl list-units --all`` on the command line to
@@ -335,15 +367,15 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
 
 
 def format_timespan_to_seconds(fmt_timespan):
-    """Convert a timespan format string into secondes.
+    """Convert a timespan format string into secondes. Take a look at the
+    systemd `time-util.c
+    <https://github.com/systemd/systemd/blob/master/src/basic/time-util.c>`_
+    source code.
 
-    https://github.com/systemd/systemd/blob/master/src/basic/time-util.c#L357
+    :param str fmt_timespan: for example ``2.345s`` or ``3min 45.234s`` or
+      ``34min left`` or ``2 months 8 days``
 
-    :param str fmt_timespan: for example `2.345s` or `3min 45.234s` or
-      `34min left` or `2 months 8 days`
-
-    :return: The seconds
-    :rtype: float
+    :return: The seconds :rtype: float
     """
     for replacement in [
         ['years', 'y'],
@@ -861,6 +893,9 @@ def main():
     global opts
     opts = get_argparser().parse_args()
 
+    if opts.dbus and data_source == 'cli':
+        print('D-Bus backend could not be used. Fall back to the CLI backend.')
+
     tasks = []
 
     if opts.dead_timers:
@@ -874,7 +909,10 @@ def main():
         ]
 
     if opts.unit:
-        tasks.append(SystemctlIsActiveResource(unit=opts.unit))
+        if opts.dbus and data_source == 'dbus':
+            tasks.append(DbusUnitResource(unit=opts.unit))
+        else:
+            tasks.append(SystemctlIsActiveResource(unit=opts.unit))
     else:
         tasks += [
             SystemctlListUnitsResource(excludes=opts.exclude),
