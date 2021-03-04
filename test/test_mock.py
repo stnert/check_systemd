@@ -5,8 +5,10 @@ import check_systemd
 
 def mock_main(argv=['check_systemd.py'], stdout=None, stderr=None):
     with mock.patch('sys.exit') as sys_exit, \
+            mock.patch('check_systemd.subprocess.run') as run, \
             mock.patch('check_systemd.subprocess.Popen') as Popen, \
             mock.patch('sys.argv', argv):
+        run.return_value.returncode = 0
         process = Popen.return_value
         process.communicate.return_value = (stdout, stderr)
         check_systemd.main()
@@ -14,7 +16,6 @@ def mock_main(argv=['check_systemd.py'], stdout=None, stderr=None):
     return {'sys_exit': sys_exit}
 
 
-@unittest.skip('TODO mock second call of subprocess.Popen')
 class TestMock(unittest.TestCase):
 
     def test_ok(self):
