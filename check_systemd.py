@@ -123,6 +123,13 @@ class DbusManager:
         except Exception as e:
             raise e
 
+    def get_all_unit_names(self):
+        all_units = self.__manager.ListUnits()
+        units_set = set()
+        for (name, _, _, _, _, _, _, _, _, _) in all_units:
+            units_set.add(name)
+        return units_set
+
 
 dbus_manager = None
 """
@@ -250,7 +257,7 @@ class DbusUnitState:
         return self.__get_dbus_property('LoadState')
 
 
-class DbusUnitResource(nagiosplugin.Resource):
+class DbusSingleUnitResource(nagiosplugin.Resource):
     """Get informations about one specific systemd unit."""
 
     name = 'SYSTEMD'
@@ -263,6 +270,24 @@ class DbusUnitResource(nagiosplugin.Resource):
         unit_state = DbusUnitState(self.unit)
         return Metric(name=self.unit, value=unit_state.active_state,
                       context='unit')
+
+
+class DbusAllUnitsResource(nagiosplugin.Resource):
+
+    name = 'SYSTEMD'
+
+    def probe(self):
+        """Query system state and return metrics.
+
+        :return: generator that emits
+          :class:`~nagiosplugin.metric.Metric` objects
+        """
+        unit_names = dbus_manager.get_all_unit_names()
+
+        for unit_name in unit_names:
+            unit_state = DbusUnitState(unit_name)
+            yield Metric(name=unit_name, value=unit_state.active_state,
+                         context='unit')
 
 
 class SystemctlListUnitsResource(nagiosplugin.Resource):
@@ -896,6 +921,10 @@ def main():
     if opts.dbus and data_source == 'cli':
         print('D-Bus backend could not be used. Fall back to the CLI backend.')
 
+    use_dbus = False
+    if opts.dbus and data_source == 'dbus':
+        use_dbus = True
+
     tasks = []
 
     if opts.dead_timers:
@@ -909,24 +938,27 @@ def main():
         ]
 
     if opts.unit:
-        if opts.dbus and data_source == 'dbus':
-            tasks.append(DbusUnitResource(unit=opts.unit))
+        if use_dbus:
+            tasks.append(DbusSingleUnitResource(unit=opts.unit))
         else:
             tasks.append(SystemctlIsActiveResource(unit=opts.unit))
     else:
-        tasks += [
-            SystemctlListUnitsResource(excludes=opts.exclude),
-            PerformanceDataContext(),
-        ]
-        analyse = subprocess.run(
-            ['systemd-analyze'],
-            stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE
-        )
-        # systemd-analyze: boot not finshed exits with 1
-        if analyse.returncode == 0:
-            tasks.append(SystemdAnalyseResource())
+        if use_dbus:
+            tasks.append(DbusAllUnitsResource())
+        else:
+            tasks += [
+                SystemctlListUnitsResource(excludes=opts.exclude),
+                PerformanceDataContext(),
+            ]
+            analyse = subprocess.run(
+                ['systemd-analyze'],
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE
+            )
+            # systemd-analyze: boot not finshed exits with 1
+            if analyse.returncode == 0:
+                tasks.append(SystemdAnalyseResource())
 
     tasks += [
         UnitContext(),
