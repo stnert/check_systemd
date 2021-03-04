@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 import check_systemd
-from helper import Capturing
+from helper import Capturing, mock_main
 
 # POpen class
 # Line 334 p = subprocess.Popen(['systemctl', 'list-units', '--all'],
@@ -17,23 +17,12 @@ from helper import Capturing
 # SystemctlIsActiveResource
 
 
-def mock_main(argv=['check_systemd.py'], stdout=None, stderr=None):
-    with mock.patch('sys.exit') as sys_exit, \
-            mock.patch('check_systemd.subprocess.run') as run, \
-            mock.patch('check_systemd.subprocess.Popen') as Popen, \
-            mock.patch('sys.argv', argv):
-        run.return_value.returncode = 0
-        process = Popen.return_value
-        process.communicate.return_value = (stdout, stderr)
-        check_systemd.main()
-
-    return {'sys_exit': sys_exit}
-
-
 class TestMock(unittest.TestCase):
 
     def test_ok(self):
-        result = mock_main()
+        result = mock_main(popen_stdout_files=[
+                           'systemctl-list-units-ok.txt',
+                           'systemd-analyze-34-min.txt'])
         result['sys_exit'].assert_called_with(0)
 
     def test_help(self):
@@ -61,20 +50,10 @@ class TestMock(unittest.TestCase):
             sys_exit.assert_called_with(0)
 
     def test_multiple_units(self):
-        with mock.patch('sys.exit') as sys_exit, \
-                mock.patch('check_systemd.subprocess.run') as run, \
-                mock.patch('check_systemd.subprocess.Popen') as Popen, \
-                mock.patch('sys.argv', ['check_systemd.py']):
-            run.return_value.returncode = 0
-            process = Popen.return_value
-            process.communicate.return_value = (
-                b'Startup finished in 5.081s (kernel) + 34min 41.211s ' +
-                b'(userspace) = 34min 46.292s\n' +
-                b'graphical.target reached after 12.154s in userspace', None)
-            check_systemd.main()
-            # self.assertIn('SYSTEMD OK - nginx.service: active', output)
-
-            sys_exit.assert_called_with(0)
+        result = mock_main(popen_stdout_files=[
+                           'systemctl-list-units-ok.txt',
+                           'systemd-analyze-34-min.txt'])
+        result['sys_exit'].assert_called_with(0)
 
 
 if __name__ == '__main__':

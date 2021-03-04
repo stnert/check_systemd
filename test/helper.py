@@ -1,8 +1,11 @@
 from io import StringIO
 import sys
 import re
+from unittest import mock
 from unittest.mock import Mock
 from os import path
+import check_systemd
+
 
 # https://github.com/Josef-Friedrich/jflib/blob/master/jflib/capturing.py
 
@@ -61,7 +64,8 @@ def read_file_as_bytes(file_name):
 
     :return: The text as a byte format.
     """
-    in_file = open(path.join('cli_output', file_name), 'rb')
+    in_file = open(path.join(path.dirname(
+        path.abspath(__file__)), 'cli_output', file_name), 'rb')
     data = in_file.read()
     in_file.close()
     return data
@@ -84,3 +88,21 @@ def mock_popen_communicate(*file_names):
         mock.communicate.return_value = (read_file_as_bytes(file_name), None)
         mocks.append(mock)
     return mocks
+
+
+def mock_main(argv=['check_systemd.py'], popen_stdout_files=[]):
+    with mock.patch('sys.exit') as sys_exit, \
+            mock.patch('check_systemd.subprocess.run') as run, \
+            mock.patch('check_systemd.subprocess.Popen') as Popen, \
+            mock.patch('sys.argv', argv):
+        run.return_value.returncode = 0
+        Popen.side_effect = mock_popen_communicate(*popen_stdout_files)
+
+        with Capturing() as output:
+            check_systemd.main()
+
+    return {
+        'sys_exit': sys_exit,
+        'run': run,
+        'output': output
+    }
