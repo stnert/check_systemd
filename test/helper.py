@@ -1,6 +1,8 @@
 from io import StringIO
 import sys
 import re
+from unittest.mock import Mock
+from os import path
 
 # https://github.com/Josef-Friedrich/jflib/blob/master/jflib/capturing.py
 
@@ -49,3 +51,36 @@ class Capturing(list):
     @staticmethod
     def _clean_ansi(text):
         return re.sub(r'\x1b.*?m', '', text)
+
+
+def read_file_as_bytes(file_name):
+    """Read a text file as bytes.
+
+    :param str file_name: The name of the text file which is placed in the
+      folder ``cli_output``.
+
+    :return: The text as a byte format.
+    """
+    in_file = open(path.join('cli_output', file_name), 'rb')
+    data = in_file.read()
+    in_file.close()
+    return data
+
+
+def mock_popen_communicate(*file_names):
+    """
+    Create multiple mock objects which are suitable to mimic multiple
+    calls of `subprocess.Popen()`.
+
+    :param file_names: Multiple file names of text files inside the folder
+      ``cli_ouput``.
+
+    :return: A list of mock objects.
+      ``Popen.side_effect = result_of_is_function``
+    """
+    mocks = []
+    for file_name in file_names:
+        mock = Mock()
+        mock.communicate.return_value = (read_file_as_bytes(file_name), None)
+        mocks.append(mock)
+    return mocks
