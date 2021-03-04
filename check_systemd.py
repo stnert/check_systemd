@@ -139,7 +139,20 @@ if data_source == 'dbus':
     dbus_manager = DbusManager()
 
 
-class DbusUnitState:
+class UnitState:
+
+    def __init__(self, **kwargs):
+        self.active_state = kwargs.pop('active_state')
+        self.load_state = kwargs.pop('load_state')
+        self.sub_state = kwargs.pop('sub_state')
+
+    def convert_to_exitcode(self):
+        if self.load_state == 'error' or self.active_state == 'failed':
+            return nagiosplugin.Critical
+        return nagiosplugin.Ok
+
+
+class DbusUnitState(UnitState):
     """
     Class that provides easy access to the three state properties
     ``ActiveState``, ``SubState`` and ``LoadState`` of the Dbus systemd API.
@@ -268,7 +281,7 @@ class DbusSingleUnitResource(nagiosplugin.Resource):
 
     def probe(self):
         unit_state = DbusUnitState(self.unit)
-        return Metric(name=self.unit, value=unit_state.active_state,
+        return Metric(name=self.unit, value=unit_state,
                       context='unit')
 
 
@@ -286,7 +299,7 @@ class DbusAllUnitsResource(nagiosplugin.Resource):
 
         for unit_name in unit_names:
             unit_state = DbusUnitState(unit_name)
-            yield Metric(name=unit_name, value=unit_state.active_state,
+            yield Metric(name=unit_name, value=unit_state,
                          context='unit')
 
 
@@ -669,6 +682,11 @@ class UnitContext(nagiosplugin.Context):
 
         :returns: :class:`~.result.Result`
         """
+        if isinstance(metric.value, UnitState):
+            unit_state = metric.value
+            hint = '{}: {}'.format(metric.name, unit_state.active_state)
+            return self.result_cls(unit_state.convert_to_exitcode(),
+                                   metric=metric, hint=hint)
         if metric.value:
             hint = '{}: {}'.format(metric.name, metric.value)
         else:
