@@ -1,11 +1,16 @@
 import unittest
 from check_systemd import get_argparser
+import re
 
 
-def argparser_to_readme(argparser, template='README-template.md',
-                        destination='README.md', indentation=0,
-                        placeholder='{{ argparse }}'):
-    """Add the formatted help output of a command line utility using the
+def argparser_to_readme(argparser, template='README.md',
+                        destination='README.md', indentation=0):
+    """
+    This function is a modified version of the function ``argparser_to_readme``
+    from the package `jflib
+    <https://github.com/Josef-Friedrich/jflib/blob/master/jflib/argparser_to_readme.py>`_
+
+    Add the formatted help output of a command line utility using the
     Python module `argparse` to a README file. Make sure to set the name
     of the program (`prop`) or you get strange program names.
 
@@ -31,16 +36,25 @@ def argparser_to_readme(argparser, template='README-template.md',
 
     with open(template, 'r', encoding='utf-8') as template_file:
         template_string = template_file.read()
-        readme = template_string.replace(placeholder, help_string)
+        readme = re.sub(
+            r'## Command line interface\n\n```\n.*?\n```',
+            r'## Command line interface\n\n```\n' +
+            help_string.replace('\\', '\\\\') + '\n```',
+            template_string, flags=re.DOTALL
+        )
 
     readme_file = open(destination, 'w')
     readme_file.write(readme)
     readme_file.close()
 
 
-class TestDoc(unittest.TestCase):
+class TestReadme(unittest.TestCase):
 
-    def test_doc(self):
+    def test_readme(self):
+        """This is not really a test. We “abuse” this test to patch the
+        ``README.md`` file with the current ``--help`` text of the ``argparse``
+        interface. Run ``make readme`` or ``tox -e py38 --
+        test/test_readme.py`` to update the readme file."""
         argparser_to_readme(argparser=get_argparser)
 
 

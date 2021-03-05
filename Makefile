@@ -8,7 +8,7 @@ upload:
 	twine upload --skip-existing dist/*
 
 readme:
-	tox -e py38 -- test/test_doc.py
+	tox -e py38 -- test/test_readme.py
 
 test:
 	pyenv update
