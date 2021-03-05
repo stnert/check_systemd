@@ -14,7 +14,7 @@ class AddBin(object):
 
     def __enter__(self):
         BIN = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                              self.bin_path))
+                                           self.bin_path))
         os.environ['PATH'] = BIN + ':' + os.environ['PATH']
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -345,40 +345,6 @@ class TestOptionUnit(unittest.TestCase):
         )
 
 
-class TestBootupNotFinished(unittest.TestCase):
-
-    def test_bootup_not_finished(self):
-        with AddBin('bin/bootup_not_finished'):
-            process = subprocess.run(
-                ['./check_systemd.py'],
-                encoding='utf-8',
-                stdout=subprocess.PIPE,
-            )
-        self.assertEqual(process.returncode, 0)
-        self.assertEqual(
-            process.stdout,
-            'SYSTEMD OK - all '
-            '| count_units=386 units_activating=0 '
-            'units_active=275 units_failed=0 units_inactive=111\n'
-        )
-
-    def test_bootup_not_finished_verbose(self):
-        with AddBin('bin/bootup_not_finished'):
-            process = subprocess.run(
-                ['./check_systemd.py', '--verbose'],
-                encoding='utf-8',
-                stdout=subprocess.PIPE,
-            )
-        self.assertEqual(process.returncode, 0)
-        self.assertEqual(
-            process.stdout,
-            'SYSTEMD OK - all\n'
-            'ok: all\n'
-            '| count_units=386 units_activating=0 '
-            'units_active=275 units_failed=0 units_inactive=111\n'
-        )
-
-
 class TestDeadTimers(unittest.TestCase):
 
     def test_dead_timers_1(self):
@@ -485,25 +451,6 @@ class TestDeadTimers(unittest.TestCase):
                 stdout=subprocess.PIPE,
             )
         self.assertEqual(process.returncode, 0)
-
-
-class TestVersion246(unittest.TestCase):
-
-    def test_version_246(self):
-        with AddBin('bin/version_246'):
-            process = subprocess.run(
-                ['./check_systemd.py'],
-                encoding='utf-8',
-                stdout=subprocess.PIPE,
-            )
-        self.assertEqual(process.returncode, 2)
-
-        self.assertEqual(
-            process.stdout,
-            'SYSTEMD CRITICAL - nm-wait-online.service: failed | '
-            'count_units=339 startup_time=12.154;60;120 units_activating=0 '
-            'units_active=263 units_failed=1 units_inactive=75\n'
-        )
 
 
 if __name__ == '__main__':

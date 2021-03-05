@@ -1,6 +1,4 @@
-#! /bin/sh
-
-echo "  UNIT                                                                                                           LOAD      ACTIVE   SUB       DESCRIPTION
+  UNIT                                                                                                           LOAD      ACTIVE   SUB       DESCRIPTION
   dev-block-254:0.device                                                                                         loaded    active   plugged   /dev/block/254:0
   dev-block-254:1.device                                                                                         loaded    active   plugged   /dev/block/254:1
   dev-disk-by\x2did-ata\x2dHITACHI_HTS723232A7A364_E3834563K5NVSN.device                                         loaded    active   plugged   HITACHI_HTS723232A7A364
@@ -346,4 +344,4 @@ ACTIVE = The high-level unit activation state, i.e. generalization of SUB.
 SUB    = The low-level unit activation state, values depend on unit type.
 
 xxx loaded units listed. Pass --all to see loaded but inactive units, too.
-To show all installed unit files use 'systemctl list-unit-files'."
+To show all installed unit files use 'systemctl list-unit-files'.

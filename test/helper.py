@@ -96,7 +96,8 @@ class MockResult:
 def execute_main(
         argv=['check_systemd.py'],
         stdout=['systemctl-list-units_ok.txt',
-                'systemd-analyze_34-min.txt', ]):
+                'systemd-analyze_12.345.txt', ],
+        analyze_returncode=0):
     """Execute the main function with a lot of patched functions and classes.
 
     :param list argv: A list of command line arguments, e. g.
@@ -105,6 +106,9 @@ def execute_main(
     :param list stdout: A list of file names of files in the directory
         ``test/cli_output``. You have to specify as many text files as there
         are calls of the function ``subprocess.Popen``
+
+    :param int analyze_returncode: The first call `systemctl analyze` to check
+        if the startup process is finished
 
     :return: A results a assembled in the class ``MockResult``
     :rtype: MockResult
@@ -117,7 +121,8 @@ def execute_main(
             mock.patch('check_systemd.subprocess.Popen') as Popen, \
             mock.patch('sys.argv', argv), \
             mock.patch('builtins.print') as mocked_print:
-        run.return_value.returncode = 0
+        # analyse = subprocess.run(['systemd-analyze'] ...)
+        run.return_value.returncode = analyze_returncode
         Popen.side_effect = mock_popen_communicate(*stdout)
         f = io.StringIO()
         with redirect_stdout(f):
