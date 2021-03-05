@@ -26,8 +26,9 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: check_systemd [-h] [-u UNIT | -e UNIT] [-n] [-w SECONDS] [-c SECONDS]
-                     [-t] [-W SECONDS] [-C SECONDS] [-i] [--dbus] [-v] [-V]
+usage: check_systemd [-h] [-v] [-V] [-u UNIT] [-i] [-e UNIT] [-n] [-w SECONDS]
+                     [-c SECONDS] [-t] [-W SECONDS] [-C SECONDS]
+                     [--dbus | --cli]
 
 Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>
 Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>
@@ -36,7 +37,19 @@ Nagios / Icinga monitoring plugin to check systemd.
 
 optional arguments:
   -h, --help            show this help message and exit
+  -v, --verbose         Increase output verbosity (use up to 3 times).
+  -V, --version         show program's version number and exit
+
+Options relation to unit selection:
+  By default all systemd units are checked. Use the option '-e' to exclude units by a regular expression. Use the option '-u' to check only one unit.
+
   -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
+  -i, --ignore-inactive-state
+                        Ignore an inactive state on a specific unit. Oneshot
+                        services for example are only active while running and
+                        not enabled. The rest of the time they are inactive.
+                        This option has only an affect if it is used with the
+                        option -u.
   -e UNIT, --exclude UNIT
                         Exclude a systemd unit from the checks. This option can
                         be applied multiple times, for example: -e mnt-
@@ -45,6 +58,8 @@ optional arguments:
                         'user@\d+\.service'. For more informations see the
                         Python documentation about regular expressions
                         (https://docs.python.org/3/library/re.html).
+
+Startup time related options:
   -n, --no-startup-time
                         Don’t check the startup time. Using this option the
                         options '-w, --warning' and '-c, --critical' have no
@@ -57,11 +72,13 @@ optional arguments:
   -c SECONDS, --critical SECONDS
                         Startup time in seconds to result in a critical status.
                         Thedefault is 120 seconds.
+
+Timers related options:
   -t, --dead-timers     Detect dead / inactive timers. See the corresponding
                         options '-W, --dead-timer-warning' and '-C, --dead-
                         timers-critical'. Dead timers are detected by parsing
                         the output of 'systemctl list-timers'. Dead timer rows
-                        displaying 'n/a' in the NEXT and LEFTcolumns and the
+                        displaying 'n/a' in the NEXT and LEFT columns and the
                         time span in the column PASSED exceeds the values
                         specified with the options '-W, --dead-timer-warning'
                         and '-C, --dead-timers-critical'.
@@ -71,18 +88,15 @@ optional arguments:
   -C SECONDS, --dead-timers-critical SECONDS
                         Time ago in seconds for dead / inactive timers to
                         trigger a critical state (by default 7 days).
-  -i, --ignore-inactive-state
-                        Ignore an inactive state on a specific unit. Oneshot
-                        services for example are only active while running and
-                        not enabled. The rest of the time they are inactive.
-                        This option has only an affect if it is used with the
-                        option -u.
+
+Monitoring data acquisition:
   --dbus                Use the systemd’s D-Bus API instead of parsing the text
                         output of various systemd related command line
                         interfaces to monitor systemd. At the moment the D-Bus
                         backend of this plugin is only partially implemented.
-  -v, --verbose         Increase output verbosity (use up to 3 times).
-  -V, --version         show program's version number and exit
+  --cli                 Use the text output of serveral systemd command line
+                        interface (cli) binaries to gather the required data for
+                        the monitoring process.
 
 Performance data:
   - count_units

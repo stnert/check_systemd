@@ -803,16 +803,45 @@ def get_argparser():
         '  - units_inactive\n',
     )
 
-    exclusive_group = parser.add_mutually_exclusive_group()
+    parser.add_argument(
+        '-v', '--verbose',
+        action='count',
+        default=0,
+        help='Increase output verbosity (use up to 3 times).'
+    )
 
-    exclusive_group.add_argument(
+    parser.add_argument(
+        '-V', '--version',
+        action='version',
+        version='%(prog)s {}'.format(__version__),
+    )
+
+    unit = parser.add_argument_group(
+        'Options relation to unit selection',
+        'By default all systemd units are checked. '
+        'Use the option \'-e\' to exclude units by a regular expression. '
+        'Use the option \'-u\' to check only one unit.'
+    )
+
+    unit_exclusive_group = unit.add_mutually_exclusive_group()
+
+    unit_exclusive_group.add_argument(
         '-u', '--unit',
         type=str,
         dest='unit',
         help='Name of the systemd unit that is being tested.',
     )
 
-    exclusive_group.add_argument(
+    unit.add_argument(
+        '-i', '--ignore-inactive-state',
+        action='store_true',
+        help='Ignore an inactive state on a specific unit. Oneshot services '
+             'for example are only active while running and not enabled. '
+             'The rest of the time they are inactive. This option has only '
+             'an affect if it is used with the option -u.'
+    )
+
+    unit_exclusive_group.add_argument(
         '-e', '--exclude',
         metavar='UNIT',
         action='append',
@@ -827,7 +856,9 @@ def get_argparser():
              '(https://docs.python.org/3/library/re.html).',
     )
 
-    parser.add_argument(
+    startup_time = parser.add_argument_group('Startup time related options')
+
+    startup_time.add_argument(
         '-n', '--no-startup-time',
         action='store_true',
         default=False,
@@ -837,7 +868,7 @@ def get_argparser():
              'no critical, warning etc. states are triggered.',
     )
 
-    parser.add_argument(
+    startup_time.add_argument(
         '-w', '--warning',
         default=60,
         metavar='SECONDS',
@@ -845,7 +876,7 @@ def get_argparser():
              'default is 60 seconds.',
     )
 
-    parser.add_argument(
+    startup_time.add_argument(
         '-c', '--critical',
         metavar='SECONDS',
         default=120,
@@ -853,7 +884,9 @@ def get_argparser():
              'default is 120 seconds.',
     )
 
-    parser.add_argument(
+    dead_timer = parser.add_argument_group('Timers related options')
+
+    dead_timer.add_argument(
         '-t', '--dead-timers',
         action='store_true',
         help='Detect dead / inactive timers. See the corresponding options '
@@ -861,13 +894,13 @@ def get_argparser():
              '\'-C, --dead-timers-critical\'. '
              'Dead timers are detected by parsing the output of '
              '\'systemctl list-timers\'. '
-             'Dead timer rows displaying \'n/a\' in the NEXT and LEFT'
+             'Dead timer rows displaying \'n/a\' in the NEXT and LEFT '
              'columns and the time span in the column PASSED exceeds the '
              'values specified with the options \'-W, --dead-timer-warning\' '
              'and \'-C, --dead-timers-critical\'.'
     )
 
-    parser.add_argument(
+    dead_timer.add_argument(
         '-W', '--dead-timers-warning',
         metavar='SECONDS',
         type=float,
@@ -876,7 +909,7 @@ def get_argparser():
              'warning state (by default 6 days).'
     )
 
-    parser.add_argument(
+    dead_timer.add_argument(
         '-C', '--dead-timers-critical',
         metavar='SECONDS',
         type=float,
@@ -885,16 +918,10 @@ def get_argparser():
              'critical state (by default 7 days).'
     )
 
-    parser.add_argument(
-        '-i', '--ignore-inactive-state',
-        action='store_true',
-        help='Ignore an inactive state on a specific unit. Oneshot services '
-             'for example are only active while running and not enabled. '
-             'The rest of the time they are inactive. This option has only '
-             'an affect if it is used with the option -u.'
-    )
+    acquisition = parser.add_argument_group('Monitoring data acquisition')
+    acquisition_exclusive_group = acquisition.add_mutually_exclusive_group()
 
-    parser.add_argument(
+    acquisition_exclusive_group.add_argument(
         '--dbus',
         action='store_true',
         help='Use the systemd’s D-Bus API instead of parsing the text output '
@@ -903,17 +930,12 @@ def get_argparser():
              'only partially implemented.'
     )
 
-    parser.add_argument(
-        '-v', '--verbose',
-        action='count',
-        default=0,
-        help='Increase output verbosity (use up to 3 times).'
-    )
-
-    parser.add_argument(
-        '-V', '--version',
-        action='version',
-        version='%(prog)s {}'.format(__version__),
+    acquisition_exclusive_group.add_argument(
+        '--cli',
+        action='store_true',
+        help='Use the text output of serveral systemd command line interface '
+             '(cli) binaries to gather the required data for the monitoring '
+             'process.'
     )
 
     return parser
