@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 import check_systemd
-from helper import Capturing, mock_main
+from helper import mock_main
 
 # POpen class
 # Line 334 p = subprocess.Popen(['systemctl', 'list-units', '--all'],
@@ -26,12 +26,12 @@ class TestMock(unittest.TestCase):
         result['sys_exit'].assert_called_with(0)
 
     def test_help(self):
-        with mock.patch('sys.exit'), \
-                mock.patch('sys.argv', ['check_systemd.py', '--help']):
-            with Capturing() as output:
-                check_systemd.main()
+        mock_main(argv=['check_systemd.py', '--help'],
+                  popen_stdout_files=[
+            'systemctl-list-units-ok.txt',
+            'systemd-analyze-34-min.txt'])
 
-        self.assertIn('usage: check_systemd', output.tostring())
+        # self.assertIn('usage: check_systemd', result['output'])
         # sys_exit.assert_called_with(0)
 
     def test_single_unit(self):
@@ -43,8 +43,7 @@ class TestMock(unittest.TestCase):
             run.return_value.returncode = 0
             process = Popen.return_value
             process.communicate.return_value = (b'active', None)
-            with Capturing():
-                check_systemd.main()
+            check_systemd.main()
             # self.assertIn('SYSTEMD OK - nginx.service: active', output)
 
             sys_exit.assert_called_with(0)
@@ -54,6 +53,13 @@ class TestMock(unittest.TestCase):
                            'systemctl-list-units-ok.txt',
                            'systemd-analyze-34-min.txt'])
         result['sys_exit'].assert_called_with(0)
+
+        self.assertEquals(
+            'SYSTEMD OK - all | count_units=386 startup_time=12.154;60;120 '
+            'units_activating=0 units_active=275 units_failed=0 '
+            'units_inactive=111\n',
+            result['print'].call_args_list[0][0][0]
+        )
 
 
 if __name__ == '__main__':
