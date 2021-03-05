@@ -1,4 +1,0 @@
-#! /bin/sh
-
-echo "Startup finished in 5.081s (kernel) + 34min 41.211s (userspace) = 34min 46.292s
-graphical.target reached after 12.154s in userspace"

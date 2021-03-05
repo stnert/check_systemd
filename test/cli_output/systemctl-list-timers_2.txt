@@ -1,23 +1,4 @@
-#! /bin/sh
-
-case $@ in
-	'list-units --all')
-		echo "UNIT                                                                                                    LOAD      ACTIVE   SUB       DESCRIPTION
-sockets.target                                                                                          loaded    active   active    Sockets
-sound.target                                                                                            loaded    active   active    Sound Card
-swap.target                                                                                             loaded    active   active    Swap
-
-LOAD   = Reflects whether the unit definition was properly loaded.
-ACTIVE = The high-level unit activation state, i.e. generalization of SUB.
-SUB    = The low-level unit activation state, values depend on unit type.
-
-xxx loaded units listed. Pass --all to see loaded but inactive units, too.
-To show all installed unit files use 'systemctl list-unit-files'.";
-		exit 0
-		;;
-
-	'list-timers --all')
-		echo "NEXT                          LEFT          LAST                          PASSED              UNIT                                                        ACTIVATES
+NEXT                          LEFT          LAST                          PASSED              UNIT                                                        ACTIVATES
 Sat 2020-05-16 11:26:47 CEST  1min 26s left Sat 2020-05-16 11:24:21 CEST  58s ago             dyndns-update-script_nuernberg_dev-eth0_ipv4.timer          dyndns-update-script_nuernberg_dev-eth0_ipv4.service
 Sat 2020-05-16 11:27:01 CEST  1min 40s left Sat 2020-05-16 11:23:44 CEST  1min 36s ago        nsca-localhost.timer                                        nsca-localhost.service
 Sat 2020-05-16 11:27:39 CEST  2min 19s left Sat 2020-05-16 11:25:14 CEST  6s ago              dyndns-update-script_nrasp_dev-eth0_ipvboth.timer           dyndns-update-script_nrasp_dev-eth0_ipvboth.service
@@ -34,8 +15,4 @@ Sun 2020-05-17 06:23:17 CEST  18h left      Sat 2020-05-16 06:16:55 CEST  5h 8mi
 n/a                           n/a           Tue 2020-04-07 05:49:00 CEST  1 months 1 days ago dfm-auto-jf.timer                                           dfm-auto-jf.service
 n/a                           n/a           Tue 2020-04-07 04:17:32 CEST  1 months 2 days ago rsync.timer                                                 rsync.service
 
-15 timers listed.";
-		exit 0
-		;;
-
-esac
+15 timers listed.

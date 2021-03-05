@@ -1,0 +1,7 @@
+NEXT                          LEFT                  LAST                          PASSED               UNIT                                                                                          ACTIVATES
+Sat 2020-05-16 14:37:33 CEST  1min 16s left         Sat 2020-05-16 14:32:27 CEST  3min 49s ago         update-motd.timer                                                                             update-motd.service
+Sat 2020-05-16 14:50:58 CEST  14min left            Sat 2020-05-16 14:31:56 CEST  4min 20s ago         rsync_nnas_data-shares-jf-maps_wnas-data-shares-jf-maps.timer                                 rsync_nnas_data-shares-jf-maps_wnas-data-shares-jf-maps.service
+Sat 2020-05-16 15:03:13 CEST  26min left            Sat 2020-05-16 14:31:56 CEST  4min 20s ago         anacron.timer                                                                                 anacron.service
+Sat 2020-05-16 15:11:15 CEST  34min left            Sat 2020-05-16 14:31:56 CEST  4min 20s ago         apt-daily.timer                                                                               apt-daily.service
+
+5 timers listed.

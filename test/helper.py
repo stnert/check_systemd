@@ -105,7 +105,21 @@ def execute_main(
 
     :param list stdout: A list of file names of files in the directory
         ``test/cli_output``. You have to specify as many text files as there
-        are calls of the function ``subprocess.Popen``
+        are calls of the function ``subprocess.Popen``:
+
+        * Line 334
+          ``p = subprocess.Popen(['systemctl', 'list-units', '--all']``,
+          ``SystemctlListUnitsResource``
+        * Line 460
+          ``p = subprocess.Popen(['systemd-analyze']``,
+          ``SystemdAnalyseResource``
+        * Line 576
+          ``p = subprocess.Popen(['systemctl', 'list-timers', '--all']``,
+          ``SystemctlListTimersResource``
+        * Line 656
+          ``p = subprocess.Popen(['systemctl', 'is-active', self.unit]``,
+          ``SystemctlIsActiveResource``
+
 
     :param int analyze_returncode: The first call `systemctl analyze` to check
         if the startup process is finished

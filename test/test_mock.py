@@ -1,19 +1,6 @@
 import unittest
 from helper import execute_main
 
-# POpen class
-# Line 334 p = subprocess.Popen(['systemctl', 'list-units', '--all'],
-# SystemctlListUnitsResource
-
-# Line 460 p = subprocess.Popen(['systemd-analyze'],
-# SystemdAnalyseResource
-
-# Line 576 p = subprocess.Popen(['systemctl', 'list-timers', '--all'],
-# SystemctlListTimersResource
-
-# Line 656 p = subprocess.Popen(['systemctl', 'is-active', self.unit],
-# SystemctlIsActiveResource
-
 
 class TestMock(unittest.TestCase):
 
