@@ -7,7 +7,7 @@ will report a degraded system to your monitoring solution. It can also be used
 to monitor individual systemd services (with the ``-u, --unit`` parameter) and
 timers units (with the ``-t, --dead-timers`` parameter).
 
-To lern more about the project, please visit the repository on `Github
+To learn more about the project, please visit the repository on `Github
 <https://github.com/Josef-Friedrich/check_systemd>`_.
 
 This plugin is based on a Python package named `nagiosplugin
@@ -69,7 +69,7 @@ __version__ = '2.3.1'
 data_source = 'dbus'
 """This variable indicates which data source should be used for the acquisition
 of monitoring informations. It accepts the values ``dbus`` or ``cli``. It
-preferes the D-Bus source. """
+prefers the D-Bus source. """
 
 opts = None
 """
