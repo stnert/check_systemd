@@ -140,13 +140,92 @@ if data_source == 'dbus':
 
 
 class UnitState:
+    """This class bundles all state related informations of a systemd unit in a
+    object. This class is inherited by the class ``DbusUnitState`` and the
+    attributes are overwritten by properties.
+    """
 
     def __init__(self, **kwargs):
         self.active_state = kwargs.pop('active_state')
-        self.load_state = kwargs.pop('load_state')
+        """From the `D-Bus interface of systemd documentation
+        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
+
+        ``ActiveState`` contains a state value that reflects whether the unit
+        is currently active or not. The following states are currently defined:
+
+        * ``active``,
+        * ``reloading``,
+        * ``inactive``,
+        * ``failed``,
+        * ``activating``, and ``deactivating``.
+
+        ``active`` indicates that unit is active (obviously...).
+
+        ``reloading`` indicates that the unit is active and currently reloading
+        its configuration.
+
+        ``inactive`` indicates that it is inactive and the previous run was
+        successful or no previous run has taken place yet.
+
+        ``failed`` indicates that it is inactive and the previous run was not
+        successful (more information about the reason for this is available on
+        the unit type specific interfaces, for example for services in the
+        Result property, see below).
+
+        ``activating`` indicates that the unit has previously been inactive but
+        is currently in the process of entering an active state.
+
+        Conversely ``deactivating`` indicates that the unit is currently in the
+        process of deactivation.
+        """
+
         self.sub_state = kwargs.pop('sub_state')
+        """From the `D-Bus interface of systemd documentation
+        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
+
+        ``SubState`` encodes states of the same state machine that
+        ``ActiveState`` covers, but knows more fine-grained states that are
+        unit-type-specific. Where ``ActiveState`` only covers six high-level
+        states, ``SubState`` covers possibly many more low-level
+        unit-type-specific states that are mapped to the six high-level states.
+        Note that multiple low-level states might map to the same high-level
+        state, but not vice versa. Not all high-level states have low-level
+        counterparts on all unit types.
+        """
+
+        self.load_state = kwargs.pop('load_state')
+        """From the `D-Bus interface of systemd documentation
+        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
+
+        ``LoadState`` contains a state value that reflects whether the
+        configuration file of this unit has been loaded. The following states
+        are currently defined:
+
+        * ``loaded``,
+        * ``error`` and
+        * ``masked``.
+
+        ``loaded`` indicates that the configuration was successfully loaded.
+
+        ``error`` indicates that the configuration failed to load, the
+        ``LoadError`` field contains information about the cause of this
+        failure.
+
+        ``masked`` indicates that the unit is currently masked out (i.e.
+        symlinked to /dev/null or suchlike).
+
+        Note that the ``LoadState`` is fully orthogonal to the ``ActiveState``
+        (see below) as units without valid loaded configuration might be active
+        (because configuration might have been reloaded at a time where a unit
+        was already active).
+        """
 
     def convert_to_exitcode(self):
+        """Convert the different systemd states into a Nagios compatible
+        exit code.
+
+        :return: A Nagios compatible exit code: 0, 1, 2, 3
+        :rtype: int"""
         if self.load_state == 'error' or self.active_state == 'failed':
             return nagiosplugin.Critical
         return nagiosplugin.Ok
@@ -191,81 +270,22 @@ class DbusUnitState(UnitState):
 
     @property
     def active_state(self):
-        """From the `D-Bus interface of systemd documentation
-        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
-
-        ``ActiveState`` contains a state value that reflects whether the unit
-        is currently active or not. The following states are currently defined:
-
-        * ``active``,
-        * ``reloading``,
-        * ``inactive``,
-        * ``failed``,
-        * ``activating``, and ``deactivating``.
-
-        ``active`` indicates that unit is active (obviously...).
-
-        ``reloading`` indicates that the unit is active and currently reloading
-        its configuration.
-
-        ``inactive`` indicates that it is inactive and the previous run was
-        successful or no previous run has taken place yet.
-
-        ``failed`` indicates that it is inactive and the previous run was not
-        successful (more information about the reason for this is available on
-        the unit type specific interfaces, for example for services in the
-        Result property, see below).
-
-        ``activating`` indicates that the unit has previously been inactive but
-        is currently in the process of entering an active state.
-
-        Conversely ``deactivating`` indicates that the unit is currently in the
-        process of deactivation.
+        """
+        See :func:`UnitState.active_state`
         """
         return self.__get_dbus_property('ActiveState')
 
     @property
     def sub_state(self):
-        """From the `D-Bus interface of systemd documentation
-        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
-
-        ``SubState`` encodes states of the same state machine that
-        ``ActiveState`` covers, but knows more fine-grained states that are
-        unit-type-specific. Where ``ActiveState`` only covers six high-level
-        states, ``SubState`` covers possibly many more low-level
-        unit-type-specific states that are mapped to the six high-level states.
-        Note that multiple low-level states might map to the same high-level
-        state, but not vice versa. Not all high-level states have low-level
-        counterparts on all unit types.
+        """
+        See :func:`UnitState.sub_state`
         """
         return self.__get_dbus_property('SubState')
 
     @property
     def load_state(self):
-        """From the `D-Bus interface of systemd documentation
-        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
-
-        ``LoadState`` contains a state value that reflects whether the
-        configuration file of this unit has been loaded. The following states
-        are currently defined:
-
-        * ``loaded``,
-        * ``error`` and
-        * ``masked``.
-
-        ``loaded`` indicates that the configuration was successfully loaded.
-
-        ``error`` indicates that the configuration failed to load, the
-        ``LoadError`` field contains information about the cause of this
-        failure.
-
-        ``masked`` indicates that the unit is currently masked out (i.e.
-        symlinked to /dev/null or suchlike).
-
-        Note that the ``LoadState`` is fully orthogonal to the ``ActiveState``
-        (see below) as units without valid loaded configuration might be active
-        (because configuration might have been reloaded at a time where a unit
-        was already active).
+        """
+        See :func:`UnitState.load_state`
         """
         return self.__get_dbus_property('LoadState')
 
