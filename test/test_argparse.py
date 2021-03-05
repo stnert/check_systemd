@@ -23,6 +23,18 @@ class TestArgparse(unittest.TestCase):
         self.assertIn('check_systemd ' +
                       check_systemd.__version__, result.output)
 
+    @unittest.skip('Maybe mock sys.exit is the reason: '
+                   'TypeError: cannot unpack non-iterable NoneType object')
+    def test_exclusive_group(self):
+        result = execute_main(argv=['-u', 'test1.service', '-e',
+                                    'test2.service'])
+        self.assertEqual(2, result.exitcode)
+        self.assertIn(
+            'error: argument -e/--exclude: not allowed with argument '
+            '-u/--unit',
+            result.output,
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

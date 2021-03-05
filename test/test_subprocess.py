@@ -130,20 +130,6 @@ class TestMultipleFailure(unittest.TestCase):
 
 class TestCli(unittest.TestCase):
 
-    def test_exclusive_group(self):
-        process = subprocess.run(
-            ['./check_systemd.py', '-u', 'test1.service', '-e',
-             'test2.service'],
-            encoding='utf-8',
-            stderr=subprocess.PIPE
-        )
-        self.assertEqual(process.returncode, 2)
-        self.assertIn(
-            'error: argument -e/--exclude: not allowed with argument '
-            '-u/--unit',
-            process.stderr,
-        )
-
     def test_option_critical(self):
         with AddBin('bin/ok'):
             process = subprocess.run(
@@ -287,62 +273,6 @@ class TestCli(unittest.TestCase):
         )
         self.assertEqual(process.returncode, 0)
         self.assertIn('check_systemd', process.stdout)
-
-
-class TestOptionUnit(unittest.TestCase):
-
-    def test_option_unit_ok(self):
-        with AddBin('bin/is_active/active'):
-            process = subprocess.run(
-                ['./check_systemd.py', '-u', 'test.service'],
-                encoding='utf-8',
-                stdout=subprocess.PIPE
-            )
-        self.assertEqual(process.returncode, 0)
-        self.assertEqual(
-            process.stdout,
-            'SYSTEMD OK - test.service: active\n'
-        )
-
-    def test_option_unit_failed(self):
-        with AddBin('bin/is_active/failed'):
-            process = subprocess.run(
-                ['./check_systemd.py', '--unit', 'test.service'],
-                encoding='utf-8',
-                stdout=subprocess.PIPE
-            )
-        self.assertEqual(process.returncode, 2)
-        self.assertEqual(
-            process.stdout,
-            'SYSTEMD CRITICAL - test.service: failed\n'
-        )
-
-    def test_option_unit_inactive(self):
-        with AddBin('bin/is_active/inactive'):
-            process = subprocess.run(
-                ['./check_systemd.py', '--unit', 'test.service'],
-                encoding='utf-8',
-                stdout=subprocess.PIPE
-            )
-        self.assertEqual(process.returncode, 2)
-        self.assertEqual(
-            process.stdout,
-            'SYSTEMD CRITICAL - test.service: inactive\n'
-        )
-
-    def test_option_ignore_inactive_state(self):
-        with AddBin('bin/is_active/inactive'):
-            process = subprocess.run(
-                ['./check_systemd.py', '--unit', 'test.service',
-                 '--ignore-inactive-state'],
-                encoding='utf-8',
-                stdout=subprocess.PIPE
-            )
-        self.assertEqual(process.returncode, 0)
-        self.assertEqual(
-            process.stdout,
-            'SYSTEMD OK - test.service: inactive\n'
-        )
 
 
 if __name__ == '__main__':

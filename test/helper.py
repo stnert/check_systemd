@@ -2,7 +2,7 @@ from unittest import mock
 from unittest.mock import Mock
 from os import path
 import check_systemd
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 import io
 
 
@@ -48,6 +48,7 @@ class MockResult:
         self.__sys_exit = kwargs.get('sys_exit')
         self.__print = kwargs.get('print')
         self.__stdout = kwargs.get('stdout')
+        self.__stderr = kwargs.get('stderr')
 
     @property
     def exitcode(self):
@@ -66,14 +67,22 @@ class MockResult:
     def stdout(self):
         """The function ``redirect_stdout()`` is used to capture the ``stdout``
         output."""
-        if self.stdout:
-            return self.stdout
+        if self.__stdout:
+            return self.__stdout
+
+    @property
+    def stderr(self):
+        """The function ``redirect_stderr()`` is used to capture the ``stderr``
+        output."""
+        if self.__stderr:
+            return self.__stderr
 
     @property
     def output(self):
-        """A combined string of the captured stdout and the print calls.
-        Somehow the whole stdout couldn’t be read. The help text could be read,
-        but not the plugin output using the function ``redirect_stdout()``."""
+        """A combined string of the captured stdout, stderr and the print
+        calls. Somehow the whole stdout couldn’t be read. The help text could
+        be read, but not the plugin output using the function
+        ``redirect_stdout()``."""
         out = ''
 
         if self.print_calls:
@@ -81,6 +90,9 @@ class MockResult:
 
         if self.__stdout:
             out += self.__stdout
+
+        if self.__stderr:
+            out += self.__stderr
 
         return out
 
@@ -138,12 +150,15 @@ def execute_main(
         # analyse = subprocess.run(['systemd-analyze'] ...)
         run.return_value.returncode = analyze_returncode
         Popen.side_effect = mock_popen_communicate(*stdout)
-        f = io.StringIO()
-        with redirect_stdout(f):
+
+        file_stdout = io.StringIO()
+        file_stderr = io.StringIO()
+        with redirect_stdout(file_stdout), redirect_stderr(file_stderr):
             check_systemd.main()
 
     return MockResult(
         sys_exit=sys_exit,
         print=mocked_print,
-        stdout=f.getvalue()
+        stdout=file_stdout.getvalue(),
+        stderr=file_stderr.getvalue(),
     )
