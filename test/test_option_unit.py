@@ -14,7 +14,7 @@ def execute_with_opt_u(argv, state='active'):
 
 class TestOptionUnit(unittest.TestCase):
 
-    def test_option_unit_ok(self):
+    def test_ok(self):
         result = execute_with_opt_u(argv=['--unit', 'test.service'],
                                     state='active')
         self.assertEqual(0, result.exitcode)
@@ -23,7 +23,7 @@ class TestOptionUnit(unittest.TestCase):
             result.first_line,
         )
 
-    def test_option_unit_failed(self):
+    def test_failed(self):
         result = execute_with_opt_u(argv=['--unit', 'test.service'],
                                     state='failed')
 
@@ -33,7 +33,7 @@ class TestOptionUnit(unittest.TestCase):
             result.first_line,
         )
 
-    def test_option_unit_inactive(self):
+    def test_inactive(self):
         result = execute_with_opt_u(argv=['--unit', 'test.service'],
                                     state='inactive')
         self.assertEqual(2, result.exitcode)
@@ -51,6 +51,15 @@ class TestOptionUnit(unittest.TestCase):
         self.assertEqual(
             'SYSTEMD OK - test.service: inactive',
             result.first_line,
+        )
+
+    def test_different_unit_name(self):
+        result = execute_with_opt_u(argv=['--unit', 'nginx.service'],
+                                    state='active')
+        self.assertEqual(result.exitcode, 0)
+        self.assertEqual(
+            'SYSTEMD OK - nginx.service: active',
+            result.first_line
         )
 
 

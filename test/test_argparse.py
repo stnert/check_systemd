@@ -5,6 +5,10 @@ import check_systemd
 
 class TestArgparse(unittest.TestCase):
 
+    def test_without_arguments(self):
+        result = execute_main()
+        self.assertEqual(result.exitcode, 0)
+
     def test_help_short(self):
         result = execute_main(argv=['-h'])
         self.assertIn('usage: check_systemd', result.output)
