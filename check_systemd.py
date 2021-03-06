@@ -835,9 +835,9 @@ def get_argparser():
     )
 
     unit = parser.add_argument_group(
-        'Options relation to unit selection',
+        'Options related to unit selection',
         'By default all systemd units are checked. '
-        'Use the option \'-e\' to exclude units by a regular expression. '
+        'Use the option \'-e\' to exclude units \nby a regular expression. '
         'Use the option \'-u\' to check only one unit.'
     )
 

@@ -40,8 +40,9 @@ optional arguments:
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit
 
-Options relation to unit selection:
-  By default all systemd units are checked. Use the option '-e' to exclude units by a regular expression. Use the option '-u' to check only one unit.
+Options related to unit selection:
+  By default all systemd units are checked. Use the option '-e' to exclude units 
+  by a regular expression. Use the option '-u' to check only one unit.
 
   -u UNIT, --unit UNIT  Name of the systemd unit that is being tested.
   -i, --ignore-inactive-state
