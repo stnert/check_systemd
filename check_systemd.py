@@ -137,14 +137,20 @@ if data_source == 'dbus':
     dbus_manager = DbusManager()
 
 
-class UnitState:
+class Unit:
     """This class bundles all state related informations of a systemd unit in a
-    object. This class is inherited by the class ``DbusUnitState`` and the
+    object. This class is inherited by the class ``DbusUnit`` and the
     attributes are overwritten by properties.
     """
 
     def __init__(self, **kwargs):
-        self.active_state = kwargs.pop('active_state')
+        self.name = kwargs.get('name')
+        """The name of the system unit, for example ``nginx.service``. In the
+        command line table of the command ``systemctl list-units`` is the
+        column containing unit names titled with “UNIT”.
+        """
+
+        self.active_state = kwargs.get('active_state')
         """From the `D-Bus interface of systemd documentation
         <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
 
@@ -177,7 +183,7 @@ class UnitState:
         process of deactivation.
         """
 
-        self.sub_state = kwargs.pop('sub_state')
+        self.sub_state = kwargs.get('sub_state')
         """From the `D-Bus interface of systemd documentation
         <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
 
@@ -220,7 +226,7 @@ class UnitState:
         * timer: ``dead``, ``waiting``, ``running``, ``elapsed``, ``failed``
         """
 
-        self.load_state = kwargs.pop('load_state')
+        self.load_state = kwargs.get('load_state')
         """From the `D-Bus interface of systemd documentation
         <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
 
@@ -258,7 +264,24 @@ class UnitState:
         return nagiosplugin.Ok
 
 
-class DbusUnitState(UnitState):
+class UnitCache:
+
+    def __init__(self):
+        self.__units = {}
+
+    def add(self, unit):
+        self.__units[unit.name] = unit
+
+    def get(self, name=None, exclude=None, include=None):
+        if name:
+            return self.__units[name]
+
+    def list(self, exclude=None, include=None):
+        for name in self.__units:
+            yield self.__units[name]
+
+
+class DbusUnit(Unit):
     """
     Class that provides easy access to the three state properties
     ``ActiveState``, ``SubState`` and ``LoadState`` of the Dbus systemd API.
@@ -327,7 +350,7 @@ class DbusSingleUnitResource(nagiosplugin.Resource):
         super().__init__(*args, **kwargs)
 
     def probe(self):
-        unit_state = DbusUnitState(self.unit)
+        unit_state = DbusUnit(self.unit)
         return Metric(name=self.unit, value=unit_state,
                       context='unit')
 
@@ -345,7 +368,7 @@ class DbusAllUnitsResource(nagiosplugin.Resource):
         unit_names = dbus_manager.get_all_unit_names()
 
         for unit_name in unit_names:
-            unit_state = DbusUnitState(unit_name)
+            unit_state = DbusUnit(unit_name)
             yield Metric(name=unit_name, value=unit_state,
                          context='unit')
 
@@ -526,7 +549,7 @@ def get_unitstate_from_cli(unit_name):
         return result.group(1)
 
     stdout = execute_cli(['systemctl', 'show', unit_name])
-    return UnitState(
+    return Unit(
         active_state=search(stdout, 'ActiveState'),
         sub_state=search(stdout, 'SubState'),
         load_state=search(stdout, 'LoadState'),
@@ -740,7 +763,7 @@ class UnitContext(nagiosplugin.Context):
 
         :returns: :class:`~.result.Result`
         """
-        if isinstance(metric.value, UnitState):
+        if isinstance(metric.value, Unit):
             unit_state = metric.value
             hint = '{}: {}'.format(metric.name, unit_state.active_state)
             return self.result_cls(unit_state.convert_to_exitcode(),
