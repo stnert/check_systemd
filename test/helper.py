@@ -4,6 +4,25 @@ from os import path
 import check_systemd
 from contextlib import redirect_stdout, redirect_stderr
 import io
+import os
+
+
+class AddBin(object):
+    """
+    :param string bin_path: Path relative to the test folder.
+    """
+
+    def __init__(self, bin_path):
+        self.bin_path = bin_path
+        self.old_path = os.environ['PATH']
+
+    def __enter__(self):
+        BIN = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                           self.bin_path))
+        os.environ['PATH'] = BIN + ':' + os.environ['PATH']
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        os.environ['PATH'] = self.old_path
 
 
 def read_file_as_bytes(file_name):
@@ -140,7 +159,7 @@ def execute_main(
     :rtype: MockResult
 
     """
-    if argv[0] != 'check_systemd.py':
+    if not argv or argv[0] != 'check_systemd.py':
         argv.insert(0, 'check_systemd.py')
     with mock.patch('sys.exit') as sys_exit, \
             mock.patch('check_systemd.subprocess.run') as run, \

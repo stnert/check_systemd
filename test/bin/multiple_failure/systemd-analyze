@@ -1,3 +1,0 @@
-#! /bin/sh
-
-echo "Startup finished in 5.081s (kernel) + 34min 41.211s (userspace) = 46.292s"
