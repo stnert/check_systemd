@@ -462,6 +462,55 @@ def format_timespan_to_seconds(fmt_timespan):
     return round(float(result), 3)
 
 
+def execute_cli(args):
+    """Execute a cli (command line interface) command and capture the stdout.
+    This is a wrapper around ``subprocess.Popen``.
+
+    :param list args: A list of programm arguments.
+
+    :return: The stdout ouf the command.
+    """
+    try:
+        p = subprocess.Popen(args,
+                             stderr=subprocess.PIPE,
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+    except OSError as e:
+        raise nagiosplugin.CheckError(e)
+
+    if stderr:
+        raise nagiosplugin.CheckError(stderr)
+
+    if stdout:
+        stdout = stdout.decode('utf-8')
+        return stdout
+
+
+def get_unitstate_from_cli(unit_name):
+    """
+    Run the command ``systemctl show unit-name.service`` on the command line
+    and extract the three keys ``ActiveState``, ``SubState``, and
+    ``LoadState``.
+
+    :param str unit_name: A systemd unit name like ``tor.service``,
+          ``mnt-nextcloud.automount`` or ``update-motd.timer``.
+
+    :return: A unit state object.
+    :rtype: UnitState
+    """
+    def search(stdout, key):
+        result = re.search(key + '=(.*)', stdout)
+        return result.group(1)
+
+    stdout = execute_cli(['systemctl', 'show', unit_name])
+    return UnitState(
+        active_state=search(stdout, 'ActiveState'),
+        sub_state=search(stdout, 'SubState'),
+        load_state=search(stdout, 'LoadState'),
+    )
+
+
 class SystemdAnalyseResource(nagiosplugin.Resource):
     """Resource that calls ``systemd-analyze`` on the command line to get
     informations about the startup time."""

@@ -40,16 +40,18 @@ def read_file_as_bytes(file_name):
     return data
 
 
-def mock_popen_communicate(*file_names):
+def get_mocks_for_popen(*file_names):
     """
     Create multiple mock objects which are suitable to mimic multiple
     calls of `subprocess.Popen()`.
+
+    Assign the result of this function to the attribute ``side_effect``:
+    ``Popen.side_effect = result_of_is_function``
 
     :param file_names: Multiple file names of text files inside the folder
       ``cli_ouput``.
 
     :return: A list of mock objects.
-      ``Popen.side_effect = result_of_is_function``
     """
     mocks = []
     for file_name in file_names:
@@ -168,7 +170,7 @@ def execute_main(
             mock.patch('builtins.print') as mocked_print:
         # analyse = subprocess.run(['systemd-analyze'] ...)
         run.return_value.returncode = analyze_returncode
-        Popen.side_effect = mock_popen_communicate(*stdout)
+        Popen.side_effect = get_mocks_for_popen(*stdout)
 
         file_stdout = io.StringIO()
         file_stderr = io.StringIO()

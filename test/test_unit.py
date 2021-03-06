@@ -1,6 +1,10 @@
+"""Unit tests"""
+
 import unittest
 import check_systemd
 from check_systemd import TableParser
+from unittest.mock import patch
+from . import helper
 
 
 class TestUnit(unittest.TestCase):
@@ -42,6 +46,18 @@ class TestTableParser(unittest.TestCase):
 
     def test_get_column_text_description(self):
         self.assert_column('DESCRIPTION', 'description')
+
+
+class TestSubprocessRelated(unittest.TestCase):
+
+    @patch('check_systemd.subprocess.Popen')
+    def test_def_get_unitstate_from_cli(self, Popen):
+        Popen.side_effect = helper.get_mocks_for_popen(
+            'systemctl-show_nginx.service.txt')
+        unit_state = check_systemd.get_unitstate_from_cli('nginx.service')
+        self.assertEqual('active', unit_state.active_state)
+        self.assertEqual('running', unit_state.sub_state)
+        self.assertEqual('loaded', unit_state.load_state)
 
 
 if __name__ == '__main__':
