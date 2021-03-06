@@ -376,18 +376,7 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
         """
         # We don’t use `systemctl --failed --no-legend`, because we want to
         # collect performance data of all units.
-        try:
-            # p = subprocess.Popen(['./test/bin/ok/systemctl', 'list-units', '--all'],  # noqa: E501
-            p = subprocess.Popen(['systemctl', 'list-units', '--all'],
-                                 stderr=subprocess.PIPE,
-                                 stdin=subprocess.PIPE,
-                                 stdout=subprocess.PIPE)
-            stdout, stderr = p.communicate()
-        except OSError as e:
-            raise nagiosplugin.CheckError(e)
-
-        if stderr:
-            raise nagiosplugin.CheckError(stderr)
+        stdout = execute_cli(['systemctl', 'list-units', '--all'])
 
         # Dictionary to store all units according their active state.
         units = {
@@ -397,7 +386,7 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
             'inactive': [],
         }
         if stdout:
-            lines = stdout.decode('utf-8').splitlines()
+            lines = stdout.splitlines()
             table_heading = lines[0]
 
             # Remove the first line because it is the header.
@@ -492,12 +481,16 @@ def format_timespan_to_seconds(fmt_timespan):
 
 
 def execute_cli(args):
-    """Execute a cli (command line interface) command and capture the stdout.
-    This is a wrapper around ``subprocess.Popen``.
+    """Execute a command on the command line (cli = command line interface))
+    and capture the stdout. This is a wrapper around ``subprocess.Popen``.
 
     :param list args: A list of programm arguments.
 
-    :return: The stdout ouf the command.
+    :raises nagiosplugin.CheckError: If the command produces some stderr output
+      or if an OSError exception occurs.
+
+    :return: The stdout of the command.
+    :rtype: str
     """
     try:
         p = subprocess.Popen(args,
@@ -552,20 +545,9 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
         :return: generator that emits
           :class:`~nagiosplugin.metric.Metric` objects
         """
-        try:
-            p = subprocess.Popen(['systemd-analyze'],
-                                 stderr=subprocess.PIPE,
-                                 stdin=subprocess.PIPE,
-                                 stdout=subprocess.PIPE)
-            stdout, stderr = p.communicate()
-        except OSError as e:
-            raise nagiosplugin.CheckError(e)
-
-        if stderr:
-            raise nagiosplugin.CheckError(stderr)
+        stdout = execute_cli(['systemd-analyze'])
 
         if stdout:
-            stdout = stdout.decode('utf-8')
             # First line:
             # Startup finished in 1.672s (kernel) + 21.378s (userspace) =
             # 23.050s
@@ -667,17 +649,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
         :return: generator that emits
           :class:`~nagiosplugin.metric.Metric` objects
         """
-        try:
-            p = subprocess.Popen(['systemctl', 'list-timers', '--all'],
-                                 stderr=subprocess.PIPE,
-                                 stdin=subprocess.PIPE,
-                                 stdout=subprocess.PIPE)
-            stdout, stderr = p.communicate()
-        except OSError as e:
-            raise nagiosplugin.CheckError(e)
-
-        if stderr:
-            raise nagiosplugin.CheckError(stderr)
+        stdout = execute_cli(['systemctl', 'list-timers', '--all'])
 
         # NEXT                          LEFT
         # Sat 2020-05-16 15:11:15 CEST  34min left
@@ -688,7 +660,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
         # UNIT             ACTIVATES
         # apt-daily.timer  apt-daily.service
         if stdout:
-            lines = stdout.decode('utf-8').splitlines()
+            lines = stdout.splitlines()
             table_heading = lines[0]
             self.column_boundaries = self.detect_column_boundaries(
                 table_heading
@@ -747,19 +719,9 @@ class SystemctlIsActiveResource(nagiosplugin.Resource):
         # - active
         # - inactive (by unkown unit file)
         # - failed
-        try:
-            p = subprocess.Popen(['systemctl', 'is-active', self.unit],
-                                 stderr=subprocess.PIPE,
-                                 stdin=subprocess.PIPE,
-                                 stdout=subprocess.PIPE)
-            stdout, stderr = p.communicate()
-        except OSError as e:
-            raise nagiosplugin.CheckError(e)
-
-        if stderr:
-            raise nagiosplugin.CheckError(stderr)
+        stdout = execute_cli(['systemctl', 'is-active', self.unit])
         if stdout:
-            for line in io.StringIO(stdout.decode('utf-8')):
+            for line in io.StringIO(stdout):
                 active = line.strip()
                 yield Metric(name=self.unit, value=active, context='unit')
 
