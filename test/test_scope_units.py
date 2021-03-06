@@ -1,7 +1,7 @@
 import unittest
 import os
 import subprocess
-from helper import execute_main
+from .helper import execute_main
 
 
 class AddBin(object):

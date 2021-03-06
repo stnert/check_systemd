@@ -1,5 +1,5 @@
 import unittest
-from helper import execute_main
+from .helper import execute_main
 
 
 def execute_with_opt_u(argv, state='active'):
