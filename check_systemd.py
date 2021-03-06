@@ -278,7 +278,15 @@ class UnitCache:
 
     def list(self, exclude=None, include=None):
         for name in self.__units:
-            yield self.__units[name]
+
+            if include and not re.match(include, name):
+                name = None
+
+            if name and exclude and re.match(exclude, name):
+                name = None
+
+            if name:
+                yield self.__units[name]
 
 
 class DbusUnit(Unit):

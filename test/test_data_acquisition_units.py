@@ -13,12 +13,12 @@ unit_mysql = Unit(name='mysql.service', active_state='active',
                   sub_state='sub', load_state='load')
 unit_named = Unit(name='named.service', active_state='active',
                   sub_state='sub', load_state='load')
-unit_networking = Unit(name='networking.service',
+unit_networking = Unit(name='networking.mount',
                        active_state='active', sub_state='sub',
                        load_state='load')
 unit_nginx = Unit(name='nginx.service', active_state='active',
                   sub_state='sub', load_state='load')
-unit_nmdb = Unit(name='nmbd.service', active_state='active',
+unit_nmdb = Unit(name='nmbd.timer', active_state='active',
                  sub_state='sub', load_state='load')
 unit_php = Unit(name='php7.4-fpm.service', active_state='active',
                 sub_state='sub', load_state='load')
@@ -50,16 +50,37 @@ class TestClassUnitCache(unittest.TestCase):
         self.unit_cache.add(unit_nmdb)
         self.unit_cache.add(unit_php)
 
+    def list(self, include=None, exclude=None):
+        units = []
+        for unit in self.unit_cache.list(include=include, exclude=exclude):
+            units.append(unit.name)
+        return units
+
     def test_method_get(self):
         unit = self.unit_cache.get(name='ModemManager.service')
         self.assertEqual('ModemManager.service', unit.name)
 
     def test_method_list(self):
-        units = []
-        for unit in self.unit_cache.list():
-            units.append(unit)
-
+        units = self.list()
         self.assertEqual(8, len(units))
+
+    def test_method_list_include(self):
+        units = self.list(include='XXX')
+        self.assertEqual(0, len(units))
+
+        units = self.list(include='named.service')
+        self.assertEqual(1, len(units))
+
+        units = self.list(include='n.*')
+        self.assertEqual(4, len(units))
+
+    def test_method_list_exclude(self):
+
+        units = self.list(exclude='named.service')
+        self.assertEqual(7, len(units))
+
+        units = self.list(exclude=r'.*\.(mount|timer)')
+        self.assertEqual(6, len(units))
 
 
 if __name__ == '__main__':
