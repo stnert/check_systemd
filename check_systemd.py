@@ -189,6 +189,35 @@ class UnitState:
         Note that multiple low-level states might map to the same high-level
         state, but not vice versa. Not all high-level states have low-level
         counterparts on all unit types.
+
+        All sub states are listed in the file `basic/unit-def.c
+        <https://github.com/systemd/systemd/blob/main/src/basic/unit-def.c>`_
+        of the systemd source code:
+
+        * automount: ``dead``, ``waiting``, ``running``, ``failed``
+        * device: ``dead``, ``tentative``, ``plugged``
+        * mount: ``dead``, ``mounting``, ``mounting-done``, ``mounted``,
+          ``remounting``, ``unmounting``, ``remounting-sigterm``,
+          ``remounting-sigkill``, ``unmounting-sigterm``,
+          ``unmounting-sigkill``, ``failed``, ``cleaning``
+        * path: ``dead``, ``waiting``, ``running``, ``failed``
+        * scope: ``dead``, ``running``, ``abandoned``, ``stop-sigterm``,
+          ``stop-sigkill``, ``failed``
+        * service: ``dead``, ``condition``, ``start-pre``, ``start``,
+          ``start-post``, ``running``, ``exited``, ``reload``, ``stop``,
+          ``stop-watchdog``, ``stop-sigterm``, ``stop-sigkill``, ``stop-post``,
+          ``final-watchdog``, ``final-sigterm``, ``final-sigkill``, ``failed``,
+          ``auto-restart``, ``cleaning``
+        * slice: ``dead``, ``active``
+        * socket: ``dead``, ``start-pre``, ``start-chown``, ``start-post``,
+          ``listening``, ``running``, ``stop-pre``, ``stop-pre-sigterm``,
+          ``stop-pre-sigkill``, ``stop-post``, ``final-sigterm``,
+          ``final-sigkill``, ``failed``, ``cleaning``
+        * swap: ``dead``, ``activating``, ``activating-done``, ``active``,
+          ``deactivating``, ``deactivating-sigterm``, ``deactivating-sigkill``,
+          ``failed``, ``cleaning``
+        * target:``dead``, ``active``
+        * timer: ``dead``, ``waiting``, ``running``, ``elapsed``, ``failed``
         """
 
         self.load_state = kwargs.pop('load_state')
