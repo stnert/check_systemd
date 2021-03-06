@@ -23,7 +23,7 @@ def execute_with_opt_t(additional_argv=None, stdout_timers_suffix='1',
     )
 
 
-class TestDeadTimers(unittest.TestCase):
+class TestScopeTimers(unittest.TestCase):
 
     def test_dead_timers_1(self):
         result = execute_with_opt_t()

@@ -1,6 +1,7 @@
 import unittest
 import os
 import subprocess
+from helper import execute_main
 
 
 class AddBin(object):
@@ -88,6 +89,16 @@ class TestFailure(unittest.TestCase):
             'critical: smartd.service: failed\n'
             '| count_units=3 startup_time=12.154;60;120 units_activating=0 '
             'units_active=1 units_failed=1 units_inactive=1\n'
+        )
+
+    def test_multiple_units(self):
+        result = execute_main()
+        self.assertEqual(0, result.exitcode)
+        self.assertEqual(
+            'SYSTEMD OK - all | count_units=386 startup_time=12.345;60;120 '
+            'units_activating=0 units_active=275 units_failed=0 '
+            'units_inactive=111',
+            result.first_line
         )
 
 
@@ -183,33 +194,6 @@ class TestCli(unittest.TestCase):
                 stdout=subprocess.PIPE
             )
         self.assertEqual(process.returncode, 0)
-
-    def test_option_version(self):
-        process = subprocess.run(
-            ['./check_systemd.py', '--version'],
-            encoding='utf-8',
-            stdout=subprocess.PIPE
-        )
-        self.assertEqual(process.returncode, 0)
-        self.assertIn('check_systemd', process.stdout)
-
-    def test_option_help(self):
-        process = subprocess.run(
-            ['./check_systemd.py', '--help'],
-            encoding='utf-8',
-            stdout=subprocess.PIPE
-        )
-        self.assertEqual(process.returncode, 0)
-        self.assertIn('check_systemd', process.stdout)
-
-    def test_entry_point(self):
-        process = subprocess.run(
-            ['check_systemd', '--help'],
-            encoding='utf-8',
-            stdout=subprocess.PIPE
-        )
-        self.assertEqual(process.returncode, 0)
-        self.assertIn('check_systemd', process.stdout)
 
 
 if __name__ == '__main__':

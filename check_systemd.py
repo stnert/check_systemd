@@ -29,23 +29,21 @@ Acquisition (``Resource``)
 Evaluation (``Context``)
 ========================
 
-* :class:`DeadTimersContext`
-* :class:`PerformanceDataContext`
-* :class:`UnitContext`
+* :class:`DeadTimersContext` (``context=dead_timers``)
+* :class:`PerformanceDataContext` (``context=performance_data``)
+* :class:`UnitContext` (``context=unit``)
 
 Presentation (``Summary``)
 ==========================
 
 * :class:`SystemdSummary`
 
+Monitoring scopes
+=================
 
-metric context names
-====================
-
-* performance_data
-* unit
-* dead_timers
-
+* Startup time
+* State of unites
+* Timers
 
 Naming scheme for the classes
 =============================
@@ -466,7 +464,7 @@ def format_timespan_to_seconds(fmt_timespan):
 
 class SystemdAnalyseResource(nagiosplugin.Resource):
     """Resource that calls ``systemd-analyze`` on the command line to get
-    informations about the startup time.."""
+    informations about the startup time."""
 
     name = 'SYSTEMD'
 
