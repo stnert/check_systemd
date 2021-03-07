@@ -69,19 +69,6 @@ is_gi = True
 """true if the packages PyGObject (gi) or Pure Python GObject Introspection
 Bindings (pgi) are available."""
 
-opts = None
-"""
-We make is variable global to be able to access the command line arguments
-everywhere in the plugin. In this variable the result of `parse_args()
-<https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.parse_args>`_
-is stored. It is an instance of the
-`argparse.Namespace
-<https://docs.python.org/3/library/argparse.html#argparse.Namespace>`_ class.
-This variable is initialized in the main function. The variable is
-intentionally not named ``args`` to avoid confusion with ``*args`` (Non-Keyword
-Arguments).
-"""
-
 try:
     # Look for gi https://pygobject.readthedocs.io/en/latest/index.html
     from gi.repository.Gio import DBusProxy, BusType
@@ -93,6 +80,30 @@ except ImportError:
     except ImportError:
         # Fallback to the command line interface source.
         is_gi = False
+
+
+class OptionContainer:
+    """This class has the same attributes as the Namespace instance return by
+    the argparse package."""
+
+    def __init__(self):
+        self.include = []
+
+        self.exclude = []
+
+
+opts = OptionContainer()
+"""
+We make is variable global to be able to access the command line arguments
+everywhere in the plugin. In this variable the result of `parse_args()
+<https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.parse_args>`_
+is stored. It is an instance of the
+`argparse.Namespace
+<https://docs.python.org/3/library/argparse.html#argparse.Namespace>`_ class.
+This variable is initialized in the main function. The variable is
+intentionally not named ``args`` to avoid confusion with ``*args`` (Non-Keyword
+Arguments).
+"""
 
 
 class DbusManager:
@@ -121,7 +132,7 @@ class DbusManager:
         except Exception as e:
             raise e
 
-    def get_all_unit_names(self):
+    def get_all_unit_names(self) -> set:
         all_units = self.__manager.ListUnits()
         units_set = set()
         for (name, _, _, _, _, _, _, _, _, _) in all_units:
@@ -133,7 +144,7 @@ dbus_manager = None
 """
 The systemd D-Bus API main entry point object, the so called “manager”.
 """
-if is_gi == 'dbus':
+if is_gi:
     dbus_manager = DbusManager()
 
 
@@ -269,11 +280,19 @@ class UnitNameFilter:
     ``fstrim.timer``) and provides a interface to filter the names by regular
     expressions."""
 
-    def __init__(self):
-        self.__unit_names = set()
+    def __init__(self, unit_names=()):
+        self.__unit_names = set(unit_names)
 
     def add(self, unit_name: str):
+        """Add one unit name.
+
+        :param unit_name: The name of the unit, for example ``apt.timer``.
+        """
         self.__unit_names.add(unit_name)
+
+    def get(self) -> typing.Set[str]:
+        """Get all stored unit names."""
+        return self.__unit_names
 
     @staticmethod
     def __make_iterable(
@@ -454,7 +473,10 @@ class DbusAllUnitsResource(nagiosplugin.Resource):
         """
         unit_names = dbus_manager.get_all_unit_names()
 
-        for unit_name in unit_names:
+        filter = UnitNameFilter(unit_names)
+
+        for unit_name in filter.list(include=opts.include,
+                                     exclude=opts.exclude):
             unit_state = DbusUnit(unit_name)
             yield Metric(name=unit_name, value=unit_state,
                          context='unit')
@@ -1007,6 +1029,21 @@ def get_argparser():
              'for example are only active while running and not enabled. '
              'The rest of the time they are inactive. This option has only '
              'an affect if it is used with the option -u.'
+    )
+
+    unit.add_argument(
+        '-I', '--include',
+        metavar='UNIT',
+        action='append',
+        default=[],
+        help='Include a systemd unit from the checks. This option can be '
+             'applied multiple times, for example: -i mnt-data.mount -i '
+             'task.service. Regular expressions can be used to include '
+             'multiple units at once, for example: '
+             '-e \'user@\\d+\\.service\'. '
+             'For more informations see the Python documentation about '
+             'regular expressions '
+             '(https://docs.python.org/3/library/re.html).',
     )
 
     unit_exclusive_group.add_argument(

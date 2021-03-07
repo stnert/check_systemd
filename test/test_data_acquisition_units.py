@@ -109,6 +109,10 @@ class TestClassUnitNameFilter(unittest.TestCase):
             unit_names.append(unit_name)
         return unit_names
 
+    def test_initialization_with_arg(self):
+        filter = UnitNameFilter(['test1.service', 'test2.service'])
+        self.assertEqual(2, len(filter.get()))
+
     def test_method_list(self):
         units = self.list()
         self.assertEqual(8, len(units))
@@ -137,6 +141,10 @@ class TestClassUnitNameFilter(unittest.TestCase):
     def test_method_list_exclude_multiple(self):
         units = self.list(exclude=('named.service', 'nmbd.timer'))
         self.assertEqual(6, len(units))
+
+    def test_method_list_include_exclude_empty_list(self):
+        units = self.list(include=[], exclude=[])
+        self.assertEqual(8, len(units))
 
 
 if __name__ == '__main__':

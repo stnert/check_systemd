@@ -26,8 +26,8 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: check_systemd [-h] [-v] [-V] [-u UNIT] [-i] [-e UNIT] [-n] [-w SECONDS]
-                     [-c SECONDS] [-t] [-W SECONDS] [-C SECONDS]
+usage: check_systemd [-h] [-v] [-V] [-u UNIT] [-i] [-I UNIT] [-e UNIT] [-n]
+                     [-w SECONDS] [-c SECONDS] [-t] [-W SECONDS] [-C SECONDS]
                      [--dbus | --cli]
 
 Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>
@@ -51,6 +51,14 @@ Options related to unit selection:
                         not enabled. The rest of the time they are inactive.
                         This option has only an affect if it is used with the
                         option -u.
+  -I UNIT, --include UNIT
+                        Include a systemd unit from the checks. This option can
+                        be applied multiple times, for example: -i mnt-
+                        data.mount -i task.service. Regular expressions can be
+                        used to include multiple units at once, for example: -e
+                        'user@\d+\.service'. For more informations see the
+                        Python documentation about regular expressions
+                        (https://docs.python.org/3/library/re.html).
   -e UNIT, --exclude UNIT
                         Exclude a systemd unit from the checks. This option can
                         be applied multiple times, for example: -e mnt-
