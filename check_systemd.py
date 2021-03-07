@@ -57,6 +57,7 @@ import io
 import subprocess
 import argparse
 import re
+import typing
 
 import nagiosplugin
 from nagiosplugin import Metric
@@ -263,42 +264,62 @@ class Unit:
         return nagiosplugin.Ok
 
 
-class UnitCache:
+class UnitNameFilter:
+    """This class stores all system unit names (e. g. ``nginx.service`` or
+    ``fstrim.timer``) and provides a interface to filter the names by regular
+    expressions."""
 
     def __init__(self):
-        self.__units = {}
+        self.__unit_names = set()
 
-    def add(self, unit):
-        self.__units[unit.name] = unit
-
-    def get(self, name=None, exclude=None, include=None):
-        if name:
-            return self.__units[name]
+    def add(self, unit_name: str):
+        self.__unit_names.add(unit_name)
 
     @staticmethod
-    def __make_iterable(regex):
+    def __make_iterable(
+        regex: typing.Union[str, typing.Iterator[str]]
+    ) -> typing.Iterator[str]:
         if isinstance(regex, str):
             return [regex]
         return regex
 
     @staticmethod
-    def __exclude(unit_name, excludes):
-        excludes = UnitCache.__make_iterable(excludes)
+    def __exclude(unit_name: str,
+                  excludes: typing.Union[str, typing.Iterator[str]]):
+        excludes = UnitNameFilter.__make_iterable(excludes)
         for exclude in excludes:
             if re.match(exclude, unit_name):
                 return True
         return False
 
     @staticmethod
-    def __include(unit_name, includes):
-        includes = UnitCache.__make_iterable(includes)
+    def __include(unit_name: str,
+                  includes: typing.Union[str, typing.Iterator[str]]):
+        includes = UnitNameFilter.__make_iterable(includes)
         for include in includes:
             if re.match(include, unit_name):
                 return True
         return False
 
-    def list(self, exclude=None, include=None):
-        for name in self.__units:
+    def list(self,
+             include: typing.Union[str, typing.Iterator[str]] = None,
+             exclude: typing.Union[str, typing.Iterator[str]] = None
+             ) -> typing.Generator[str, None, None]:
+        """
+        List all unit names or apply filters (``include`` or ``exclude``) to
+        the list of unit names.
+
+        :param include: If the unit name matches the provided regular
+          expression, it is included in the list of unit names. A single
+          regular expression (``include='.*service'``) or a list of regular
+          expressions (``include=('.*service', '.*mount')``).
+
+        :param exclude: If the unit name matches the provided regular
+          expression, it is excluded from the list of unit names. A single
+          regular expression (``exclude='.*service'``) or a list of regular
+          expressions (``exclude=('.*service', '.*mount')``).
+        """
+        for name in self.__unit_names:
 
             if include and not self.__include(name, include):
                 name = None
@@ -307,7 +328,44 @@ class UnitCache:
                 name = None
 
             if name:
-                yield self.__units[name]
+                yield name
+
+
+class UnitCache:
+    """This class is a container class for systemd units."""
+
+    def __init__(self):
+        self.__units = {}
+        self.__name_filter = UnitNameFilter()
+
+    def add(self, unit):
+        self.__units[unit.name] = unit
+        self.__name_filter.add(unit.name)
+
+    def get(self, name=None):
+        if name:
+            return self.__units[name]
+
+    def list(self,
+             include: typing.Union[str, typing.Iterator[str]] = None,
+             exclude: typing.Union[str, typing.Iterator[str]] = None
+             ) -> typing.Generator[Unit, None, None]:
+        """
+        List all units or apply filters (``include`` or ``exclude``) to
+        the list of unit.
+
+        :param include: If the unit name matches the provided regular
+          expression, it is included in the list of unit names. A single
+          regular expression (``include='.*service'``) or a list of regular
+          expressions (``include=('.*service', '.*mount')``).
+
+        :param exclude: If the unit name matches the provided regular
+          expression, it is excluded from the list of unit names. A single
+          regular expression (``exclude='.*service'``) or a list of regular
+          expressions (``exclude=('.*service', '.*mount')``).
+        """
+        for name in self.__name_filter.list(include=include, exclude=exclude):
+            yield self.__units[name]
 
 
 class DbusUnit(Unit):

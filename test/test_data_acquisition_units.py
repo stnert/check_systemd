@@ -1,7 +1,7 @@
 """Tests related to data acquisition of systemd units."""
 
 import unittest
-from check_systemd import Unit, UnitCache
+from check_systemd import Unit, UnitCache, UnitNameFilter
 
 
 unit_modem_manager = Unit(name='ModemManager.service',
@@ -59,6 +59,55 @@ class TestClassUnitCache(unittest.TestCase):
     def test_method_get(self):
         unit = self.unit_cache.get(name='ModemManager.service')
         self.assertEqual('ModemManager.service', unit.name)
+
+    def test_method_list(self):
+        units = self.list()
+        self.assertEqual(8, len(units))
+
+    def test_method_list_include(self):
+        units = self.list(include='XXX')
+        self.assertEqual(0, len(units))
+
+        units = self.list(include='named.service')
+        self.assertEqual(1, len(units))
+
+        units = self.list(include='n.*')
+        self.assertEqual(4, len(units))
+
+    def test_method_list_include_multiple(self):
+        units = self.list(include=('n.*', 'p.*'))
+        self.assertEqual(5, len(units))
+
+    def test_method_list_exclude(self):
+        units = self.list(exclude='named.service')
+        self.assertEqual(7, len(units))
+
+        units = self.list(exclude=r'.*\.(mount|timer)')
+        self.assertEqual(6, len(units))
+
+    def test_method_list_exclude_multiple(self):
+        units = self.list(exclude=('named.service', 'nmbd.timer'))
+        self.assertEqual(6, len(units))
+
+
+class TestClassUnitNameFilter(unittest.TestCase):
+
+    def setUp(self):
+        self.filter = UnitNameFilter()
+        self.filter.add('ModemManager.service')
+        self.filter.add('mongod.service')
+        self.filter.add('mysql.service')
+        self.filter.add('named.service')
+        self.filter.add('networking.mount')
+        self.filter.add('nginx.service')
+        self.filter.add('nmbd.timer')
+        self.filter.add('php7.4-fpm.service')
+
+    def list(self, include=None, exclude=None):
+        unit_names = []
+        for unit_name in self.filter.list(include=include, exclude=exclude):
+            unit_names.append(unit_name)
+        return unit_names
 
     def test_method_list(self):
         units = self.list()

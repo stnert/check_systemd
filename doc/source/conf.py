@@ -7,6 +7,8 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    'sphinx_autodoc_typehints'
 ]
 templates_path = ['_templates']
 source_suffix = '.rst'
@@ -25,3 +27,4 @@ todo_include_todos = False
 html_static_path = []
 htmlhelp_basename = 'checksystemddoc'
 autodoc_default_flags = ['members', 'undoc-members', 'private-members', 'show-inheritance']
+napoleon_use_param = True
