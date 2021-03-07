@@ -25,7 +25,7 @@ class AddBin(object):
         os.environ['PATH'] = self.old_path
 
 
-def read_file_as_bytes(file_name):
+def read_file_as_bytes(file_name: str) -> bytes:
     """Read a text file as bytes.
 
     :param str file_name: The name of the text file which is placed in the

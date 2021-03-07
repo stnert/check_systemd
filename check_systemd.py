@@ -731,6 +731,46 @@ class TableParser:
         return column.strip()
 
 
+class TableParserNg:
+
+    def __init__(self, stdout):
+        all_lines = stdout.splitlines()
+        self.header_line = all_lines[0]
+
+        counter = 0
+        for line in all_lines:
+            # The table footer is separted by a blank line
+            if line == '':
+                break
+            counter += 1
+        self.body_lines = all_lines[1:counter]
+
+    @staticmethod
+    def detect_column_lengths(header_line):
+        column_lengths = []
+        match = re.search(r'^ +', header_line)
+        if match:
+            whitespace_prefix_length = match.end()
+            column_lengths.append(whitespace_prefix_length)
+            header_line = header_line[whitespace_prefix_length:]
+
+        word = 0
+        space = 0
+
+        for char in header_line:
+            if word and space and char != ' ':
+                column_lengths.append(word + space)
+                word = 0
+                space = 0
+
+            if char == ' ':
+                space += 1
+            else:
+                word += 1
+
+        return column_lengths
+
+
 class SystemctlListTimersResource(nagiosplugin.Resource):
     """
     Resource that calls ``systemctl list-timers --all`` on the command line to
