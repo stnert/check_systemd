@@ -16,5 +16,6 @@ class TestTableParser(unittest.TestCase):
 
     def test_detect_column_lengths(self):
         detect = TableParserNg.detect_column_lengths
-        self.assertEqual([2, 2], detect('1 2 3'))
-        self.assertEqual([2, 2, 2], detect('  1 2 3  '))
+        self.assertEqual([3, 3], detect('1  2  3'))
+        self.assertEqual([2, 3, 3], detect('  1  2  3  '))
+        self.assertEqual([2, 5, 5], detect('  1 1  2 2  3 3  '))

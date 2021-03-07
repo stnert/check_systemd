@@ -758,7 +758,7 @@ class TableParserNg:
         space = 0
 
         for char in header_line:
-            if word and space and char != ' ':
+            if word and space > 1 and char != ' ':
                 column_lengths.append(word + space)
                 word = 0
                 space = 0
