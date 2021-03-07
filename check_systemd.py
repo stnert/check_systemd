@@ -64,10 +64,9 @@ from nagiosplugin import Metric
 __version__ = '2.3.1'
 
 
-data_source = 'dbus'
-"""This variable indicates which data source should be used for the acquisition
-of monitoring informations. It accepts the values ``dbus`` or ``cli``. It
-prefers the D-Bus source. """
+is_gi = True
+"""true if the packages PyGObject (gi) or Pure Python GObject Introspection
+Bindings (pgi) are available."""
 
 opts = None
 """
@@ -92,7 +91,7 @@ except ImportError:
         from pgi.repository.Gio import DBusProxy, BusType
     except ImportError:
         # Fallback to the command line interface source.
-        data_source = 'cli'
+        is_gi = False
 
 
 class DbusManager:
@@ -133,7 +132,7 @@ dbus_manager = None
 """
 The systemd D-Bus API main entry point object, the so called “manager”.
 """
-if data_source == 'dbus':
+if is_gi == 'dbus':
     dbus_manager = DbusManager()
 
 
@@ -1034,7 +1033,7 @@ def get_argparser():
 
     acquisition_exclusive_group.add_argument(
         '--dbus',
-        action='store_true',
+        dest='data_source', action='store_const', const='dbus', default='cli',
         help='Use the systemd’s D-Bus API instead of parsing the text output '
              'of various systemd related command line interfaces to monitor '
              'systemd. At the moment the D-Bus backend of this plugin is '
@@ -1043,7 +1042,7 @@ def get_argparser():
 
     acquisition_exclusive_group.add_argument(
         '--cli',
-        action='store_true',
+        dest='data_source', action='store_const', const='cli',
         help='Use the text output of serveral systemd command line interface '
              '(cli) binaries to gather the required data for the monitoring '
              'process.'
@@ -1069,12 +1068,9 @@ def main():
     global opts
     opts = get_argparser().parse_args()
 
-    if opts.dbus and data_source == 'cli':
+    if opts.data_source == 'dbus' and not is_gi:
         print('D-Bus backend could not be used. Fall back to the CLI backend.')
-
-    use_dbus = False
-    if opts.dbus and data_source == 'dbus':
-        use_dbus = True
+        opts.data_source = 'cli'
 
     tasks = []
 
@@ -1089,12 +1085,12 @@ def main():
         ]
 
     if opts.unit:
-        if use_dbus:
+        if opts.data_source == 'dbus':
             tasks.append(DbusSingleUnitResource(unit=opts.unit))
         else:
             tasks.append(SystemctlIsActiveResource(unit=opts.unit))
     else:
-        if use_dbus:
+        if opts.data_source == 'dbus':
             tasks.append(DbusAllUnitsResource())
         else:
             tasks += [
