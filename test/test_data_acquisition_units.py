@@ -74,12 +74,19 @@ class TestClassUnitCache(unittest.TestCase):
         units = self.list(include='n.*')
         self.assertEqual(4, len(units))
 
-    def test_method_list_exclude(self):
+    def test_method_list_include_multiple(self):
+        units = self.list(include=('n.*', 'p.*'))
+        self.assertEqual(5, len(units))
 
+    def test_method_list_exclude(self):
         units = self.list(exclude='named.service')
         self.assertEqual(7, len(units))
 
         units = self.list(exclude=r'.*\.(mount|timer)')
+        self.assertEqual(6, len(units))
+
+    def test_method_list_exclude_multiple(self):
+        units = self.list(exclude=('named.service', 'nmbd.timer'))
         self.assertEqual(6, len(units))
 
 

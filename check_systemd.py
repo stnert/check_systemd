@@ -276,13 +276,35 @@ class UnitCache:
         if name:
             return self.__units[name]
 
+    @staticmethod
+    def __make_iterable(regex):
+        if isinstance(regex, str):
+            return [regex]
+        return regex
+
+    @staticmethod
+    def __exclude(unit_name, excludes):
+        excludes = UnitCache.__make_iterable(excludes)
+        for exclude in excludes:
+            if re.match(exclude, unit_name):
+                return True
+        return False
+
+    @staticmethod
+    def __include(unit_name, includes):
+        includes = UnitCache.__make_iterable(includes)
+        for include in includes:
+            if re.match(include, unit_name):
+                return True
+        return False
+
     def list(self, exclude=None, include=None):
         for name in self.__units:
 
-            if include and not re.match(include, name):
+            if include and not self.__include(name, include):
                 name = None
 
-            if name and exclude and re.match(exclude, name):
+            if name and exclude and self.__exclude(name, exclude):
                 name = None
 
             if name:
