@@ -60,7 +60,7 @@ import re
 import typing
 
 import nagiosplugin
-from nagiosplugin import Metric
+from nagiosplugin import Metric, Result
 
 __version__ = '2.3.1'
 
@@ -374,9 +374,9 @@ class DbusUnit(Unit):
     ``ActiveState``, ``SubState`` and ``LoadState`` of the Dbus systemd API.
     """
 
-    def __init__(self, unit_name):
+    def __init__(self, unit_name: str):
         """
-        :param str unit_name: A systemd unit name like ``tor.service``,
+        :param unit_name: A systemd unit name like ``tor.service``,
           ``mnt-nextcloud.automount`` or ``update-motd.timer``.
         """
         try:
@@ -393,7 +393,7 @@ class DbusUnit(Unit):
         <https://lazka.github.io/pgi-docs/#Gio-2.0/classes/DBusProxy.html#Gio.DBusProxy.new_for_bus_sync>`_.
         """
 
-    def __get_dbus_property(self, property_name):
+    def __get_dbus_property(self, property_name: str) -> str:
         """
         Get the property of a systemd D-Bus unit object. This method uses the
         methods `Gio.DBusProxy.get_cached_property
@@ -406,7 +406,7 @@ class DbusUnit(Unit):
         return self.__dbus_unit.get_cached_property(property_name).unpack()
 
     @property
-    def active_state(self):
+    def active_state(self) -> str:
         """
         See :func:`UnitState.active_state`
         """
@@ -420,7 +420,7 @@ class DbusUnit(Unit):
         return self.__get_dbus_property('SubState')
 
     @property
-    def load_state(self):
+    def load_state(self) -> str:
         """
         See :func:`UnitState.load_state`
         """
@@ -436,7 +436,7 @@ class DbusSingleUnitResource(nagiosplugin.Resource):
         self.unit = kwargs.pop('unit')
         super().__init__(*args, **kwargs)
 
-    def probe(self):
+    def probe(self) -> Metric:
         unit_state = DbusUnit(self.unit)
         return Metric(name=self.unit, value=unit_state,
                       context='unit')
@@ -446,7 +446,7 @@ class DbusAllUnitsResource(nagiosplugin.Resource):
 
     name = 'SYSTEMD'
 
-    def probe(self):
+    def probe(self) -> typing.Generator[Metric, None, None]:
         """Query system state and return metrics.
 
         :return: generator that emits
@@ -478,7 +478,7 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
                 return(True)
         return(False)
 
-    def probe(self):
+    def probe(self) -> typing.Generator[Metric, None, None]:
         """Query system state and return metrics.
 
         :return: generator that emits
@@ -550,16 +550,16 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
             yield Metric(name='all', value=None, context='unit')
 
 
-def format_timespan_to_seconds(fmt_timespan):
+def format_timespan_to_seconds(fmt_timespan: str) -> float:
     """Convert a timespan format string into secondes. Take a look at the
     systemd `time-util.c
     <https://github.com/systemd/systemd/blob/master/src/basic/time-util.c>`_
     source code.
 
-    :param str fmt_timespan: for example ``2.345s`` or ``3min 45.234s`` or
+    :param fmt_timespan: for example ``2.345s`` or ``3min 45.234s`` or
       ``34min left`` or ``2 months 8 days``
 
-    :return: The seconds :rtype: float
+    :return: The seconds
     """
     for replacement in [
         ['years', 'y'],
@@ -590,17 +590,16 @@ def format_timespan_to_seconds(fmt_timespan):
     return round(float(result), 3)
 
 
-def execute_cli(args):
+def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
     """Execute a command on the command line (cli = command line interface))
     and capture the stdout. This is a wrapper around ``subprocess.Popen``.
 
-    :param list args: A list of programm arguments.
+    :param args: A list of programm arguments.
 
     :raises nagiosplugin.CheckError: If the command produces some stderr output
       or if an OSError exception occurs.
 
     :return: The stdout of the command.
-    :rtype: str
     """
     try:
         p = subprocess.Popen(args,
@@ -619,7 +618,7 @@ def execute_cli(args):
         return stdout
 
 
-def get_unitstate_from_cli(unit_name):
+def get_unitstate_from_cli(unit_name: str) -> Unit:
     """
     Run the command ``systemctl show unit-name.service`` on the command line
     and extract the three keys ``ActiveState``, ``SubState``, and
@@ -649,7 +648,7 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
 
     name = 'SYSTEMD'
 
-    def probe(self):
+    def probe(self) -> typing.Generator[Metric, None, None]:
         """Query system state and return metrics.
 
         :return: generator that emits
@@ -681,27 +680,28 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
 class TableParser:
     """A parser for the various table outputs of different systemd commands."""
 
-    def __init__(self, heading_row):
+    def __init__(self, heading_row: str):
         """
-        :param str heading_row: A row with column titles.
+        :param heading_row: A row with column titles.
         """
         self.heading_row = heading_row
 
-    def detect_column_boundaries(self, column_title):
+    def detect_column_boundaries(self,
+                                 column_title: str) -> typing.Iterator[int]:
         """
-        :param str column_title: The title of the column, for example UNIT,
+        :param column_title: The title of the column, for example UNIT,
           ACTIVE. The column title must be included in the heading row.
         """
         match = re.search(re.compile(column_title + r'\s*'), self.heading_row)
         return [match.start(), match.end()]
 
-    def get_column_text(self, row, column_title):
+    def get_column_text(self, row: str, column_title: str) -> str:
         """Get the text of a certain column, that is specified by the column
         title. Leading and trailing whitespaces are removed.
 
-        :param str row: The current row of the table to extract a certain
+        :param row: The current row of the table to extract a certain
           column.
-        :param str column_title: The title of the column, for example UNIT,
+        :param column_title: The title of the column, for example UNIT,
           ACTIVE. The column title must be included in the heading row.
         """
         boundaries = self.detect_column_boundaries(column_title)
@@ -739,7 +739,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
                 return(True)
         return(False)
 
-    def detect_column_boundaries(self, heading):
+    def detect_column_boundaries(self, heading) -> typing.Iterator[int]:
         boundaries = []
         previous_column_start = 0
         for column_title in self.column_names[1:]:
@@ -748,13 +748,13 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
             previous_column_start = next_column_start
         return boundaries
 
-    def get_column_text(self, row, column_name):
+    def get_column_text(self, row: str, column_name: str) -> str:
         boundaries = self.column_boundaries[
             self.column_names.index(column_name)
         ]
         return row[boundaries[0]:boundaries[1]].strip()
 
-    def probe(self):
+    def probe(self) -> typing.Generator[Metric, None, None]:
         """
         :return: generator that emits
           :class:`~nagiosplugin.metric.Metric` objects
@@ -819,7 +819,7 @@ class SystemctlIsActiveResource(nagiosplugin.Resource):
         self.unit = kwargs.pop('unit')
         super().__init__(*args, **kwargs)
 
-    def probe(self):
+    def probe(self) -> typing.Generator[Metric, None, None]:
         """Query system state and return metrics.
 
         :return: generator that emits
@@ -841,7 +841,7 @@ class UnitContext(nagiosplugin.Context):
     def __init__(self):
         super(UnitContext, self).__init__('unit')
 
-    def evaluate(self, metric, resource):
+    def evaluate(self, metric, resource) -> Result:
         """Determines state of a given metric.
 
         :param metric: associated metric that is to be evaluated
@@ -914,7 +914,7 @@ class SystemdSummary(nagiosplugin.Summary):
     <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/summary.py>`_.
     """
 
-    def ok(self, results):
+    def ok(self, results) -> str:
         """Formats status line when overall state is ok.
 
         :param results: :class:`~nagiosplugin.result.Results` container
@@ -925,7 +925,7 @@ class SystemdSummary(nagiosplugin.Summary):
                 return '{0}'.format(result)
         return 'all'
 
-    def problem(self, results):
+    def problem(self, results) -> str:
         """Formats status line when overall state is not ok.
 
         :param results: :class:`~.result.Results` container
@@ -938,7 +938,7 @@ class SystemdSummary(nagiosplugin.Summary):
                 summary.append(result)
         return ', '.join(['{0}'.format(result) for result in summary])
 
-    def verbose(self, results):
+    def verbose(self, results) -> str:
         """Provides extra lines if verbose plugin execution is requested.
 
         :param results: :class:`~.result.Results` container
