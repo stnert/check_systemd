@@ -275,6 +275,25 @@ class Unit:
         return nagiosplugin.Ok
 
 
+def match_multiple(unit_name: str,
+                   regexes: typing.Union[str, typing.Iterator[str]]) -> bool:
+    """
+    Match multiple regular expressions against a unit name.
+
+    :param unit_name: The unit name to be matched.
+
+    :param regexes: A single regular expression (``include='.*service'``) or a
+      list of regular expressions (``include=('.*service', '.*mount')``).
+
+    :return: True if one regular expression matches"""
+    if isinstance(regexes, str):
+        regexes = [regexes]
+    for regex in regexes:
+        if re.match(regex, unit_name):
+            return True
+    return False
+
+
 class UnitNameFilter:
     """This class stores all system unit names (e. g. ``nginx.service`` or
     ``fstrim.timer``) and provides a interface to filter the names by regular
@@ -293,32 +312,6 @@ class UnitNameFilter:
     def get(self) -> typing.Set[str]:
         """Get all stored unit names."""
         return self.__unit_names
-
-    @staticmethod
-    def __make_iterable(
-        regex: typing.Union[str, typing.Iterator[str]]
-    ) -> typing.Iterator[str]:
-        if isinstance(regex, str):
-            return [regex]
-        return regex
-
-    @staticmethod
-    def __exclude(unit_name: str,
-                  excludes: typing.Union[str, typing.Iterator[str]]):
-        excludes = UnitNameFilter.__make_iterable(excludes)
-        for exclude in excludes:
-            if re.match(exclude, unit_name):
-                return True
-        return False
-
-    @staticmethod
-    def __include(unit_name: str,
-                  includes: typing.Union[str, typing.Iterator[str]]):
-        includes = UnitNameFilter.__make_iterable(includes)
-        for include in includes:
-            if re.match(include, unit_name):
-                return True
-        return False
 
     def list(self,
              include: typing.Union[str, typing.Iterator[str]] = None,
@@ -340,10 +333,10 @@ class UnitNameFilter:
         """
         for name in self.__unit_names:
 
-            if include and not self.__include(name, include):
+            if include and not match_multiple(name, include):
                 name = None
 
-            if name and exclude and self.__exclude(name, exclude):
+            if name and exclude and match_multiple(name, exclude):
                 name = None
 
             if name:
@@ -494,12 +487,6 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
     def __init__(self, excludes=[]):
         self.excludes = excludes
 
-    def re_match(self, unit):
-        for exclude in self.excludes:
-            if re.match(exclude, unit):
-                return(True)
-        return(False)
-
     def probe(self) -> typing.Generator[Metric, None, None]:
         """Query system state and return metrics.
 
@@ -545,7 +532,7 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
                 active = table_parser.get_column_text(line, 'ACTIVE')
 
                 # Only count not excluded units.
-                if not self.re_match(unit):
+                if not match_multiple(unit, self.excludes):
                     # Quick fix:
                     # Issue on Arch: “not-found” in column ACTIVE
                     # maybe cli table output changed on newer versions of
@@ -557,7 +544,7 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
                     count_units += 1
 
             for unit in units['failed']:
-                if not self.re_match(unit):
+                if not match_multiple(unit, self.excludes):
                     yield Metric(name=unit, value='failed', context='unit')
 
             for active, unit_names in units.items():
@@ -847,12 +834,6 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
 
     name = 'SYSTEMD'
 
-    def re_match(self, unit):
-        for exclude in self.excludes:
-            if re.match(exclude, unit):
-                return(True)
-        return(False)
-
     def probe(self) -> typing.Generator[Metric, None, None]:
         """
         :return: generator that emits
@@ -874,7 +855,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
 
             for row in table_parser.list_rows():
                 unit = row['unit']
-                if self.re_match(unit):
+                if match_multiple(unit, self.excludes):
                     continue
                 next_date_time = row['next']
 
