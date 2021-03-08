@@ -505,31 +505,13 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
             'inactive': [],
         }
         if stdout:
-            lines = stdout.splitlines()
-            table_heading = lines[0]
-
-            # Remove the first line because it is the header.
-
-            # Remove the  last seven lines:
-
-            # empty line
-            # LOAD   = Reflects whether the unit definition...
-            # ACTIVE = The high-level unit activation state...
-            # SUB    = The low-level unit activation state...
-            # empty line
-            # xxx loaded units listed. Pass --all to see ...
-            # To show all installed unit files use...
-            table_body = lines[1:-7]
-            table_parser = TableParser(table_heading)
-            # Output of `systemctl list-units --all:
-            # UNIT           LOAD   ACTIVE SUB     JOB   DESCRIPTION
-            # foobar.service loaded active waiting       Description text
+            table_parser = TableParser(stdout)
             count_units = 0
-            for line in table_body:
+            for row in table_parser.list_rows():
                 # foobar.service
-                unit = table_parser.get_column_text(line, 'UNIT')
+                unit = row['unit']
                 # failed
-                active = table_parser.get_column_text(line, 'ACTIVE')
+                active = row['active']
 
                 # Only count not excluded units.
                 if not match_multiple(unit, self.excludes):
@@ -687,44 +669,12 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
 
 
 class TableParser:
-    """A parser for the various table outputs of different systemd commands."""
-
-    def __init__(self, heading_row: str):
-        """
-        :param heading_row: A row with column titles.
-        """
-        self.heading_row = heading_row
-
-    def detect_column_boundaries(self,
-                                 column_title: str) -> typing.Iterator[int]:
-        """
-        :param column_title: The title of the column, for example UNIT,
-          ACTIVE. The column title must be included in the heading row.
-        """
-        match = re.search(re.compile(column_title + r'\s*'), self.heading_row)
-        return [match.start(), match.end()]
-
-    def get_column_text(self, row: str, column_title: str) -> str:
-        """Get the text of a certain column, that is specified by the column
-        title. Leading and trailing whitespaces are removed.
-
-        :param row: The current row of the table to extract a certain
-          column.
-        :param column_title: The title of the column, for example UNIT,
-          ACTIVE. The column title must be included in the heading row.
-        """
-        boundaries = self.detect_column_boundaries(column_title)
-        column = row[boundaries[0]:boundaries[1]]
-        return column.strip()
-
-
-class TableParserNg:
 
     def __init__(self, stdout):
         rows = stdout.splitlines()
-        self.header_row = TableParserNg.__normalize_header(rows[0])
-        self.column_lengths = TableParserNg.__detect_lengths(self.header_row)
-        self.columns = TableParserNg.__split_row(
+        self.header_row = TableParser.__normalize_header(rows[0])
+        self.column_lengths = TableParser.__detect_lengths(self.header_row)
+        self.columns = TableParser.__split_row(
             self.header_row, self.column_lengths)
         counter = 0
         for line in rows:
@@ -795,8 +745,8 @@ class TableParserNg:
         :param row_number: The index number of the table row starting at 0.
 
         """
-        body_columns = TableParserNg.__split_row(self.body_rows[row_number],
-                                                 self.column_lengths)
+        body_columns = TableParser.__split_row(self.body_rows[row_number],
+                                               self.column_lengths)
 
         result = {}
 
@@ -850,7 +800,7 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
         # UNIT             ACTIVATES
         # apt-daily.timer  apt-daily.service
         if stdout:
-            table_parser = TableParserNg(stdout)
+            table_parser = TableParser(stdout)
             state = nagiosplugin.Ok
 
             for row in table_parser.list_rows():
