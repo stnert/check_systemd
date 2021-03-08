@@ -734,30 +734,44 @@ class TableParser:
 class TableParserNg:
 
     def __init__(self, stdout):
-        all_lines = stdout.splitlines()
-        self.header_line = all_lines[0]
-
+        rows = stdout.splitlines()
+        self.header_row = TableParserNg.__normalize_header(rows[0])
+        self.column_lengths = TableParserNg.__detect_lengths(self.header_row)
+        self.columns = TableParserNg.__split_row(
+            self.header_row, self.column_lengths)
         counter = 0
-        for line in all_lines:
+        for line in rows:
             # The table footer is separted by a blank line
             if line == '':
                 break
             counter += 1
-        self.body_lines = all_lines[1:counter]
+        self.body_rows = rows[1:counter]
 
     @staticmethod
-    def detect_column_lengths(header_line):
+    def __normalize_header(header_row: str) -> str:
+        """Replace a single space character that is surrounded by word
+        characters with an underscore and convert the word to lower case. Now
+        we can more easily detect the column boundaries. A column starts with a
+        word followed by whitespaces. The first word character after a
+        whitespace marks the beginning of a new row."""
+        header_row = header_row.lower()
+        header_row = re.sub(r'(\w) (\w)', r'\1_\2', header_row)
+        return header_row
+
+    @staticmethod
+    def __detect_lengths(header_row: str) -> list:
         column_lengths = []
-        match = re.search(r'^ +', header_line)
+        match = re.search(r'^ +', header_row)
         if match:
             whitespace_prefix_length = match.end()
             column_lengths.append(whitespace_prefix_length)
-            header_line = header_line[whitespace_prefix_length:]
+            header_row = header_row[whitespace_prefix_length:]
 
+        header_row = re.sub(r'(\w) (\w)', '\1_\2', header_row)
         word = 0
         space = 0
 
-        for char in header_line:
+        for char in header_row:
             if word and space > 1 and char != ' ':
                 column_lengths.append(word + space)
                 word = 0
@@ -769,6 +783,23 @@ class TableParserNg:
                 word += 1
 
         return column_lengths
+
+    @staticmethod
+    def __split_row(line: str, column_lengths: list) -> list:
+        columns = []
+        right = 0
+        for length in column_lengths:
+            left = right
+            right = right + length
+            columns.append(line[left:right].strip())
+        columns.append(line[right:].strip())
+        return columns
+
+    @property
+    def row_count(self):
+        """The number of rows. Only the body rows are counted. The header row
+        is not taken into account."""
+        return len(self.body_rows)
 
 
 class SystemctlListTimersResource(nagiosplugin.Resource):
