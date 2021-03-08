@@ -50,9 +50,14 @@ class TestTableParser(unittest.TestCase):
 
     def test_get_row_all(self):
         parser = get_parser()
-        row = parser.row_count
         for i in range(0, parser.row_count):
             row = parser.get_row(i)
+        self.assertEqual('systemd-tmpfiles-clean.timer', row['unit'])
+
+    def test_list_rows(self):
+        parser = get_parser()
+        for row in parser.list_rows():
+            pass
         self.assertEqual('systemd-tmpfiles-clean.timer', row['unit'])
 
 

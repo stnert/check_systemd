@@ -823,6 +823,11 @@ class TableParserNg:
             index += 1
         return result
 
+    def list_rows(self) -> typing.Generator[dict, None, None]:
+        """List all rows."""
+        for i in range(0, self.row_count):
+            yield self.get_row(i)
+
 
 class SystemctlListTimersResource(nagiosplugin.Resource):
     """
@@ -842,32 +847,11 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
 
     name = 'SYSTEMD'
 
-    column_names = [
-        'NEXT', 'LEFT', 'LAST', 'PASSED', 'UNIT', 'ACTIVATES'
-    ]
-
-    column_boundaries = None
-
     def re_match(self, unit):
         for exclude in self.excludes:
             if re.match(exclude, unit):
                 return(True)
         return(False)
-
-    def detect_column_boundaries(self, heading) -> typing.Iterator[int]:
-        boundaries = []
-        previous_column_start = 0
-        for column_title in self.column_names[1:]:
-            next_column_start = heading.index(column_title)
-            boundaries.append([previous_column_start, next_column_start])
-            previous_column_start = next_column_start
-        return boundaries
-
-    def get_column_text(self, row: str, column_name: str) -> str:
-        boundaries = self.column_boundaries[
-            self.column_names.index(column_name)
-        ]
-        return row[boundaries[0]:boundaries[1]].strip()
 
     def probe(self) -> typing.Generator[Metric, None, None]:
         """
@@ -885,25 +869,17 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
         # UNIT             ACTIVATES
         # apt-daily.timer  apt-daily.service
         if stdout:
-            lines = stdout.splitlines()
-            table_heading = lines[0]
-            self.column_boundaries = self.detect_column_boundaries(
-                table_heading
-            )
-            # Remove the first line because it is the header.
-            # Remove the two last lines: empty line + "XX timers listed."
-            table_body = lines[1:-2]
+            table_parser = TableParserNg(stdout)
+            state = nagiosplugin.Ok
 
-            state = nagiosplugin.Ok  # ok
-
-            for row in table_body:
-                unit = self.get_column_text(row, 'UNIT')
+            for row in table_parser.list_rows():
+                unit = row['unit']
                 if self.re_match(unit):
                     continue
-                next_date_time = self.get_column_text(row, 'NEXT')
+                next_date_time = row['next']
 
                 if next_date_time == 'n/a':
-                    passed_text = self.get_column_text(row, 'PASSED')
+                    passed_text = row['passed']
 
                     if passed_text == 'n/a':
                         state = nagiosplugin.Critical
