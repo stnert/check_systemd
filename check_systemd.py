@@ -801,6 +801,28 @@ class TableParserNg:
         is not taken into account."""
         return len(self.body_rows)
 
+    def get_row(self, row_number: int) -> dict:
+        """Retrieve a table row as a dictionary. The keys are taken from the
+        header row. The first row number is 0.
+
+        :param row_number: The index number of the table row starting at 0.
+
+        """
+        body_columns = TableParserNg.__split_row(self.body_rows[row_number],
+                                                 self.column_lengths)
+
+        result = {}
+
+        index = 0
+        for column in self.columns:
+            if column == '':
+                key = 'column_{}'.format(index)
+            else:
+                key = column
+            result[key] = body_columns[index]
+            index += 1
+        return result
+
 
 class SystemctlListTimersResource(nagiosplugin.Resource):
     """
