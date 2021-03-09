@@ -172,7 +172,8 @@ class Unit:
         * ``reloading``,
         * ``inactive``,
         * ``failed``,
-        * ``activating``, and ``deactivating``.
+        * ``activating``, and
+        * ``deactivating``.
 
         ``active`` indicates that unit is active (obviously...).
 
@@ -350,9 +351,25 @@ class UnitCache:
         self.__units = {}
         self.__name_filter = UnitNameFilter()
 
-    def add(self, unit):
+    def __add_unit(self, unit: Unit):
         self.__units[unit.name] = unit
         self.__name_filter.add(unit.name)
+
+    def add(self, unit: Unit = None, name: str = None,
+            active_state: str = None, sub_state: str = None,
+            load_state: str = None) -> Unit:
+        if not unit:
+            unit = Unit()
+        if name:
+            unit.name = name
+        if active_state:
+            unit.active_state = active_state
+        if sub_state:
+            unit.sub_state = sub_state
+        if load_state:
+            unit.load_state = load_state
+        self.__add_unit(unit)
+        return unit
 
     def get(self, name=None):
         if name:
@@ -378,6 +395,33 @@ class UnitCache:
         """
         for name in self.__name_filter.list(include=include, exclude=exclude):
             yield self.__units[name]
+
+    @property
+    def count(self):
+        return len(self.__units)
+
+    def count_by_states(self, states: typing.Iterator[str]) -> dict:
+        states_normalized = []
+        counter = {}
+        for state_spec in states:
+            # state_proerty:state_value
+            # for example: active_state:failed
+            state_property = state_spec.split(':')[0]
+            state_value = state_spec.split(':')[1]
+            state = {
+                'property': state_property,
+                'value': state_value,
+                'spec': state_spec,
+            }
+            states_normalized.append(state)
+            counter[state_spec] = 0
+
+        for unit in self.list():
+            for state in states_normalized:
+                if getattr(unit, state['property']) == state['value']:
+                    counter[state['spec']] += 1
+
+        return counter
 
 
 class DbusUnit(Unit):
@@ -507,11 +551,15 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
         if stdout:
             table_parser = TableParser(stdout)
             count_units = 0
+            unit_cache = UnitCache()
             for row in table_parser.list_rows():
                 # foobar.service
                 unit = row['unit']
                 # failed
                 active = row['active']
+
+                unit_cache.add(name=row['unit'], active_state=row['active'],
+                               sub_state=row['sub'], load_state=row['load'])
 
                 # Only count not excluded units.
                 if not match_multiple(unit, self.excludes):

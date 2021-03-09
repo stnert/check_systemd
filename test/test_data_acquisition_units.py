@@ -7,7 +7,7 @@ from check_systemd import Unit, UnitCache, UnitNameFilter
 unit_modem_manager = Unit(name='ModemManager.service',
                           active_state='active', sub_state='sub',
                           load_state='load')
-unit_mongod = Unit(name='mongod.service', active_state='active',
+unit_mongod = Unit(name='mongod.service', active_state='failed',
                    sub_state='sub', load_state='load')
 unit_mysql = Unit(name='mysql.service', active_state='active',
                   sub_state='sub', load_state='load')
@@ -56,6 +56,13 @@ class TestClassUnitCache(unittest.TestCase):
             units.append(unit.name)
         return units
 
+    def test_method_add_with_kwargs(self):
+        self.assertEqual(8, self.unit_cache.count)
+        unit = self.unit_cache.add(name='test.service', active_state='active',
+                                   sub_state='sub', load_state='load')
+        self.assertEqual(unit.name, 'test.service')
+        self.assertEqual(9, self.unit_cache.count)
+
     def test_method_get(self):
         unit = self.unit_cache.get(name='ModemManager.service')
         self.assertEqual('ModemManager.service', unit.name)
@@ -88,6 +95,12 @@ class TestClassUnitCache(unittest.TestCase):
     def test_method_list_exclude_multiple(self):
         units = self.list(exclude=('named.service', 'nmbd.timer'))
         self.assertEqual(6, len(units))
+
+    def test_method_count_by_states(self):
+        counter = self.unit_cache.count_by_states(('active_state:active',
+                                                   'active_state:failed'))
+        self.assertEqual(counter['active_state:active'], 7)
+        self.assertEqual(counter['active_state:failed'], 1)
 
 
 class TestClassUnitNameFilter(unittest.TestCase):
