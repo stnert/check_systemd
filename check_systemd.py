@@ -400,7 +400,10 @@ class UnitCache:
     def count(self):
         return len(self.__units)
 
-    def count_by_states(self, states: typing.Iterator[str]) -> dict:
+    def count_by_states(self, states: typing.Iterator[str],
+                        include: typing.Union[str, typing.Iterator[str]] =
+                        None, exclude: typing.Union[str, typing.Iterator[str]]
+                        = None) -> dict:
         states_normalized = []
         counter = {}
         for state_spec in states:
@@ -416,7 +419,7 @@ class UnitCache:
             states_normalized.append(state)
             counter[state_spec] = 0
 
-        for unit in self.list():
+        for unit in self.list(include=include, exclude=exclude):
             for state in states_normalized:
                 if getattr(unit, state['property']) == state['value']:
                     counter[state['spec']] += 1
@@ -577,9 +580,13 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
                 if not match_multiple(unit, self.excludes):
                     yield Metric(name=unit, value='failed', context='unit')
 
-            for active, unit_names in units.items():
-                yield Metric(name='units_{}'.format(active),
-                             value=len(units[active]),
+            for state_spec, count in unit_cache.count_by_states((
+                    'active_state:failed',
+                    'active_state:active',
+                    'active_state:activating',
+                    'active_state:inactive',), exclude=self.excludes).items():
+                yield Metric(name='units_{}'.format(state_spec.split(':')[1]),
+                             value=count,
                              context='performance_data')
 
             yield Metric(name='count_units', value=count_units,
