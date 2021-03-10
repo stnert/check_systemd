@@ -26,7 +26,9 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: check_systemd [-h] [-v] [-V] [-u UNIT] [-i] [-I UNIT] [-e UNIT] [-n]
+usage: check_systemd [-h] [-v] [-V] [-u UNIT] [-i] [-I UNIT]
+                     [--include-type UNIT_TYPE [UNIT_TYPE ...]] [-e UNIT]
+                     [--exclude-type UNIT_TYPE [UNIT_TYPE ...]] [-n]
                      [-w SECONDS] [-c SECONDS] [-t] [-W SECONDS] [-C SECONDS]
                      [--dbus | --cli]
 
@@ -59,6 +61,8 @@ Options related to unit selection:
                         'user@\d+\.service'. For more informations see the
                         Python documentation about regular expressions
                         (https://docs.python.org/3/library/re.html).
+  --include-type UNIT_TYPE [UNIT_TYPE ...]
+                        One or more unit types (for example: 'service', 'timer')
   -e UNIT, --exclude UNIT
                         Exclude a systemd unit from the checks. This option can
                         be applied multiple times, for example: -e mnt-
@@ -67,6 +71,8 @@ Options related to unit selection:
                         'user@\d+\.service'. For more informations see the
                         Python documentation about regular expressions
                         (https://docs.python.org/3/library/re.html).
+  --exclude-type UNIT_TYPE [UNIT_TYPE ...]
+                        One or more unit types (for example: 'service', 'timer')
 
 Startup time related options:
   -n, --no-startup-time

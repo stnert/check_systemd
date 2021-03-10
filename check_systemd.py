@@ -58,6 +58,7 @@ import subprocess
 import argparse
 import re
 import typing
+import collections.abc
 
 import nagiosplugin
 from nagiosplugin import Metric, Result
@@ -293,6 +294,45 @@ def match_multiple(unit_name: str,
         if re.match(regex, unit_name):
             return True
     return False
+
+
+class SystemdUnitTypesList(collections.abc.MutableSequence):
+
+    def __init__(self, *args):
+        self.unit_types = list()
+        self.__all_types = (
+            'service', 'socket', 'target', 'device', 'mount', 'automount',
+            'timer', 'swap', 'path', 'slice', 'scope'
+        )
+        self.extend(list(args))
+
+    def __len__(self):
+        return len(self.unit_types)
+
+    def __getitem__(self, index):
+        return self.unit_types[index]
+
+    def __delitem__(self, index):
+        del self.unit_types[index]
+
+    def __setitem__(self, index, unit_type):
+        self.__check_type(unit_type)
+        self.unit_types[index] = unit_type
+
+    def __str__(self):
+        return str(self.unit_types)
+
+    def insert(self, index, unit_type):
+        self.__check_type(unit_type)
+        self.unit_types.insert(index, unit_type)
+
+    def __check_type(self, type):
+        if type not in self.__all_types:
+            raise ValueError('The given type \'{}\' is not a valid systemd '
+                             'unit type.'.format(type))
+
+    def convert_to_regexp(self):
+        return r'.*\.({})$'.format('|'.join(self.unit_types))
 
 
 class UnitNameFilter:
@@ -1074,6 +1114,15 @@ def get_argparser():
              '(https://docs.python.org/3/library/re.html).',
     )
 
+    unit.add_argument(
+        '--include-type',
+        metavar='UNIT_TYPE',
+        action='append',
+        nargs='+',
+        default=[],
+        help='One or more unit types (for example: \'service\', \'timer\')',
+    )
+
     unit_exclusive_group.add_argument(
         '-e', '--exclude',
         metavar='UNIT',
@@ -1087,6 +1136,15 @@ def get_argparser():
              'For more informations see the Python documentation about '
              'regular expressions '
              '(https://docs.python.org/3/library/re.html).',
+    )
+
+    unit.add_argument(
+        '--exclude-type',
+        metavar='UNIT_TYPE',
+        action='append',
+        nargs='+',
+        default=[],
+        help='One or more unit types (for example: \'service\', \'timer\')',
     )
 
     startup_time = parser.add_argument_group('Startup time related options')

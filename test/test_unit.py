@@ -2,6 +2,7 @@
 
 import unittest
 import check_systemd
+from check_systemd import SystemdUnitTypesList
 from unittest.mock import patch
 from . import helper
 
@@ -30,6 +31,18 @@ class TestSubprocessRelated(unittest.TestCase):
         self.assertEqual('active', unit_state.active_state)
         self.assertEqual('running', unit_state.sub_state)
         self.assertEqual('loaded', unit_state.load_state)
+
+
+class TestClassSystemdUnitTypesList(unittest.TestCase):
+
+    def test_initialization(self):
+        unit_types = SystemdUnitTypesList('service', 'timer')
+        self.assertEqual(['service', 'timer'], list(unit_types))
+
+    def test_convert_to_regexp(self):
+        unit_types = SystemdUnitTypesList('service', 'timer')
+        self.assertEqual('.*\\.(service|timer)$',
+                         unit_types.convert_to_regexp())
 
 
 if __name__ == '__main__':
