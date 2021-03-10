@@ -83,13 +83,13 @@ except ImportError:
 
 
 class OptionContainer:
-    """This class has the same attributes as the Namespace instance return by
-    the argparse package."""
+    """This class has the same attributes as the ``Namespace`` instance
+    returned by the ``argparse`` package."""
 
     def __init__(self):
         self.include = []
-
         self.exclude = []
+        self.unit = None
 
 
 opts = OptionContainer()
@@ -531,9 +531,6 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
     """
     name = 'SYSTEMD'
 
-    def __init__(self, excludes=[]):
-        self.excludes = excludes
-
     def probe(self) -> typing.Generator[Metric, None, None]:
         """Query system state and return metrics.
 
@@ -544,56 +541,29 @@ class SystemctlListUnitsResource(nagiosplugin.Resource):
         # collect performance data of all units.
         stdout = execute_cli(['systemctl', 'list-units', '--all'])
 
-        # Dictionary to store all units according their active state.
-        units = {
-            'failed': [],
-            'active': [],
-            'activating': [],
-            'inactive': [],
-        }
         if stdout:
             table_parser = TableParser(stdout)
-            count_units = 0
             unit_cache = UnitCache()
             for row in table_parser.list_rows():
-                # foobar.service
-                unit = row['unit']
-                # failed
-                active = row['active']
-
                 unit_cache.add(name=row['unit'], active_state=row['active'],
                                sub_state=row['sub'], load_state=row['load'])
 
-                # Only count not excluded units.
-                if not match_multiple(unit, self.excludes):
-                    # Quick fix:
-                    # Issue on Arch: “not-found” in column ACTIVE
-                    # maybe cli table output changed on newer versions of
-                    # systemd?
-                    # maybe .split() is not working correctly?
-                    if active not in units:
-                        units[active] = []
-                    units[active].append(unit)
-                    count_units += 1
-
-            for unit in units['failed']:
-                if not match_multiple(unit, self.excludes):
-                    yield Metric(name=unit, value='failed', context='unit')
+            unit_counter = 0
+            for unit in unit_cache.list(exclude=opts.exclude):
+                yield Metric(name=unit.name, value=unit, context='unit')
+                unit_counter += 1
 
             for state_spec, count in unit_cache.count_by_states((
                     'active_state:failed',
                     'active_state:active',
                     'active_state:activating',
-                    'active_state:inactive',), exclude=self.excludes).items():
+                    'active_state:inactive',), exclude=opts.exclude).items():
                 yield Metric(name='units_{}'.format(state_spec.split(':')[1]),
                              value=count,
                              context='performance_data')
 
-            yield Metric(name='count_units', value=count_units,
+            yield Metric(name='count_units', value=unit_counter,
                          context='performance_data')
-
-        if len(units['failed']) == 0:
-            yield Metric(name='all', value=None, context='unit')
 
 
 def format_timespan_to_seconds(fmt_timespan: str) -> float:
@@ -928,10 +898,12 @@ class UnitContext(nagiosplugin.Context):
         :returns: :class:`~.result.Result`
         """
         if isinstance(metric.value, Unit):
-            unit_state = metric.value
-            hint = '{}: {}'.format(metric.name, unit_state.active_state)
-            return self.result_cls(unit_state.convert_to_exitcode(),
-                                   metric=metric, hint=hint)
+            unit = metric.value
+            exitcode = unit.convert_to_exitcode()
+            if exitcode != 0:
+                hint = '{}: {}'.format(metric.name, unit.active_state)
+                return self.result_cls(exitcode, metric=metric, hint=hint)
+
         if metric.value:
             hint = '{}: {}'.format(metric.name, metric.value)
         else:
@@ -997,9 +969,10 @@ class SystemdSummary(nagiosplugin.Summary):
         :param results: :class:`~nagiosplugin.result.Results` container
         :returns: status line
         """
-        for result in results.most_significant:
-            if isinstance(result.context, UnitContext):
-                return '{0}'.format(result)
+        if opts.unit:
+            for result in results.most_significant:
+                if isinstance(result.context, UnitContext):
+                    return '{0}'.format(result)
         return 'all'
 
     def problem(self, results) -> str:
@@ -1244,7 +1217,7 @@ def main():
             tasks.append(DbusAllUnitsResource())
         else:
             tasks += [
-                SystemctlListUnitsResource(excludes=opts.exclude),
+                SystemctlListUnitsResource(),
                 PerformanceDataContext(),
             ]
             analyse = subprocess.run(

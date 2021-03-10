@@ -19,6 +19,7 @@ class TestBootupNotFinished(unittest.TestCase):
         )
 
     def test_bootup_not_finished_verbose(self):
+        self.maxDiff = None
         result = execute_main(
             argv=['--verbose'],
             stdout=['systemctl-list-units_ok.txt',
@@ -26,9 +27,11 @@ class TestBootupNotFinished(unittest.TestCase):
             analyze_returncode=1)
 
         self.assertEqual(result.exitcode, 0)
-        self.assertEqual(
-            'SYSTEMD OK - all\n'
-            'ok: all\n'
+        self.assertIn(
+            'SYSTEMD OK - all\n',
+            result.output
+        )
+        self.assertIn(
             '| count_units=386 units_activating=0 '
             'units_active=275 units_failed=0 units_inactive=111\n',
             result.output
