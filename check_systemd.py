@@ -1042,6 +1042,26 @@ class SystemdSummary(nagiosplugin.Summary):
         return summary
 
 
+def convert_to_regexp_list(regexp=None, unit_names=None,
+                           unit_types=None):
+    result = set()
+    if regexp:
+        for regexp in regexp:
+            result.add(regexp)
+
+    if unit_names:
+        if isinstance(unit_names, str):
+            unit_names = [unit_names]
+        for unit_name in unit_names:
+            result.add(unit_name.replace('.', '\\.'))
+
+    if unit_types:
+        types = SystemdUnitTypesList(*unit_types)
+        result.add(types.convert_to_regexp())
+
+    return result
+
+
 def get_argparser():
     parser = argparse.ArgumentParser(
         prog='check_systemd',  # To get the right command name in the README.
@@ -1084,8 +1104,9 @@ def get_argparser():
     unit_exclusive_group = unit.add_mutually_exclusive_group()
 
     unit_exclusive_group.add_argument(
-        '-u', '--unit',
+        '-u', '--unit', '--include-unit',
         type=str,
+        metavar='UNIT_NAME',
         dest='unit',
         help='Name of the systemd unit that is being tested.',
     )
@@ -1101,7 +1122,7 @@ def get_argparser():
 
     unit.add_argument(
         '-I', '--include',
-        metavar='UNIT',
+        metavar='REGEXP',
         action='append',
         default=[],
         help='Include a systemd unit from the checks. This option can be '
@@ -1117,15 +1138,20 @@ def get_argparser():
     unit.add_argument(
         '--include-type',
         metavar='UNIT_TYPE',
-        action='append',
         nargs='+',
-        default=[],
         help='One or more unit types (for example: \'service\', \'timer\')',
     )
 
     unit_exclusive_group.add_argument(
+        '--exclude-unit',
+        metavar='UNIT_NAME',
+        nargs='+',
+        help='Name of the systemd unit that is being tested.',
+    )
+
+    unit_exclusive_group.add_argument(
         '-e', '--exclude',
-        metavar='UNIT',
+        metavar='REGEXP',
         action='append',
         default=[],
         help='Exclude a systemd unit from the checks. This option can be '
@@ -1142,8 +1168,6 @@ def get_argparser():
         '--exclude-type',
         metavar='UNIT_TYPE',
         action='append',
-        nargs='+',
-        default=[],
         help='One or more unit types (for example: \'service\', \'timer\')',
     )
 
@@ -1252,6 +1276,21 @@ def main():
     if opts.data_source == 'dbus' and not is_gi:
         print('D-Bus backend could not be used. Fall back to the CLI backend.')
         opts.data_source = 'cli'
+
+    opts.include = convert_to_regexp_list(
+        regexp=opts.include,
+        unit_names=opts.unit,
+        unit_types=opts.include_type
+    )
+    del opts.include_type
+
+    opts.exclude = convert_to_regexp_list(
+        regexp=opts.exclude,
+        unit_names=opts.exclude_unit,
+        unit_types=opts.exclude_type
+    )
+    del opts.exclude_type
+    del opts.exclude_unit
 
     tasks = []
 
