@@ -1254,25 +1254,8 @@ def get_argparser():
     return parser
 
 
-def main():
-    """The main entry point of the monitoring plugin. First the command line
-    arguments are read into the variable ``opts``. The configuration of this
-    ``opts`` object decides which instances of the `Resource
-    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/resource.py>`_,
-    `Context
-    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/context.py>`_
-    and `Summary
-    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/summary.py>`_
-    subclasses are assembled in a list called ``tasks``. This list is passed
-    the main class of the ``nagiosplugin`` library: the `Check
-    <https://nagiosplugin.readthedocs.io/en/stable/api/core.html#nagiosplugin-check>`_
-    class.
-    """
-    global opts
-    opts = get_argparser().parse_args()
-
+def normalize_argparser(opts: argparse.Namespace) -> argparse.Namespace:
     if opts.data_source == 'dbus' and not is_gi:
-        print('D-Bus backend could not be used. Fall back to the CLI backend.')
         opts.data_source = 'cli'
 
     opts.include = convert_to_regexp_list(
@@ -1290,6 +1273,27 @@ def main():
     )
     del opts.exclude_type
     del opts.exclude_unit
+
+    return opts
+
+
+def main():
+    """The main entry point of the monitoring plugin. First the command line
+    arguments are read into the variable ``opts``. The configuration of this
+    ``opts`` object decides which instances of the `Resource
+    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/resource.py>`_,
+    `Context
+    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/context.py>`_
+    and `Summary
+    <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/summary.py>`_
+    subclasses are assembled in a list called ``tasks``. This list is passed
+    the main class of the ``nagiosplugin`` library: the `Check
+    <https://nagiosplugin.readthedocs.io/en/stable/api/core.html#nagiosplugin-check>`_
+    class.
+    """
+    global opts
+    opts = get_argparser().parse_args()
+    opts = normalize_argparser(opts)
 
     tasks = []
 
