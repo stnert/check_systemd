@@ -74,20 +74,6 @@ class TestWithSubprocess(unittest.TestCase):
         self.assertIn('check_systemd ' +
                       check_systemd.__version__, process.stdout)
 
-    def test_exclusive_group(self):
-        process = subprocess.run(
-            ['./check_systemd.py', '-u', 'test1.service', '-e',
-             'test2.service'],
-            encoding='utf-8',
-            stderr=subprocess.PIPE
-        )
-        self.assertEqual(process.returncode, 2)
-        self.assertIn(
-            'error: argument -e/--exclude: not allowed with argument '
-            '-u/--unit',
-            process.stderr,
-        )
-
     def test_exclusive_cli_dbus(self):
         process = subprocess.run(
             ['./check_systemd.py', '--cli', '--dbus'],

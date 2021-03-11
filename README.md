@@ -26,9 +26,9 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: check_systemd [-h] [-v] [-V] [-u UNIT_NAME] [-i] [-I REGEXP]
-                     [--include-type UNIT_TYPE [UNIT_TYPE ...]]
-                     [--exclude-unit UNIT_NAME [UNIT_NAME ...]] [-e REGEXP]
+usage: check_systemd [-h] [-v] [-V] [-i] [-I REGEXP] [-u UNIT_NAME]
+                     [--include-type UNIT_TYPE [UNIT_TYPE ...]] [-e REGEXP]
+                     [--exclude-unit UNIT_NAME [UNIT_NAME ...]]
                      [--exclude-type UNIT_TYPE] [-n] [-w SECONDS] [-c SECONDS]
                      [-t] [-W SECONDS] [-C SECONDS] [--dbus | --cli]
 
@@ -46,8 +46,6 @@ Options related to unit selection:
   By default all systemd units are checked. Use the option '-e' to exclude units 
   by a regular expression. Use the option '-u' to check only one unit.
 
-  -u UNIT_NAME, --unit UNIT_NAME, --include-unit UNIT_NAME
-                        Name of the systemd unit that is being tested.
   -i, --ignore-inactive-state
                         Ignore an inactive state on a specific unit. Oneshot
                         services for example are only active while running and
@@ -55,17 +53,17 @@ Options related to unit selection:
                         This option has only an affect if it is used with the
                         option -u.
   -I REGEXP, --include REGEXP
-                        Include a systemd unit from the checks. This option can
-                        be applied multiple times, for example: -i mnt-
-                        data.mount -i task.service. Regular expressions can be
-                        used to include multiple units at once, for example: -e
+                        Include systemd units to the checks. This option can be
+                        applied multiple times, for example: -i mnt-data.mount
+                        -i task.service. Regular expressions can be used to
+                        include multiple units at once, for example: -e
                         'user@\d+\.service'. For more informations see the
                         Python documentation about regular expressions
                         (https://docs.python.org/3/library/re.html).
+  -u UNIT_NAME, --unit UNIT_NAME, --include-unit UNIT_NAME
+                        Name of the systemd unit that is being tested.
   --include-type UNIT_TYPE [UNIT_TYPE ...]
                         One or more unit types (for example: 'service', 'timer')
-  --exclude-unit UNIT_NAME [UNIT_NAME ...]
-                        Name of the systemd unit that is being tested.
   -e REGEXP, --exclude REGEXP
                         Exclude a systemd unit from the checks. This option can
                         be applied multiple times, for example: -e mnt-
@@ -74,6 +72,8 @@ Options related to unit selection:
                         'user@\d+\.service'. For more informations see the
                         Python documentation about regular expressions
                         (https://docs.python.org/3/library/re.html).
+  --exclude-unit UNIT_NAME [UNIT_NAME ...]
+                        Name of the systemd unit that is being tested.
   --exclude-type UNIT_TYPE
                         One or more unit types (for example: 'service', 'timer')
 

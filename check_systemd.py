@@ -1009,7 +1009,7 @@ class SystemdSummary(nagiosplugin.Summary):
         :param results: :class:`~nagiosplugin.result.Results` container
         :returns: status line
         """
-        if opts.unit:
+        if opts.include_unit:
             for result in results.most_significant:
                 if isinstance(result.context, UnitContext):
                     return '{0}'.format(result)
@@ -1101,16 +1101,6 @@ def get_argparser():
         'Use the option \'-u\' to check only one unit.'
     )
 
-    unit_exclusive_group = unit.add_mutually_exclusive_group()
-
-    unit_exclusive_group.add_argument(
-        '-u', '--unit', '--include-unit',
-        type=str,
-        metavar='UNIT_NAME',
-        dest='unit',
-        help='Name of the systemd unit that is being tested.',
-    )
-
     unit.add_argument(
         '-i', '--ignore-inactive-state',
         action='store_true',
@@ -1125,7 +1115,7 @@ def get_argparser():
         metavar='REGEXP',
         action='append',
         default=[],
-        help='Include a systemd unit from the checks. This option can be '
+        help='Include systemd units to the checks. This option can be '
              'applied multiple times, for example: -i mnt-data.mount -i '
              'task.service. Regular expressions can be used to include '
              'multiple units at once, for example: '
@@ -1136,20 +1126,21 @@ def get_argparser():
     )
 
     unit.add_argument(
+        '-u', '--unit', '--include-unit',
+        type=str,
+        metavar='UNIT_NAME',
+        dest='include_unit',
+        help='Name of the systemd unit that is being tested.',
+    )
+
+    unit.add_argument(
         '--include-type',
         metavar='UNIT_TYPE',
         nargs='+',
         help='One or more unit types (for example: \'service\', \'timer\')',
     )
 
-    unit_exclusive_group.add_argument(
-        '--exclude-unit',
-        metavar='UNIT_NAME',
-        nargs='+',
-        help='Name of the systemd unit that is being tested.',
-    )
-
-    unit_exclusive_group.add_argument(
+    unit.add_argument(
         '-e', '--exclude',
         metavar='REGEXP',
         action='append',
@@ -1162,6 +1153,13 @@ def get_argparser():
              'For more informations see the Python documentation about '
              'regular expressions '
              '(https://docs.python.org/3/library/re.html).',
+    )
+
+    unit.add_argument(
+        '--exclude-unit',
+        metavar='UNIT_NAME',
+        nargs='+',
+        help='Name of the systemd unit that is being tested.',
     )
 
     unit.add_argument(
@@ -1279,9 +1277,10 @@ def main():
 
     opts.include = convert_to_regexp_list(
         regexp=opts.include,
-        unit_names=opts.unit,
+        unit_names=opts.include_unit,
         unit_types=opts.include_type
     )
+    # del opts.include_unit
     del opts.include_type
 
     opts.exclude = convert_to_regexp_list(
@@ -1304,11 +1303,11 @@ def main():
             DeadTimersContext()
         ]
 
-    if opts.unit:
+    if opts.include_unit:
         if opts.data_source == 'dbus':
-            tasks.append(DbusSingleUnitResource(unit=opts.unit))
+            tasks.append(DbusSingleUnitResource(unit=opts.include_unit))
         else:
-            tasks.append(SystemctlIsActiveResource(unit=opts.unit))
+            tasks.append(SystemctlIsActiveResource(unit=opts.include_unit))
     else:
         if opts.data_source == 'dbus':
             tasks.append(DbusAllUnitsResource())
