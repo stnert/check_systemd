@@ -25,19 +25,39 @@ class AddBin(object):
         os.environ['PATH'] = self.old_path
 
 
-def read_file_as_bytes(file_name: str) -> bytes:
-    """Read a text file as bytes.
+def get_cli_output_path(file_name: str) -> str:
+    return path.join(path.dirname(
+        path.abspath(__file__)), 'cli_output', file_name)
 
-    :param str file_name: The name of the text file which is placed in the
-      folder ``cli_output``.
 
-    :return: The text as a byte format.
+def convert_to_bytes(file_name_or_str: str) -> bytes:
+    """Read a text file as bytes or convert a string into bytes.
+
+    :param file_name_or_str: The name of a text file which is placed in the
+      folder ``cli_output`` or a string that is converted to bytes.
+
+    :return: The text in byte format.
     """
-    in_file = open(path.join(path.dirname(
-        path.abspath(__file__)), 'cli_output', file_name), 'rb')
-    data = in_file.read()
-    in_file.close()
-    return data
+    output_path = get_cli_output_path(file_name_or_str)
+    if os.path.exists(output_path):
+        in_file = open(output_path, 'rb')
+        data = in_file.read()
+        in_file.close()
+        return data
+    else:
+        return file_name_or_str.encode()
+
+
+def Popen(returncode=0, stdout=None, stderr=None) -> Mock:
+    """A mocked version of ``subprocess.P0pen``."""
+    mock = Mock()
+    mock.returncode = returncode
+    if stdout:
+        stdout = convert_to_bytes(stdout)
+    if stderr:
+        stderr = convert_to_bytes(stderr)
+    mock.communicate.return_value = (stdout, stderr)
+    return mock
 
 
 def get_mocks_for_popen(*file_names):
@@ -55,9 +75,7 @@ def get_mocks_for_popen(*file_names):
     """
     mocks = []
     for file_name in file_names:
-        mock = Mock()
-        mock.communicate.return_value = (read_file_as_bytes(file_name), None)
-        mocks.append(mock)
+        mocks.append(Popen(stdout=file_name))
     return mocks
 
 

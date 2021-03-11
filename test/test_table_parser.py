@@ -1,10 +1,10 @@
 import unittest
-from .helper import read_file_as_bytes
+from .helper import convert_to_bytes
 from check_systemd import TableParser
 
 
 def read_stdout(file_name: str) -> str:
-    return read_file_as_bytes(file_name).decode('utf-8')
+    return convert_to_bytes(file_name).decode('utf-8')
 
 
 def get_parser():
