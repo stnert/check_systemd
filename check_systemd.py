@@ -666,6 +666,10 @@ def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
     except OSError as e:
         raise nagiosplugin.CheckError(e)
 
+    if p.returncode != 0:
+        raise nagiosplugin.CheckError('The command exits with a none-zero'
+                                      'return code ({})'.format(p.returncode))
+
     if stderr:
         raise nagiosplugin.CheckError(stderr)
 

@@ -1,3 +1,4 @@
+import typing
 from unittest import mock
 from unittest.mock import Mock
 from os import path
@@ -48,7 +49,7 @@ def convert_to_bytes(file_name_or_str: str) -> bytes:
         return file_name_or_str.encode()
 
 
-def Popen(returncode=0, stdout=None, stderr=None) -> Mock:
+def MPopen(returncode=0, stdout=None, stderr=None) -> Mock:
     """A mocked version of ``subprocess.P0pen``."""
     mock = Mock()
     mock.returncode = returncode
@@ -60,22 +61,22 @@ def Popen(returncode=0, stdout=None, stderr=None) -> Mock:
     return mock
 
 
-def get_mocks_for_popen(*file_names):
+def get_mocks_for_popen(*stdout):
     """
-    Create multiple mock objects which are suitable to mimic multiple
-    calls of `subprocess.Popen()`.
+    Create multiple mock objects which are suitable to mimic multiple calls of
+    ``subprocess.Popen()``.
 
     Assign the result of this function to the attribute ``side_effect``:
     ``Popen.side_effect = result_of_is_function``
 
-    :param file_names: Multiple file names of text files inside the folder
-      ``cli_ouput``.
+    :param stdout: Multiple strings or multiple file names of text files inside
+      the folder ``cli_ouput``.
 
-    :return: A list of mock objects.
+    :return: A list of mock objects for the class ``subprocess.Popen()``.
     """
     mocks = []
-    for file_name in file_names:
-        mocks.append(Popen(stdout=file_name))
+    for out in stdout:
+        mocks.append(MPopen(stdout=out))
     return mocks
 
 
@@ -145,16 +146,17 @@ class MockResult:
 
 
 def execute_main(
-        argv=['check_systemd.py'],
-        stdout=['systemctl-list-units_ok.txt',
-                'systemd-analyze_12.345.txt', ],
-        analyze_returncode=0):
+        argv: typing.Iterable[str] = ['check_systemd.py'],
+        stdout: typing.Iterable[str] = ['systemctl-list-units_ok.txt',
+                                        'systemd-analyze_12.345.txt', ],
+        analyze_returncode: int = 0,
+        popen: typing.Iterable[MPopen] = None) -> MockResult:
     """Execute the main function with a lot of patched functions and classes.
 
-    :param list argv: A list of command line arguments, e. g.
+    :param argv: A list of command line arguments, e. g.
         ``argv=['-u', 'nginx.service']``
 
-    :param list stdout: A list of file names of files in the directory
+    :param stdout: A list of file names of files in the directory
         ``test/cli_output``. You have to specify as many text files as there
         are calls of the function ``subprocess.Popen``:
 
@@ -171,13 +173,12 @@ def execute_main(
           ``p = subprocess.Popen(['systemctl', 'is-active', self.unit]``,
           ``SystemctlIsActiveResource``
 
+    :param popen: Some mocked Popen classes.
 
     :param int analyze_returncode: The first call `systemctl analyze` to check
         if the startup process is finished
 
     :return: A results a assembled in the class ``MockResult``
-    :rtype: MockResult
-
     """
     if not argv or argv[0] != 'check_systemd.py':
         argv.insert(0, 'check_systemd.py')
@@ -188,7 +189,10 @@ def execute_main(
             mock.patch('builtins.print') as mocked_print:
         # analyse = subprocess.run(['systemd-analyze'] ...)
         run.return_value.returncode = analyze_returncode
-        Popen.side_effect = get_mocks_for_popen(*stdout)
+        if popen:
+            Popen.side_effect = popen
+        else:
+            Popen.side_effect = get_mocks_for_popen(*stdout)
 
         file_stdout = io.StringIO()
         file_stderr = io.StringIO()

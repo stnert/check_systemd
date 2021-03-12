@@ -2,9 +2,11 @@
 
 import unittest
 import check_systemd
-from check_systemd import SystemdUnitTypesList
+from check_systemd import SystemdUnitTypesList, execute_cli
 from unittest.mock import patch
 from . import helper
+from .helper import MPopen
+from nagiosplugin import CheckError
 
 
 class TestUnit(unittest.TestCase):
@@ -43,6 +45,23 @@ class TestClassSystemdUnitTypesList(unittest.TestCase):
         unit_types = SystemdUnitTypesList('service', 'timer')
         self.assertEqual('.*\\.(service|timer)$',
                          unit_types.convert_to_regexp())
+
+
+class TestFunctionExecuteCli(unittest.TestCase):
+
+    def test_execute_cli_stdout(self):
+        with patch('check_systemd.subprocess.Popen') as Popen:
+            Popen.return_value = MPopen(stdout='ok')
+            stdout = execute_cli(['ls'])
+        self.assertEqual('ok', stdout)
+
+    def test_execute_cli_stderr(self):
+        with patch('check_systemd.subprocess.Popen') as Popen:
+            Popen.side_effect = (MPopen(stdout='ok'), MPopen(stderr='Not ok'))
+            stdout = execute_cli(['ls'])
+            self.assertEqual('ok', stdout)
+            with self.assertRaises(CheckError):
+                execute_cli(['ls'])
 
 
 if __name__ == '__main__':
