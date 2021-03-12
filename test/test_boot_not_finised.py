@@ -1,15 +1,14 @@
 import unittest
-from .helper import execute_main
+from .helper import execute_main, MPopen
 
 
 class TestBootupNotFinished(unittest.TestCase):
 
     def test_bootup_not_finished(self):
-        result = execute_main(
-            stdout=['systemctl-list-units_ok.txt',
-                    'systemd-analyze_not-finished.txt', ],
-            analyze_returncode=1)
-
+        result = execute_main(popen=(
+            MPopen(stdout='systemctl-list-units_ok.txt'),
+            MPopen(returncode=1, stderr='systemd-analyze_not-finished.txt')
+        ))
         self.assertEqual(result.exitcode, 0)
         self.assertEqual(
             'SYSTEMD OK - all '
@@ -20,11 +19,10 @@ class TestBootupNotFinished(unittest.TestCase):
 
     def test_bootup_not_finished_verbose(self):
         self.maxDiff = None
-        result = execute_main(
-            argv=['--verbose'],
-            stdout=['systemctl-list-units_ok.txt',
-                    'systemd-analyze_not-finished.txt', ],
-            analyze_returncode=1)
+        result = execute_main(argv=['--verbose'], popen=(
+            MPopen(stdout='systemctl-list-units_ok.txt'),
+            MPopen(returncode=1, stderr='systemd-analyze_not-finished.txt')
+        ))
 
         self.assertEqual(result.exitcode, 0)
         self.assertIn(

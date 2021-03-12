@@ -149,7 +149,6 @@ def execute_main(
         argv: typing.Iterable[str] = ['check_systemd.py'],
         stdout: typing.Iterable[str] = ['systemctl-list-units_ok.txt',
                                         'systemd-analyze_12.345.txt', ],
-        analyze_returncode: int = 0,
         popen: typing.Iterable[MPopen] = None) -> MockResult:
     """Execute the main function with a lot of patched functions and classes.
 
@@ -183,12 +182,9 @@ def execute_main(
     if not argv or argv[0] != 'check_systemd.py':
         argv.insert(0, 'check_systemd.py')
     with mock.patch('sys.exit') as sys_exit, \
-            mock.patch('check_systemd.subprocess.run') as run, \
             mock.patch('check_systemd.subprocess.Popen') as Popen, \
             mock.patch('sys.argv', argv), \
             mock.patch('builtins.print') as mocked_print:
-        # analyse = subprocess.run(['systemd-analyze'] ...)
-        run.return_value.returncode = analyze_returncode
         if popen:
             Popen.side_effect = popen
         else:
@@ -205,3 +201,8 @@ def execute_main(
         stdout=file_stdout.getvalue(),
         stderr=file_stderr.getvalue(),
     )
+
+
+class Expected:
+    startup_time = 'startup_time=12.345;60;120'
+    """``startup_time=12.345;60;120``"""

@@ -1,5 +1,5 @@
 import unittest
-from .helper import execute_main
+from .helper import execute_main, Expected
 
 
 def execute_with_opt_u(argv, state='active'):
@@ -19,7 +19,7 @@ class TestOptionUnit(unittest.TestCase):
                                     state='active')
         self.assertEqual(0, result.exitcode)
         self.assertEqual(
-            'SYSTEMD OK - test.service: active',
+            'SYSTEMD OK - test.service: active | ' + Expected.startup_time,
             result.first_line,
         )
 
@@ -29,7 +29,8 @@ class TestOptionUnit(unittest.TestCase):
 
         self.assertEqual(2, result.exitcode)
         self.assertEqual(
-            'SYSTEMD CRITICAL - test.service: failed',
+            'SYSTEMD CRITICAL - test.service: failed | ' +
+            Expected.startup_time,
             result.first_line,
         )
 
@@ -38,7 +39,8 @@ class TestOptionUnit(unittest.TestCase):
                                     state='inactive')
         self.assertEqual(2, result.exitcode)
         self.assertEqual(
-            'SYSTEMD CRITICAL - test.service: inactive',
+            'SYSTEMD CRITICAL - test.service: inactive | '
+            + Expected.startup_time,
             result.first_line,
         )
 
@@ -49,7 +51,7 @@ class TestOptionUnit(unittest.TestCase):
 
         self.assertEqual(0, result.exitcode)
         self.assertEqual(
-            'SYSTEMD OK - test.service: inactive',
+            'SYSTEMD OK - test.service: inactive | ' + Expected.startup_time,
             result.first_line,
         )
 
@@ -58,7 +60,7 @@ class TestOptionUnit(unittest.TestCase):
                                     state='active')
         self.assertEqual(result.exitcode, 0)
         self.assertEqual(
-            'SYSTEMD OK - nginx.service: active',
+            'SYSTEMD OK - nginx.service: active | ' + Expected.startup_time,
             result.first_line
         )
 

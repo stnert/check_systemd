@@ -714,7 +714,11 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
         :return: generator that emits
           :class:`~nagiosplugin.metric.Metric` objects
         """
-        stdout = execute_cli(['systemd-analyze'])
+        stdout = None
+        try:
+            stdout = execute_cli(['systemd-analyze'])
+        except nagiosplugin.CheckError:
+            pass
 
         if stdout:
             # First line:
@@ -1324,17 +1328,9 @@ def main():
                 SystemctlListUnitsResource(),
                 PerformanceDataContext(),
             ]
-            analyse = subprocess.run(
-                ['systemd-analyze'],
-                stderr=subprocess.PIPE,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE
-            )
-            # systemd-analyze: boot not finshed exits with 1
-            if analyse.returncode == 0:
-                tasks.append(SystemdAnalyseResource())
 
     tasks += [
+        SystemdAnalyseResource(),
         UnitContext(),
         SystemdSummary()
     ]
