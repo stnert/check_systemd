@@ -40,15 +40,15 @@ class TestClassUnitCache(unittest.TestCase):
 
     def setUp(self):
         self.unit_cache = UnitCache()
-        self.unit_cache.add(unit_modem_manager)
-        self.unit_cache.add(unit_mongod)
-        self.unit_cache.add(unit_mysql)
-        self.unit_cache.add(unit_named)
-        self.unit_cache.add(unit_networking)
-        self.unit_cache.add(unit_nginx)
-        self.unit_cache.add(unit_modem_manager)
-        self.unit_cache.add(unit_nmdb)
-        self.unit_cache.add(unit_php)
+        self.unit_cache.add_unit(unit_modem_manager)
+        self.unit_cache.add_unit(unit_mongod)
+        self.unit_cache.add_unit(unit_mysql)
+        self.unit_cache.add_unit(unit_named)
+        self.unit_cache.add_unit(unit_networking)
+        self.unit_cache.add_unit(unit_nginx)
+        self.unit_cache.add_unit(unit_modem_manager)
+        self.unit_cache.add_unit(unit_nmdb)
+        self.unit_cache.add_unit(unit_php)
 
     def list(self, include=None, exclude=None):
         units = []
@@ -58,8 +58,9 @@ class TestClassUnitCache(unittest.TestCase):
 
     def test_method_add_with_kwargs(self):
         self.assertEqual(8, self.unit_cache.count)
-        unit = self.unit_cache.add(name='test.service', active_state='active',
-                                   sub_state='sub', load_state='load')
+        unit = self.unit_cache.add_unit(name='test.service',
+                                        active_state='active',
+                                        sub_state='sub', load_state='load')
         self.assertEqual(unit.name, 'test.service')
         self.assertEqual(9, self.unit_cache.count)
 

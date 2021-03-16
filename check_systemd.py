@@ -91,6 +91,7 @@ class OptionContainer:
         self.include = []
         self.exclude = []
         self.unit = None
+        self.data_source: str = None
 
 
 opts = OptionContainer()
@@ -120,6 +121,10 @@ class DbusManager:
             BusType.SYSTEM, 0, None, 'org.freedesktop.systemd1',
             '/org/freedesktop/systemd1', 'org.freedesktop.systemd1.Manager',
             None)
+
+    @property
+    def manager(self):
+        return self.__manager
 
     def load_unit(self, unit_name):
         """
@@ -395,9 +400,9 @@ class UnitCache:
         self.__units[unit.name] = unit
         self.__name_filter.add(unit.name)
 
-    def add(self, unit: Unit = None, name: str = None,
-            active_state: str = None, sub_state: str = None,
-            load_state: str = None) -> Unit:
+    def add_unit(self, unit: Unit = None, name: str = None,
+                 active_state: str = None, sub_state: str = None,
+                 load_state: str = None) -> Unit:
         if not unit:
             unit = Unit()
         if name:
@@ -467,143 +472,59 @@ class UnitCache:
         return counter
 
 
-class DbusUnit(Unit):
-    """
-    Class that provides easy access to the three state properties
-    ``ActiveState``, ``SubState`` and ``LoadState`` of the Dbus systemd API.
-    """
+class CliUnitCache(UnitCache):
 
-    def __init__(self, unit_name: str):
-        """
-        :param unit_name: A systemd unit name like ``tor.service``,
-          ``mnt-nextcloud.automount`` or ``update-motd.timer``.
-        """
-        try:
-            loaded_unit = dbus_manager.load_unit(unit_name)
-        except Exception as e:
-            raise e
-
-        self.__dbus_unit = DBusProxy.new_for_bus_sync(
-            BusType.SYSTEM, 0, None, 'org.freedesktop.systemd1',
-            loaded_unit, 'org.freedesktop.systemd1.Unit', None)
-        """
-        The systemd D-Bus unit object is fetched by the method
-        `Gio.DBusProxy.new_for_bus_sync
-        <https://lazka.github.io/pgi-docs/#Gio-2.0/classes/DBusProxy.html#Gio.DBusProxy.new_for_bus_sync>`_.
-        """
-
-    def __get_dbus_property(self, property_name: str) -> str:
-        """
-        Get the property of a systemd D-Bus unit object. This method uses the
-        methods `Gio.DBusProxy.get_cached_property
-        <https://lazka.github.io/pgi-docs/#Gio-2.0/classes/DBusProxy.html#Gio.DBusProxy.get_cached_property>`_
-        and
-        `GLib.Variant.unpack
-        <https://lazka.github.io/pgi-docs/#GLib-2.0/classes/Variant.html#GLib.Variant.unpack>`_
-        for the lookup.
-        """
-        return self.__dbus_unit.get_cached_property(property_name).unpack()
-
-    @property
-    def active_state(self) -> str:
-        """
-        See :func:`UnitState.active_state`
-        """
-        return self.__get_dbus_property('ActiveState')
-
-    @property
-    def sub_state(self):
-        """
-        See :func:`UnitState.sub_state`
-        """
-        return self.__get_dbus_property('SubState')
-
-    @property
-    def load_state(self) -> str:
-        """
-        See :func:`UnitState.load_state`
-        """
-        return self.__get_dbus_property('LoadState')
-
-
-class DbusSingleUnitResource(nagiosplugin.Resource):
-    """Get informations about one specific systemd unit."""
-
-    name = 'SYSTEMD'
-
-    def __init__(self, *args, **kwargs):
-        self.unit = kwargs.pop('unit')
-        super().__init__(*args, **kwargs)
-
-    def probe(self) -> Metric:
-        unit_state = DbusUnit(self.unit)
-        return Metric(name=self.unit, value=unit_state,
-                      context='unit')
-
-
-class DbusAllUnitsResource(nagiosplugin.Resource):
-
-    name = 'SYSTEMD'
-
-    def probe(self) -> typing.Generator[Metric, None, None]:
-        """Query system state and return metrics.
-
-        :return: generator that emits
-          :class:`~nagiosplugin.metric.Metric` objects
-        """
-        unit_names = dbus_manager.get_all_unit_names()
-
-        filter = UnitNameFilter(unit_names)
-
-        for unit_name in filter.list(include=opts.include,
-                                     exclude=opts.exclude):
-            unit_state = DbusUnit(unit_name)
-            yield Metric(name=unit_name, value=unit_state,
-                         context='unit')
-
-
-class SystemctlListUnitsResource(nagiosplugin.Resource):
-    """
-    Resource that calls ``systemctl list-units --all`` on the command line to
-    get informations about all systemd units.
-
-    :param list excludes: A list of systemd unit names.
-    """
-    name = 'SYSTEMD'
-
-    def probe(self) -> typing.Generator[Metric, None, None]:
-        """Query system state and return metrics.
-
-        :return: generator that emits
-          :class:`~nagiosplugin.metric.Metric` objects
-        """
-        # We don’t use `systemctl --failed --no-legend`, because we want to
-        # collect performance data of all units.
+    def __init__(self):
+        super().__init__()
         stdout = execute_cli(['systemctl', 'list-units', '--all'])
-
         if stdout:
             table_parser = TableParser(stdout)
-            unit_cache = UnitCache()
             for row in table_parser.list_rows():
-                unit_cache.add(name=row['unit'], active_state=row['active'],
-                               sub_state=row['sub'], load_state=row['load'])
+                self.add_unit(name=row['unit'], active_state=row['active'],
+                              sub_state=row['sub'], load_state=row['load'])
 
-            unit_counter = 0
-            for unit in unit_cache.list(exclude=opts.exclude):
-                yield Metric(name=unit.name, value=unit, context='unit')
-                unit_counter += 1
 
-            for state_spec, count in unit_cache.count_by_states((
-                    'active_state:failed',
-                    'active_state:active',
-                    'active_state:activating',
-                    'active_state:inactive',), exclude=opts.exclude).items():
-                yield Metric(name='units_{}'.format(state_spec.split(':')[1]),
-                             value=count,
-                             context='performance_data')
+class DbusUnitCache(UnitCache):
 
-            yield Metric(name='count_units', value=unit_counter,
+    def __init__(self):
+        super().__init__()
+        all_units = dbus_manager.manager.ListUnits()
+        for (name, _, load_state, active_state, sub_state,
+             _, _, _, _, _) in all_units:
+            self.add_unit(name=name, active_state=active_state,
+                          sub_state=sub_state, load_state=load_state)
+
+
+unit_cache: UnitCache = None
+"""An instance of :class:`DbusUnitCache` or :class:`CliUnitCache`"""
+
+
+class UnitsResource(nagiosplugin.Resource):
+
+    name = 'SYSTEMD'
+
+    def probe(self) -> typing.Generator[Metric, None, None]:
+        for unit in unit_cache.list(include=opts.include,
+                                    exclude=opts.exclude):
+            yield Metric(name=unit.name, value=unit, context='unit')
+
+
+class PerformanceDataResource(nagiosplugin.Resource):
+
+    name = 'SYSTEMD'
+
+    def probe(self) -> typing.Generator[Metric, None, None]:
+        for state_spec, count in unit_cache.count_by_states((
+                'active_state:failed',
+                'active_state:active',
+                'active_state:activating',
+                'active_state:inactive',), exclude=opts.exclude).items():
+            yield Metric(name='units_{}'.format(state_spec.split(':')[1]),
+                         value=count,
                          context='performance_data')
+
+        yield Metric(name='count_units', value=unit_cache.count,
+                     context='performance_data')
 
 
 def format_timespan_to_seconds(fmt_timespan: str) -> float:
@@ -1303,6 +1224,12 @@ def main():
     opts = get_argparser().parse_args()
     opts = normalize_argparser(opts)
 
+    global unit_cache
+    if opts.data_source == 'dbus':
+        unit_cache = DbusUnitCache()
+    else:
+        unit_cache = CliUnitCache()
+
     tasks = []
 
     if opts.dead_timers:
@@ -1315,21 +1242,10 @@ def main():
             DeadTimersContext()
         ]
 
-    if opts.include_unit:
-        if opts.data_source == 'dbus':
-            tasks.append(DbusSingleUnitResource(unit=opts.include_unit))
-        else:
-            tasks.append(SystemctlIsActiveResource(unit=opts.include_unit))
-    else:
-        if opts.data_source == 'dbus':
-            tasks.append(DbusAllUnitsResource())
-        else:
-            tasks += [
-                SystemctlListUnitsResource(),
-                PerformanceDataContext(),
-            ]
-
     tasks += [
+        UnitsResource(),
+        PerformanceDataResource(),
+        PerformanceDataContext(),
         SystemdAnalyseResource(),
         UnitContext(),
         SystemdSummary()
