@@ -53,7 +53,6 @@ Naming scheme for the classes
 * inherited class model: ``Resource|Context|Summary``
 
 """
-import io
 import subprocess
 import argparse
 import re
@@ -125,25 +124,6 @@ class DbusManager:
     @property
     def manager(self):
         return self.__manager
-
-    def load_unit(self, unit_name):
-        """
-        Load a systemd D-Bus unit object by it’s name.
-
-        :param str unit_name: A systemd unit name like ``tor.service``,
-          ``mnt-nextcloud.automount`` or ``update-motd.timer``.
-        """
-        try:
-            return self.__manager.LoadUnit('(s)', unit_name)
-        except Exception as e:
-            raise e
-
-    def get_all_unit_names(self) -> set:
-        all_units = self.__manager.ListUnits()
-        units_set = set()
-        for (name, _, _, _, _, _, _, _, _, _) in all_units:
-            units_set.add(name)
-        return units_set
 
 
 dbus_manager = None
@@ -799,33 +779,6 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
                     value=state,
                     context='dead_timers'
                 )
-
-
-class SystemctlIsActiveResource(nagiosplugin.Resource):
-    """Resource that calls ``systemctl is-active <service>`` on the command
-    line to get informations about one specifiy systemd unit."""
-
-    name = 'SYSTEMD'
-
-    def __init__(self, *args, **kwargs):
-        self.unit = kwargs.pop('unit')
-        super().__init__(*args, **kwargs)
-
-    def probe(self) -> typing.Generator[Metric, None, None]:
-        """Query system state and return metrics.
-
-        :return: generator that emits
-          :class:`~nagiosplugin.metric.Metric` objects
-        """
-        # Execute `systemctl is-active <service>` and get output
-        # - active
-        # - inactive (by unkown unit file)
-        # - failed
-        stdout = execute_cli(['systemctl', 'is-active', self.unit])
-        if stdout:
-            for line in io.StringIO(stdout):
-                active = line.strip()
-                yield Metric(name=self.unit, value=active, context='unit')
 
 
 class UnitContext(nagiosplugin.Context):
