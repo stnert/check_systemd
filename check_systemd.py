@@ -10,6 +10,13 @@ timers units (with the ``-t, --dead-timers`` parameter).
 To learn more about the project, please visit the repository on `Github
 <https://github.com/Josef-Friedrich/check_systemd>`_.
 
+Monitoring scopes
+=================
+
+* Startup time (``context=startup_time``)
+* State of unites (``context=units``)
+* Timers (``context=timers``)
+
 This plugin is based on a Python package named `nagiosplugin
 <https://pypi.org/project/nagiosplugin/>`_. ``nagiosplugin`` has a fine-grained
 class model to separate concerns. A Nagios / Icinga plugin must perform these
@@ -21,37 +28,22 @@ the following subclasses:
 Acquisition (``Resource``)
 ==========================
 
-* :class:`SystemctlIsActiveResource`
-* :class:`SystemctlListTimersResource`
-* :class:`SystemctlListUnitsResource`
-* :class:`SystemdAnalyseResource`
+* :class:`UnitsResource` (``context=units``)
+* :class:`PerformanceDataResource` (``context=performance_data``)
+* :class:`StartupTimeResource` (``context=startup_time``)
+* :class:`TimersResource` (``context=timers``)
 
 Evaluation (``Context``)
 ========================
 
-* :class:`DeadTimersContext` (``context=dead_timers``)
+* :class:`TimersContext` (``context=timers``)
 * :class:`PerformanceDataContext` (``context=performance_data``)
-* :class:`UnitContext` (``context=unit``)
+* :class:`UnitsContext` (``context=units``)
 
 Presentation (``Summary``)
 ==========================
 
 * :class:`SystemdSummary`
-
-Monitoring scopes
-=================
-
-* Startup time
-* State of unites
-* Timers
-
-Naming scheme for the classes
-=============================
-
-* data source: ``Dbus|Cli`` +
-* Custom name: ``CustomName`` +
-* inherited class model: ``Resource|Context|Summary``
-
 """
 import subprocess
 import argparse
@@ -107,6 +99,9 @@ Arguments).
 """
 
 
+# Data backend: D-Bus #########################################################
+
+
 class DbusManager:
     """
     This class holds the main entry point object of the D-Bus systemd API. See
@@ -132,6 +127,201 @@ The systemd D-Bus API main entry point object, the so called “manager”.
 """
 if is_gi:
     dbus_manager = DbusManager()
+
+
+# Data backend: CLI (command line interface) ##################################
+
+
+def format_timespan_to_seconds(fmt_timespan: str) -> float:
+    """Convert a timespan format string into secondes. Take a look at the
+    systemd `time-util.c
+    <https://github.com/systemd/systemd/blob/master/src/basic/time-util.c>`_
+    source code.
+
+    :param fmt_timespan: for example ``2.345s`` or ``3min 45.234s`` or
+      ``34min left`` or ``2 months 8 days``
+
+    :return: The seconds
+    """
+    for replacement in [
+        ['years', 'y'],
+        ['months', 'month'],
+        ['weeks', 'w'],
+        ['days', 'd'],
+    ]:
+        fmt_timespan = fmt_timespan.replace(
+            ' ' + replacement[0], replacement[1]
+        )
+    seconds = {
+        'y': 31536000,  # 365 * 24 * 60 * 60
+        'month': 2592000,  # 30 * 24 * 60 * 60
+        'w': 604800,  # 7 * 24 * 60 * 60
+        'd': 86400,  # 24 * 60 * 60
+        'h': 3600,  # 60 * 60
+        'min': 60,
+        's': 1,
+        'ms': 0.001,
+    }
+    result = 0
+    for span in fmt_timespan.split():
+        match = re.search(r'([\d\.]+)([a-z]+)', span)
+        if match:
+            value = match.group(1)
+            unit = match.group(2)
+            result += float(value) * seconds[unit]
+    return round(float(result), 3)
+
+
+def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
+    """Execute a command on the command line (cli = command line interface))
+    and capture the stdout. This is a wrapper around ``subprocess.Popen``.
+
+    :param args: A list of programm arguments.
+
+    :raises nagiosplugin.CheckError: If the command produces some stderr output
+      or if an OSError exception occurs.
+
+    :return: The stdout of the command.
+    """
+    try:
+        p = subprocess.Popen(args,
+                             stderr=subprocess.PIPE,
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+    except OSError as e:
+        raise nagiosplugin.CheckError(e)
+
+    if p.returncode != 0:
+        raise nagiosplugin.CheckError('The command exits with a none-zero'
+                                      'return code ({})'.format(p.returncode))
+
+    if stderr:
+        raise nagiosplugin.CheckError(stderr)
+
+    if stdout:
+        stdout = stdout.decode('utf-8')
+        return stdout
+
+
+class TableParser:
+
+    def __init__(self, stdout):
+        rows = stdout.splitlines()
+        self.header_row = TableParser.__normalize_header(rows[0])
+        self.column_lengths = TableParser.__detect_lengths(self.header_row)
+        self.columns = TableParser.__split_row(
+            self.header_row, self.column_lengths)
+        counter = 0
+        for line in rows:
+            # The table footer is separted by a blank line
+            if line == '':
+                break
+            counter += 1
+        self.body_rows = rows[1:counter]
+
+    @staticmethod
+    def __normalize_header(header_row: str) -> str:
+        """Replace a single space character that is surrounded by word
+        characters with an underscore and convert the word to lower case. Now
+        we can more easily detect the column boundaries. A column starts with a
+        word followed by whitespaces. The first word character after a
+        whitespace marks the beginning of a new row."""
+        header_row = header_row.lower()
+        header_row = re.sub(r'(\w) (\w)', r'\1_\2', header_row)
+        return header_row
+
+    @staticmethod
+    def __detect_lengths(header_row: str) -> list:
+        column_lengths = []
+        match = re.search(r'^ +', header_row)
+        if match:
+            whitespace_prefix_length = match.end()
+            column_lengths.append(whitespace_prefix_length)
+            header_row = header_row[whitespace_prefix_length:]
+
+        header_row = re.sub(r'(\w) (\w)', '\1_\2', header_row)
+        word = 0
+        space = 0
+
+        for char in header_row:
+            if word and space > 1 and char != ' ':
+                column_lengths.append(word + space)
+                word = 0
+                space = 0
+
+            if char == ' ':
+                space += 1
+            else:
+                word += 1
+
+        return column_lengths
+
+    @staticmethod
+    def __split_row(line: str, column_lengths: list) -> list:
+        columns = []
+        right = 0
+        for length in column_lengths:
+            left = right
+            right = right + length
+            columns.append(line[left:right].strip())
+        columns.append(line[right:].strip())
+        return columns
+
+    @property
+    def row_count(self):
+        """The number of rows. Only the body rows are counted. The header row
+        is not taken into account."""
+        return len(self.body_rows)
+
+    def get_row(self, row_number: int) -> dict:
+        """Retrieve a table row as a dictionary. The keys are taken from the
+        header row. The first row number is 0.
+
+        :param row_number: The index number of the table row starting at 0.
+
+        """
+        body_columns = TableParser.__split_row(self.body_rows[row_number],
+                                               self.column_lengths)
+
+        result = {}
+
+        index = 0
+        for column in self.columns:
+            if column == '':
+                key = 'column_{}'.format(index)
+            else:
+                key = column
+            result[key] = body_columns[index]
+            index += 1
+        return result
+
+    def list_rows(self) -> typing.Generator[dict, None, None]:
+        """List all rows."""
+        for i in range(0, self.row_count):
+            yield self.get_row(i)
+
+
+# Unit abstraction ############################################################
+
+
+def match_multiple(unit_name: str,
+                   regexes: typing.Union[str, typing.Iterator[str]]) -> bool:
+    """
+    Match multiple regular expressions against a unit name.
+
+    :param unit_name: The unit name to be matched.
+
+    :param regexes: A single regular expression (``include='.*service'``) or a
+      list of regular expressions (``include=('.*service', '.*mount')``).
+
+    :return: True if one regular expression matches"""
+    if isinstance(regexes, str):
+        regexes = [regexes]
+    for regex in regexes:
+        if re.match(regex, unit_name):
+            return True
+    return False
 
 
 class Unit:
@@ -260,25 +450,6 @@ class Unit:
         if self.load_state == 'error' or self.active_state == 'failed':
             return nagiosplugin.Critical
         return nagiosplugin.Ok
-
-
-def match_multiple(unit_name: str,
-                   regexes: typing.Union[str, typing.Iterator[str]]) -> bool:
-    """
-    Match multiple regular expressions against a unit name.
-
-    :param unit_name: The unit name to be matched.
-
-    :param regexes: A single regular expression (``include='.*service'``) or a
-      list of regular expressions (``include=('.*service', '.*mount')``).
-
-    :return: True if one regular expression matches"""
-    if isinstance(regexes, str):
-        regexes = [regexes]
-    for regex in regexes:
-        if re.match(regex, unit_name):
-            return True
-    return False
 
 
 class SystemdUnitTypesList(collections.abc.MutableSequence):
@@ -479,6 +650,9 @@ unit_cache: UnitCache = None
 """An instance of :class:`DbusUnitCache` or :class:`CliUnitCache`"""
 
 
+# Acquisition: *Resource ######################################################
+
+
 class UnitsResource(nagiosplugin.Resource):
 
     name = 'SYSTEMD'
@@ -486,7 +660,7 @@ class UnitsResource(nagiosplugin.Resource):
     def probe(self) -> typing.Generator[Metric, None, None]:
         for unit in unit_cache.list(include=opts.include,
                                     exclude=opts.exclude):
-            yield Metric(name=unit.name, value=unit, context='unit')
+            yield Metric(name=unit.name, value=unit, context='units')
 
 
 class PerformanceDataResource(nagiosplugin.Resource):
@@ -507,79 +681,7 @@ class PerformanceDataResource(nagiosplugin.Resource):
                      context='performance_data')
 
 
-def format_timespan_to_seconds(fmt_timespan: str) -> float:
-    """Convert a timespan format string into secondes. Take a look at the
-    systemd `time-util.c
-    <https://github.com/systemd/systemd/blob/master/src/basic/time-util.c>`_
-    source code.
-
-    :param fmt_timespan: for example ``2.345s`` or ``3min 45.234s`` or
-      ``34min left`` or ``2 months 8 days``
-
-    :return: The seconds
-    """
-    for replacement in [
-        ['years', 'y'],
-        ['months', 'month'],
-        ['weeks', 'w'],
-        ['days', 'd'],
-    ]:
-        fmt_timespan = fmt_timespan.replace(
-            ' ' + replacement[0], replacement[1]
-        )
-    seconds = {
-        'y': 31536000,  # 365 * 24 * 60 * 60
-        'month': 2592000,  # 30 * 24 * 60 * 60
-        'w': 604800,  # 7 * 24 * 60 * 60
-        'd': 86400,  # 24 * 60 * 60
-        'h': 3600,  # 60 * 60
-        'min': 60,
-        's': 1,
-        'ms': 0.001,
-    }
-    result = 0
-    for span in fmt_timespan.split():
-        match = re.search(r'([\d\.]+)([a-z]+)', span)
-        if match:
-            value = match.group(1)
-            unit = match.group(2)
-            result += float(value) * seconds[unit]
-    return round(float(result), 3)
-
-
-def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
-    """Execute a command on the command line (cli = command line interface))
-    and capture the stdout. This is a wrapper around ``subprocess.Popen``.
-
-    :param args: A list of programm arguments.
-
-    :raises nagiosplugin.CheckError: If the command produces some stderr output
-      or if an OSError exception occurs.
-
-    :return: The stdout of the command.
-    """
-    try:
-        p = subprocess.Popen(args,
-                             stderr=subprocess.PIPE,
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-    except OSError as e:
-        raise nagiosplugin.CheckError(e)
-
-    if p.returncode != 0:
-        raise nagiosplugin.CheckError('The command exits with a none-zero'
-                                      'return code ({})'.format(p.returncode))
-
-    if stderr:
-        raise nagiosplugin.CheckError(stderr)
-
-    if stdout:
-        stdout = stdout.decode('utf-8')
-        return stdout
-
-
-class SystemdAnalyseResource(nagiosplugin.Resource):
+class StartupTimeResource(nagiosplugin.Resource):
     """Resource that calls ``systemd-analyze`` on the command line to get
     informations about the startup time."""
 
@@ -618,105 +720,7 @@ class SystemdAnalyseResource(nagiosplugin.Resource):
                              context='startup_time')
 
 
-class TableParser:
-
-    def __init__(self, stdout):
-        rows = stdout.splitlines()
-        self.header_row = TableParser.__normalize_header(rows[0])
-        self.column_lengths = TableParser.__detect_lengths(self.header_row)
-        self.columns = TableParser.__split_row(
-            self.header_row, self.column_lengths)
-        counter = 0
-        for line in rows:
-            # The table footer is separted by a blank line
-            if line == '':
-                break
-            counter += 1
-        self.body_rows = rows[1:counter]
-
-    @staticmethod
-    def __normalize_header(header_row: str) -> str:
-        """Replace a single space character that is surrounded by word
-        characters with an underscore and convert the word to lower case. Now
-        we can more easily detect the column boundaries. A column starts with a
-        word followed by whitespaces. The first word character after a
-        whitespace marks the beginning of a new row."""
-        header_row = header_row.lower()
-        header_row = re.sub(r'(\w) (\w)', r'\1_\2', header_row)
-        return header_row
-
-    @staticmethod
-    def __detect_lengths(header_row: str) -> list:
-        column_lengths = []
-        match = re.search(r'^ +', header_row)
-        if match:
-            whitespace_prefix_length = match.end()
-            column_lengths.append(whitespace_prefix_length)
-            header_row = header_row[whitespace_prefix_length:]
-
-        header_row = re.sub(r'(\w) (\w)', '\1_\2', header_row)
-        word = 0
-        space = 0
-
-        for char in header_row:
-            if word and space > 1 and char != ' ':
-                column_lengths.append(word + space)
-                word = 0
-                space = 0
-
-            if char == ' ':
-                space += 1
-            else:
-                word += 1
-
-        return column_lengths
-
-    @staticmethod
-    def __split_row(line: str, column_lengths: list) -> list:
-        columns = []
-        right = 0
-        for length in column_lengths:
-            left = right
-            right = right + length
-            columns.append(line[left:right].strip())
-        columns.append(line[right:].strip())
-        return columns
-
-    @property
-    def row_count(self):
-        """The number of rows. Only the body rows are counted. The header row
-        is not taken into account."""
-        return len(self.body_rows)
-
-    def get_row(self, row_number: int) -> dict:
-        """Retrieve a table row as a dictionary. The keys are taken from the
-        header row. The first row number is 0.
-
-        :param row_number: The index number of the table row starting at 0.
-
-        """
-        body_columns = TableParser.__split_row(self.body_rows[row_number],
-                                               self.column_lengths)
-
-        result = {}
-
-        index = 0
-        for column in self.columns:
-            if column == '':
-                key = 'column_{}'.format(index)
-            else:
-                key = column
-            result[key] = body_columns[index]
-            index += 1
-        return result
-
-    def list_rows(self) -> typing.Generator[dict, None, None]:
-        """List all rows."""
-        for i in range(0, self.row_count):
-            yield self.get_row(i)
-
-
-class SystemctlListTimersResource(nagiosplugin.Resource):
+class TimersResource(nagiosplugin.Resource):
     """
     Resource that calls ``systemctl list-timers --all`` on the command line to
     get informations about dead / inactive timers. There is one type of systemd
@@ -777,14 +781,17 @@ class SystemctlListTimersResource(nagiosplugin.Resource):
                 yield Metric(
                     name=unit,
                     value=state,
-                    context='dead_timers'
+                    context='timers'
                 )
 
 
-class UnitContext(nagiosplugin.Context):
+# Evaluation: *Context ########################################################
+
+
+class UnitsContext(nagiosplugin.Context):
 
     def __init__(self):
-        super(UnitContext, self).__init__('unit')
+        super(UnitsContext, self).__init__('units')
 
     def evaluate(self, metric, resource) -> Result:
         """Determines state of a given metric.
@@ -821,10 +828,10 @@ class UnitContext(nagiosplugin.Context):
             return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
 
 
-class DeadTimersContext(nagiosplugin.Context):
+class TimersContext(nagiosplugin.Context):
 
     def __init__(self):
-        super(DeadTimersContext, self).__init__('dead_timers')
+        super(TimersContext, self).__init__('timers')
 
     def evaluate(self, metric, resource):
         """Determines state of a given metric.
@@ -856,6 +863,9 @@ class PerformanceDataContext(nagiosplugin.Context):
         return nagiosplugin.Performance(label=metric.name, value=metric.value)
 
 
+# Presentation: *Summary ######################################################
+
+
 class SystemdSummary(nagiosplugin.Summary):
     """Format the different status lines. A subclass of `nagiosplugin.Summary
     <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/summary.py>`_.
@@ -869,7 +879,7 @@ class SystemdSummary(nagiosplugin.Summary):
         """
         if opts.include_unit:
             for result in results.most_significant:
-                if isinstance(result.context, UnitContext):
+                if isinstance(result.context, UnitsContext):
                     return '{0}'.format(result)
         return 'all'
 
@@ -882,7 +892,7 @@ class SystemdSummary(nagiosplugin.Summary):
         """
         summary = []
         for result in results.most_significant:
-            if result.context.name in ['startup_time', 'unit', 'dead_timers']:
+            if result.context.name in ['startup_time', 'units', 'timers']:
                 summary.append(result)
         return ', '.join(['{0}'.format(result) for result in summary])
 
@@ -895,9 +905,12 @@ class SystemdSummary(nagiosplugin.Summary):
         """
         summary = []
         for result in results.most_significant:
-            if result.context.name in ['startup_time', 'unit', 'dead_timers']:
+            if result.context.name in ['startup_time', 'units', 'timers']:
                 summary.append('{0}: {1}'.format(result.state, result))
         return summary
+
+
+# Command line interface (argparse) ###########################################
 
 
 def convert_to_regexp_list(regexp=None, unit_names=None,
@@ -1163,20 +1176,20 @@ def main():
 
     if opts.dead_timers:
         tasks += [
-            SystemctlListTimersResource(
+            TimersResource(
                 excludes=opts.exclude,
                 warning=opts.dead_timers_warning,
                 critical=opts.dead_timers_critical,
             ),
-            DeadTimersContext()
+            TimersContext()
         ]
 
     tasks += [
         UnitsResource(),
         PerformanceDataResource(),
         PerformanceDataContext(),
-        SystemdAnalyseResource(),
-        UnitContext(),
+        StartupTimeResource(),
+        UnitsContext(),
         SystemdSummary()
     ]
 
