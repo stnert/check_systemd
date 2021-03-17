@@ -35,7 +35,7 @@ usage: check_systemd [-h] [-v] [-V] [-i] [-I REGEXP] [-u UNIT_NAME]
                      [--include-type UNIT_TYPE [UNIT_TYPE ...]] [-e REGEXP]
                      [--exclude-unit UNIT_NAME [UNIT_NAME ...]]
                      [--exclude-type UNIT_TYPE] [-n] [-w SECONDS] [-c SECONDS]
-                     [-t] [-W SECONDS] [-C SECONDS] [--dbus | --cli]
+                     [-t] [-W SECONDS] [-C SECONDS] [--dbus | --cli] [-P | -p]
 
 Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>
 Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>
@@ -120,6 +120,12 @@ Monitoring data acquisition:
   --cli                 Use the text output of serveral systemd command line
                         interface (cli) binaries to gather the required data for
                         the monitoring process.
+
+Performance data:
+  -P, --performance-data
+                        Attach no performance data to the plugin output.
+  -p, --no-performance-data
+                        Attach performance data to the plugin output.
 
 Performance data:
   - count_units

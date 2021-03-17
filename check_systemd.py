@@ -845,6 +845,22 @@ class TimersContext(nagiosplugin.Context):
         return self.result_cls(metric.value, metric=metric, hint=metric.name)
 
 
+class StartupTimeContext(nagiosplugin.ScalarContext):
+
+    def __init__(self):
+        super(StartupTimeContext, self).__init__('startup_time')
+        if opts.startup_time:
+            self.warning = nagiosplugin.Range(opts.warning)
+            self.critical = nagiosplugin.Range(opts.critical)
+
+    def performance(self, metric, resource):
+        if not opts.performance_data:
+            return None
+        return nagiosplugin.Performance(metric.name, metric.value, metric.uom,
+                           self.warning, self.critical,
+                           metric.min, metric.max)
+
+
 class PerformanceDataContext(nagiosplugin.Context):
 
     def __init__(self):
@@ -1044,8 +1060,9 @@ def get_argparser():
 
     startup_time.add_argument(
         '-n', '--no-startup-time',
-        action='store_true',
-        default=False,
+        dest='startup_time',
+        action='store_false',
+        default=True,
         help='Don’t check the startup time. Using this option the options '
              '\'-w, --warning\' and \'-c, --critical\' have no effect. '
              'Performance data about the startup time is collected, but '
@@ -1122,6 +1139,21 @@ def get_argparser():
              'process.'
     )
 
+    perf_data = parser.add_argument_group('Performance data')
+    perf_data_exclusive_group = perf_data.add_mutually_exclusive_group()
+
+    perf_data_exclusive_group.add_argument(
+        '-P', '--performance-data',
+        dest='performance_data', action='store_true', default=True,
+        help='Attach no performance data to the plugin output.'
+    )
+
+    perf_data_exclusive_group.add_argument(
+        '-p', '--no-performance-data',
+        dest='performance_data',  action='store_false',
+        help='Attach performance data to the plugin output.'
+    )
+
     return parser
 
 
@@ -1172,7 +1204,17 @@ def main():
     else:
         unit_cache = CliUnitCache()
 
-    tasks = []
+    tasks = [
+        UnitsResource(),
+        UnitsContext(),
+        SystemdSummary()
+    ]
+
+    if opts.startup_time:
+        tasks += [
+            StartupTimeResource(),
+            StartupTimeContext(),
+        ]
 
     if opts.dead_timers:
         tasks += [
@@ -1184,29 +1226,11 @@ def main():
             TimersContext()
         ]
 
-    tasks += [
-        UnitsResource(),
-        PerformanceDataResource(),
-        PerformanceDataContext(),
-        StartupTimeResource(),
-        UnitsContext(),
-        SystemdSummary()
-    ]
-
-    if not opts.no_startup_time:
-        tasks.append(
-            nagiosplugin.ScalarContext(
-                name='startup_time',
-                warning=opts.warning,
-                critical=opts.critical,
-            )
-        )
-    else:
-        tasks.append(
-            nagiosplugin.ScalarContext(
-                name='startup_time'
-            )
-        )
+    if opts.performance_data:
+        tasks += [
+            PerformanceDataResource(),
+            PerformanceDataContext(),
+        ]
 
     check = nagiosplugin.Check(*tasks)
     check.main(opts.verbose)
