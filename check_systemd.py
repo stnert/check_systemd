@@ -599,30 +599,6 @@ def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
         return stdout
 
 
-def get_unitstate_from_cli(unit_name: str) -> Unit:
-    """
-    Run the command ``systemctl show unit-name.service`` on the command line
-    and extract the three keys ``ActiveState``, ``SubState``, and
-    ``LoadState``.
-
-    :param str unit_name: A systemd unit name like ``tor.service``,
-          ``mnt-nextcloud.automount`` or ``update-motd.timer``.
-
-    :return: A unit state object.
-    :rtype: UnitState
-    """
-    def search(stdout, key):
-        result = re.search(key + '=(.*)', stdout)
-        return result.group(1)
-
-    stdout = execute_cli(['systemctl', 'show', unit_name])
-    return Unit(
-        active_state=search(stdout, 'ActiveState'),
-        sub_state=search(stdout, 'SubState'),
-        load_state=search(stdout, 'LoadState'),
-    )
-
-
 class SystemdAnalyseResource(nagiosplugin.Resource):
     """Resource that calls ``systemd-analyze`` on the command line to get
     informations about the startup time."""
