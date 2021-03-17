@@ -48,7 +48,7 @@ optional arguments:
   -V, --version         show program's version number and exit
 
 Options related to unit selection:
-  By default all systemd units are checked. Use the option '-e' to exclude units 
+  By default all systemd units are checked. Use the option '-e' to exclude units
   by a regular expression. Use the option '-u' to check only one unit.
 
   -i, --ignore-inactive-state
@@ -149,12 +149,6 @@ To get the startup time it executes:
 
 ```sh
 systemd-analyze
-```
-
-To check a specific  unit (`-u, --unit`) this command is executed:
-
-```sh
-systemctl is-active <unit-name>
 ```
 
 To find dead timers this plugin launches:
