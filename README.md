@@ -34,8 +34,8 @@ pip3 install check_systemd
 usage: check_systemd [-h] [-v] [-V] [-i] [-I REGEXP] [-u UNIT_NAME]
                      [--include-type UNIT_TYPE [UNIT_TYPE ...]] [-e REGEXP]
                      [--exclude-unit UNIT_NAME [UNIT_NAME ...]]
-                     [--exclude-type UNIT_TYPE] [-n] [-w SECONDS] [-c SECONDS]
-                     [-t] [-W SECONDS] [-C SECONDS] [--dbus | --cli] [-P | -p]
+                     [--exclude-type UNIT_TYPE] [-t] [-W SECONDS] [-C SECONDS]
+                     [-n] [-w SECONDS] [-c SECONDS] [--dbus | --cli] [-P | -p]
 
 Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>
 Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>
@@ -82,6 +82,23 @@ Options related to unit selection:
   --exclude-type UNIT_TYPE
                         One or more unit types (for example: 'service', 'timer')
 
+Timers related options:
+  -t, --timers, --dead-timers
+                        Detect dead / inactive timers. See the corresponding
+                        options '-W, --dead-timer-warning' and '-C, --dead-
+                        timers-critical'. Dead timers are detected by parsing
+                        the output of 'systemctl list-timers'. Dead timer rows
+                        displaying 'n/a' in the NEXT and LEFT columns and the
+                        time span in the column PASSED exceeds the values
+                        specified with the options '-W, --dead-timer-warning'
+                        and '-C, --dead-timers-critical'.
+  -W SECONDS, --timers-warning SECONDS, --dead-timers-warning SECONDS
+                        Time ago in seconds for dead / inactive timers to
+                        trigger a warning state (by default 6 days).
+  -C SECONDS, --timers-critical SECONDS, --dead-timers-critical SECONDS
+                        Time ago in seconds for dead / inactive timers to
+                        trigger a critical state (by default 7 days).
+
 Startup time related options:
   -n, --no-startup-time
                         Don’t check the startup time. Using this option the
@@ -95,22 +112,6 @@ Startup time related options:
   -c SECONDS, --critical SECONDS
                         Startup time in seconds to result in a critical status.
                         Thedefault is 120 seconds.
-
-Timers related options:
-  -t, --dead-timers     Detect dead / inactive timers. See the corresponding
-                        options '-W, --dead-timer-warning' and '-C, --dead-
-                        timers-critical'. Dead timers are detected by parsing
-                        the output of 'systemctl list-timers'. Dead timer rows
-                        displaying 'n/a' in the NEXT and LEFT columns and the
-                        time span in the column PASSED exceeds the values
-                        specified with the options '-W, --dead-timer-warning'
-                        and '-C, --dead-timers-critical'.
-  -W SECONDS, --dead-timers-warning SECONDS
-                        Time ago in seconds for dead / inactive timers to
-                        trigger a warning state (by default 6 days).
-  -C SECONDS, --dead-timers-critical SECONDS
-                        Time ago in seconds for dead / inactive timers to
-                        trigger a critical state (by default 7 days).
 
 Monitoring data acquisition:
   --dbus                Use the systemd’s D-Bus API instead of parsing the text

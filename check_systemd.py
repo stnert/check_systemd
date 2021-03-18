@@ -13,9 +13,9 @@ To learn more about the project, please visit the repository on `Github
 Monitoring scopes
 =================
 
-* Startup time (``context=startup_time``)
 * State of unites (``context=units``)
 * Timers (``context=timers``)
+* Startup time (``context=startup_time``)
 
 This plugin is based on a Python package named `nagiosplugin
 <https://pypi.org/project/nagiosplugin/>`_. ``nagiosplugin`` has a fine-grained
@@ -771,9 +771,9 @@ class TimersResource(nagiosplugin.Resource):
                         )
 
                         if passed_text == 'n/a' or \
-                                passed >= opts.dead_timers_critical:
+                                passed >= opts.timers_critical:
                             state = nagiosplugin.Critical
-                        elif passed >= opts.dead_timers_warning:
+                        elif passed >= opts.timers_warning:
                             state = nagiosplugin.Warn
 
                 yield Metric(
@@ -847,7 +847,7 @@ class StartupTimeContext(nagiosplugin.ScalarContext):
 
     def __init__(self):
         super(StartupTimeContext, self).__init__('startup_time')
-        if opts.startup_time:
+        if opts.scope_startup_time:
             self.warning = nagiosplugin.Range(opts.warning)
             self.critical = nagiosplugin.Range(opts.critical)
 
@@ -855,8 +855,8 @@ class StartupTimeContext(nagiosplugin.ScalarContext):
         if not opts.performance_data:
             return None
         return nagiosplugin.Performance(metric.name, metric.value, metric.uom,
-                           self.warning, self.critical,
-                           metric.min, metric.max)
+                                        self.warning, self.critical,
+                                        metric.min, metric.max)
 
 
 class PerformanceDataContext(nagiosplugin.Context):
@@ -979,14 +979,16 @@ def get_argparser():
         version='%(prog)s {}'.format(__version__),
     )
 
-    unit = parser.add_argument_group(
+    # Scope: units ############################################################
+
+    units = parser.add_argument_group(
         'Options related to unit selection',
         'By default all systemd units are checked. '
         'Use the option \'-e\' to exclude units\nby a regular expression. '
         'Use the option \'-u\' to check only one unit.'
     )
 
-    unit.add_argument(
+    units.add_argument(
         '-i', '--ignore-inactive-state',
         action='store_true',
         help='Ignore an inactive state on a specific unit. Oneshot services '
@@ -995,7 +997,7 @@ def get_argparser():
              'an affect if it is used with the option -u.'
     )
 
-    unit.add_argument(
+    units.add_argument(
         '-I', '--include',
         metavar='REGEXP',
         action='append',
@@ -1010,7 +1012,7 @@ def get_argparser():
              '(https://docs.python.org/3/library/re.html).',
     )
 
-    unit.add_argument(
+    units.add_argument(
         '-u', '--unit', '--include-unit',
         type=str,
         metavar='UNIT_NAME',
@@ -1018,14 +1020,14 @@ def get_argparser():
         help='Name of the systemd unit that is being tested.',
     )
 
-    unit.add_argument(
+    units.add_argument(
         '--include-type',
         metavar='UNIT_TYPE',
         nargs='+',
         help='One or more unit types (for example: \'service\', \'timer\')',
     )
 
-    unit.add_argument(
+    units.add_argument(
         '-e', '--exclude',
         metavar='REGEXP',
         action='append',
@@ -1040,25 +1042,63 @@ def get_argparser():
              '(https://docs.python.org/3/library/re.html).',
     )
 
-    unit.add_argument(
+    units.add_argument(
         '--exclude-unit',
         metavar='UNIT_NAME',
         nargs='+',
         help='Name of the systemd unit that is being tested.',
     )
 
-    unit.add_argument(
+    units.add_argument(
         '--exclude-type',
         metavar='UNIT_TYPE',
         action='append',
         help='One or more unit types (for example: \'service\', \'timer\')',
     )
 
+    # Scope: timers ###########################################################
+
+    timers = parser.add_argument_group('Timers related options')
+
+    timers.add_argument(
+        '-t', '--timers', '--dead-timers',
+        dest='scope_timers', action='store_true',
+        help='Detect dead / inactive timers. See the corresponding options '
+             '\'-W, --dead-timer-warning\' and '
+             '\'-C, --dead-timers-critical\'. '
+             'Dead timers are detected by parsing the output of '
+             '\'systemctl list-timers\'. '
+             'Dead timer rows displaying \'n/a\' in the NEXT and LEFT '
+             'columns and the time span in the column PASSED exceeds the '
+             'values specified with the options \'-W, --dead-timer-warning\' '
+             'and \'-C, --dead-timers-critical\'.'
+    )
+
+    timers.add_argument(
+        '-W', '--timers-warning', '--dead-timers-warning',
+        dest='timers_warning', metavar='SECONDS',
+        type=float,
+        default=60 * 60 * 24 * 6,
+        help='Time ago in seconds for dead / inactive timers to trigger a '
+             'warning state (by default 6 days).'
+    )
+
+    timers.add_argument(
+        '-C', '--timers-critical', '--dead-timers-critical',
+        dest='timers_critical', metavar='SECONDS',
+        type=float,
+        default=60 * 60 * 24 * 7,
+        help='Time ago in seconds for dead / inactive timers to trigger a '
+             'critical state (by default 7 days).'
+    )
+
+    # Scope: startup_time #####################################################
+
     startup_time = parser.add_argument_group('Startup time related options')
 
     startup_time.add_argument(
         '-n', '--no-startup-time',
-        dest='startup_time',
+        dest='scope_startup_time',
         action='store_false',
         default=True,
         help='Don’t check the startup time. Using this option the options '
@@ -1083,39 +1123,7 @@ def get_argparser():
              'default is 120 seconds.',
     )
 
-    dead_timer = parser.add_argument_group('Timers related options')
-
-    dead_timer.add_argument(
-        '-t', '--dead-timers',
-        action='store_true',
-        help='Detect dead / inactive timers. See the corresponding options '
-             '\'-W, --dead-timer-warning\' and '
-             '\'-C, --dead-timers-critical\'. '
-             'Dead timers are detected by parsing the output of '
-             '\'systemctl list-timers\'. '
-             'Dead timer rows displaying \'n/a\' in the NEXT and LEFT '
-             'columns and the time span in the column PASSED exceeds the '
-             'values specified with the options \'-W, --dead-timer-warning\' '
-             'and \'-C, --dead-timers-critical\'.'
-    )
-
-    dead_timer.add_argument(
-        '-W', '--dead-timers-warning',
-        metavar='SECONDS',
-        type=float,
-        default=60 * 60 * 24 * 6,
-        help='Time ago in seconds for dead / inactive timers to trigger a '
-             'warning state (by default 6 days).'
-    )
-
-    dead_timer.add_argument(
-        '-C', '--dead-timers-critical',
-        metavar='SECONDS',
-        type=float,
-        default=60 * 60 * 24 * 7,
-        help='Time ago in seconds for dead / inactive timers to trigger a '
-             'critical state (by default 7 days).'
-    )
+    # Backend #################################################################
 
     acquisition = parser.add_argument_group('Monitoring data acquisition')
     acquisition_exclusive_group = acquisition.add_mutually_exclusive_group()
@@ -1136,6 +1144,8 @@ def get_argparser():
              '(cli) binaries to gather the required data for the monitoring '
              'process.'
     )
+
+    # Performance data ########################################################
 
     perf_data = parser.add_argument_group('Performance data')
     perf_data_exclusive_group = perf_data.add_mutually_exclusive_group()
@@ -1208,13 +1218,13 @@ def main():
         SystemdSummary(),
     ]
 
-    if opts.startup_time:
+    if opts.scope_startup_time:
         tasks += [
             StartupTimeResource(),
             StartupTimeContext(),
         ]
 
-    if opts.dead_timers:
+    if opts.scope_timers:
         tasks += [
             TimersResource(),
             TimersContext(),
