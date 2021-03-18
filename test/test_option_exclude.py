@@ -16,56 +16,45 @@ class TestOptionExclude(unittest.TestCase):
 
     def test_known_service(self):
         result = execute_with_opt_e(
-            argv=['-e', 'smartd.service'],
+            argv=['-e', 'smartd.service', '--no-performance-data'],
             unit_suffix='failed',
         )
         self.assertEqual(result.exitcode, 0)
         self.assertEqual(
-            'SYSTEMD OK - all | count_units=2 startup_time=12.345;60;120 '
-            'units_activating=0 units_active=1 units_failed=0 '
-            'units_inactive=1',
+            'SYSTEMD OK - all',
             result.first_line
         )
 
     def test_unknown_service(self):
         result = execute_with_opt_e(
-            argv=['-e', 'testX.service'],
+            argv=['-e', 'testX.service', '--no-performance-data'],
             unit_suffix='failed',
         )
         self.assertEqual(result.exitcode, 2)
         self.assertEqual(
-            'SYSTEMD CRITICAL - smartd.service: failed | count_units=3 '
-            'startup_time=12.345;60;120 '
-            'units_activating=0 units_active=1 units_failed=1 '
-            'units_inactive=1',
+            'SYSTEMD CRITICAL - smartd.service: failed',
             result.first_line
         )
 
     def test_regexp(self):
         result = execute_with_opt_e(
-            argv=['-e', 'user@\\d+\\.service'],
+            argv=['-e', 'user@\\d+\\.service', '--no-performance-data'],
             unit_suffix='regexp-excludes',
         )
         self.assertEqual(0, result.exitcode)
         self.assertEqual(
-            'SYSTEMD OK - all | count_units=2 '
-            'startup_time=12.345;60;120 '
-            'units_activating=0 units_active=1 units_failed=0 '
-            'units_inactive=1',
+            'SYSTEMD OK - all',
             result.first_line
         )
 
     def test_regexp_dot(self):
         result = execute_with_opt_e(
-            argv=['-e', '.*'],
+            argv=['-e', '.*', '--no-performance-data'],
             unit_suffix='regexp-excludes',
         )
         self.assertEqual(0, result.exitcode)
         self.assertEqual(
-            'SYSTEMD OK - all | count_units=0 '
-            'startup_time=12.345;60;120 '
-            'units_activating=0 units_active=0 units_failed=0 '
-            'units_inactive=0',
+            'SYSTEMD OK - all',
             result.first_line
         )
 

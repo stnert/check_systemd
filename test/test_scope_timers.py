@@ -4,11 +4,11 @@ from .helper import execute_main
 
 def execute_with_opt_t(additional_argv=None, stdout_timers_suffix='1',
                        warning=None, critical=None):
-    argv = ['-t', '--no-performance-data']
+    argv = ['--timers', '--no-performance-data']
     if warning:
-        argv += ['-W', str(warning)]
+        argv += ['--timers-warning', str(warning)]
     if critical:
-        argv += ['-C', str(critical)]
+        argv += ['--timers-critical', str(critical)]
 
     if additional_argv:
         argv += additional_argv
