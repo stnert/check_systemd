@@ -4,7 +4,7 @@ from .helper import execute_main
 
 def execute_with_opt_t(additional_argv=None, stdout_timers_suffix='1',
                        warning=None, critical=None):
-    argv = ['-t']
+    argv = ['-t', '--no-performance-data']
     if warning:
         argv += ['-W', str(warning)]
     if critical:
@@ -29,9 +29,7 @@ class TestScopeTimers(unittest.TestCase):
         result = execute_with_opt_t()
         self.assertEqual(2, result.exitcode)
         self.assertEqual(
-            'SYSTEMD CRITICAL - phpsessionclean.timer '
-            '| count_units=3 startup_time=12.345;60;120 units_activating=0 '
-            'units_active=3 units_failed=0 units_inactive=0',
+            'SYSTEMD CRITICAL - phpsessionclean.timer',
             result.first_line
         )
 
@@ -40,9 +38,7 @@ class TestScopeTimers(unittest.TestCase):
         self.assertEqual(2, result.exitcode)
         self.assertEqual(
             'SYSTEMD CRITICAL - dfm-auto-jf.timer, '
-            'rsync.timer '
-            '| count_units=3 startup_time=12.345;60;120 units_activating=0 '
-            'units_active=3 units_failed=0 units_inactive=0',
+            'rsync.timer',
             result.first_line
         )
 
@@ -65,9 +61,7 @@ class TestScopeTimers(unittest.TestCase):
         result = execute_with_opt_t(stdout_timers_suffix='ok')
         self.assertEqual(0, result.exitcode)
         self.assertEqual(
-            'SYSTEMD OK - all '
-            '| count_units=3 startup_time=12.345;60;120 units_activating=0 '
-            'units_active=3 units_failed=0 units_inactive=0',
+            'SYSTEMD OK - all',
             result.first_line
         )
 
@@ -76,9 +70,7 @@ class TestScopeTimers(unittest.TestCase):
                                     '-e', 'dfm-auto-jf.timer'])
         self.assertEqual(2, result.exitcode)
         self.assertEqual(
-            'SYSTEMD CRITICAL - rsync.timer '
-            '| count_units=3 startup_time=12.345;60;120 units_activating=0 '
-            'units_active=3 units_failed=0 units_inactive=0',
+            'SYSTEMD CRITICAL - rsync.timer',
             result.first_line
         )
 
