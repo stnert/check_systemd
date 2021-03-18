@@ -17,6 +17,12 @@ Monitoring scopes
 * Timers (``context=timers``)
 * Startup time (``context=startup_time``)
 
+Data sources
+============
+
+* D-Bus (``dbus``)
+* Command line interface (``cli``)
+
 This plugin is based on a Python package named `nagiosplugin
 <https://pypi.org/project/nagiosplugin/>`_. ``nagiosplugin`` has a fine-grained
 class model to separate concerns. A Nagios / Icinga plugin must perform these
@@ -29,16 +35,17 @@ Acquisition (``Resource``)
 ==========================
 
 * :class:`UnitsResource` (``context=units``)
-* :class:`PerformanceDataResource` (``context=performance_data``)
-* :class:`StartupTimeResource` (``context=startup_time``)
 * :class:`TimersResource` (``context=timers``)
+* :class:`StartupTimeResource` (``context=startup_time``)
+* :class:`PerformanceDataResource` (``context=performance_data``)
 
 Evaluation (``Context``)
 ========================
 
-* :class:`TimersContext` (``context=timers``)
-* :class:`PerformanceDataContext` (``context=performance_data``)
 * :class:`UnitsContext` (``context=units``)
+* :class:`TimersContext` (``context=timers``)
+* :class:`StartupTimeContext` (``context=timers``)
+* :class:`PerformanceDataContext` (``context=performance_data``)
 
 Presentation (``Summary``)
 ==========================
@@ -99,7 +106,7 @@ Arguments).
 """
 
 
-# Data backend: D-Bus #########################################################
+# Data source: D-Bus ##########################################################
 
 
 class DbusManager:
@@ -129,7 +136,7 @@ if is_gi:
     dbus_manager = DbusManager()
 
 
-# Data backend: CLI (command line interface) ##################################
+# Data source: CLI (command line interface) ###################################
 
 
 def format_timespan_to_seconds(fmt_timespan: str) -> float:
@@ -663,63 +670,6 @@ class UnitsResource(nagiosplugin.Resource):
             yield Metric(name=unit.name, value=unit, context='units')
 
 
-class PerformanceDataResource(nagiosplugin.Resource):
-
-    name = 'SYSTEMD'
-
-    def probe(self) -> typing.Generator[Metric, None, None]:
-        for state_spec, count in unit_cache.count_by_states((
-                'active_state:failed',
-                'active_state:active',
-                'active_state:activating',
-                'active_state:inactive',), exclude=opts.exclude).items():
-            yield Metric(name='units_{}'.format(state_spec.split(':')[1]),
-                         value=count,
-                         context='performance_data')
-
-        yield Metric(name='count_units', value=unit_cache.count,
-                     context='performance_data')
-
-
-class StartupTimeResource(nagiosplugin.Resource):
-    """Resource that calls ``systemd-analyze`` on the command line to get
-    informations about the startup time."""
-
-    name = 'SYSTEMD'
-
-    def probe(self) -> typing.Generator[Metric, None, None]:
-        """Query system state and return metrics.
-
-        :return: generator that emits
-          :class:`~nagiosplugin.metric.Metric` objects
-        """
-        stdout = None
-        try:
-            stdout = execute_cli(['systemd-analyze'])
-        except nagiosplugin.CheckError:
-            pass
-
-        if stdout:
-            # First line:
-            # Startup finished in 1.672s (kernel) + 21.378s (userspace) =
-            # 23.050s
-
-            # On raspian no second line
-            # Second line:
-            # graphical.target reached after 1min 2.154s in userspace
-            match = re.search(r'reached after (.+) in userspace', stdout)
-
-            if not match:
-                match = re.search(r' = (.+)\n', stdout)
-
-            # Output when boot process is not finished:
-            # Bootup is not yet finished. Please try again later.
-            if match:
-                yield Metric(name='startup_time',
-                             value=format_timespan_to_seconds(match.group(1)),
-                             context='startup_time')
-
-
 class TimersResource(nagiosplugin.Resource):
     """
     Resource that calls ``systemctl list-timers --all`` on the command line to
@@ -781,6 +731,63 @@ class TimersResource(nagiosplugin.Resource):
                     value=state,
                     context='timers'
                 )
+
+
+class StartupTimeResource(nagiosplugin.Resource):
+    """Resource that calls ``systemd-analyze`` on the command line to get
+    informations about the startup time."""
+
+    name = 'SYSTEMD'
+
+    def probe(self) -> typing.Generator[Metric, None, None]:
+        """Query system state and return metrics.
+
+        :return: generator that emits
+          :class:`~nagiosplugin.metric.Metric` objects
+        """
+        stdout = None
+        try:
+            stdout = execute_cli(['systemd-analyze'])
+        except nagiosplugin.CheckError:
+            pass
+
+        if stdout:
+            # First line:
+            # Startup finished in 1.672s (kernel) + 21.378s (userspace) =
+            # 23.050s
+
+            # On raspian no second line
+            # Second line:
+            # graphical.target reached after 1min 2.154s in userspace
+            match = re.search(r'reached after (.+) in userspace', stdout)
+
+            if not match:
+                match = re.search(r' = (.+)\n', stdout)
+
+            # Output when boot process is not finished:
+            # Bootup is not yet finished. Please try again later.
+            if match:
+                yield Metric(name='startup_time',
+                             value=format_timespan_to_seconds(match.group(1)),
+                             context='startup_time')
+
+
+class PerformanceDataResource(nagiosplugin.Resource):
+
+    name = 'SYSTEMD'
+
+    def probe(self) -> typing.Generator[Metric, None, None]:
+        for state_spec, count in unit_cache.count_by_states((
+                'active_state:failed',
+                'active_state:active',
+                'active_state:activating',
+                'active_state:inactive',), exclude=opts.exclude).items():
+            yield Metric(name='units_{}'.format(state_spec.split(':')[1]),
+                         value=count,
+                         context='performance_data')
+
+        yield Metric(name='count_units', value=unit_cache.count,
+                     context='performance_data')
 
 
 # Evaluation: *Context ########################################################
