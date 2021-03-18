@@ -17,8 +17,8 @@ def execute_with_opt_t(additional_argv=None, stdout_timers_suffix='1',
         argv=argv,
         stdout=[
             'systemctl-list-units_3units.txt',
-            'systemctl-list-timers_{}.txt'.format(stdout_timers_suffix),
             'systemd-analyze_12.345.txt',
+            'systemctl-list-timers_{}.txt'.format(stdout_timers_suffix),
         ],
     )
 

@@ -730,11 +730,8 @@ class TimersResource(nagiosplugin.Resource):
       checks.
     """
 
-    def __init__(self, excludes=[], *args, **kwargs):
-        self.excludes = excludes
-        self.warning = kwargs.pop('warning')
-        self.critical = kwargs.pop('critical')
-        super().__init__(*args, **kwargs)
+    def __init__(self):
+        super().__init__()
 
     name = 'SYSTEMD'
 
@@ -759,7 +756,7 @@ class TimersResource(nagiosplugin.Resource):
 
             for row in table_parser.list_rows():
                 unit = row['unit']
-                if match_multiple(unit, self.excludes):
+                if match_multiple(unit, opts.exclude):
                     continue
                 next_date_time = row['next']
 
@@ -773,9 +770,10 @@ class TimersResource(nagiosplugin.Resource):
                             passed_text
                         )
 
-                        if passed_text == 'n/a' or passed >= self.critical:
+                        if passed_text == 'n/a' or \
+                                passed >= opts.dead_timers_critical:
                             state = nagiosplugin.Critical
-                        elif passed >= self.warning:
+                        elif passed >= opts.dead_timers_warning:
                             state = nagiosplugin.Warn
 
                 yield Metric(
@@ -1207,7 +1205,7 @@ def main():
     tasks = [
         UnitsResource(),
         UnitsContext(),
-        SystemdSummary()
+        SystemdSummary(),
     ]
 
     if opts.startup_time:
@@ -1218,12 +1216,8 @@ def main():
 
     if opts.dead_timers:
         tasks += [
-            TimersResource(
-                excludes=opts.exclude,
-                warning=opts.dead_timers_warning,
-                critical=opts.dead_timers_critical,
-            ),
-            TimersContext()
+            TimersResource(),
+            TimersContext(),
         ]
 
     if opts.performance_data:
