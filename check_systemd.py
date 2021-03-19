@@ -665,9 +665,18 @@ class UnitsResource(nagiosplugin.Resource):
     name = 'SYSTEMD'
 
     def probe(self) -> typing.Generator[Metric, None, None]:
+        counter = 0
         for unit in unit_cache.list(include=opts.include,
                                     exclude=opts.exclude):
             yield Metric(name=unit.name, value=unit, context='units')
+            counter += 1
+
+        if counter == 0:
+            raise ValueError(
+                'Please verify your --include-* and --exclude-* '
+                'options. No units have been added for '
+                'testing.'
+            )
 
 
 class TimersResource(nagiosplugin.Resource):
@@ -996,15 +1005,6 @@ def get_argparser():
     )
 
     units.add_argument(
-        '-i', '--ignore-inactive-state',
-        action='store_true',
-        help='Ignore an inactive state on a specific unit. Oneshot services '
-             'for example are only active while running and not enabled. '
-             'The rest of the time they are inactive. This option has only '
-             'an affect if it is used with the option -u.'
-    )
-
-    units.add_argument(
         '-I', '--include',
         metavar='REGEXP',
         action='append',
@@ -1195,6 +1195,7 @@ def normalize_argparser(opts: argparse.Namespace) -> argparse.Namespace:
     return opts
 
 
+@nagiosplugin.guarded
 def main():
     """The main entry point of the monitoring plugin. First the command line
     arguments are read into the variable ``opts``. The configuration of this
