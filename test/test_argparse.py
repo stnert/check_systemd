@@ -6,6 +6,8 @@ from .helper import execute_main
 import check_systemd
 from check_systemd import get_argparser
 import subprocess
+import io
+from contextlib import redirect_stderr
 
 
 class TestFromFunction(unittest.TestCase):
@@ -23,7 +25,8 @@ class TestFromFunction(unittest.TestCase):
         self.assertEqual('cli', opts.data_source)
 
     def test_exclusive_cli_dbus(self):
-        with self.assertRaises(SystemExit) as cm:
+        dev_null = io.StringIO()
+        with self.assertRaises(SystemExit) as cm, redirect_stderr(dev_null):
             get_argparser().parse_args(['--cli', '--dbus'])
         self.assertEqual(cm.exception.code, 2)
 
