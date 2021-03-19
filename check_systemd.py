@@ -724,6 +724,7 @@ class TimersResource(nagiosplugin.Resource):
         # apt-daily.timer  apt-daily.service
         if stdout:
             table_parser = TableParser(stdout)
+            table_parser.check_header(('unit', 'next', 'passed'))
             state = nagiosplugin.Ok
 
             for row in table_parser.list_rows():
