@@ -29,7 +29,7 @@ class TestScopeStartupTime(unittest.TestCase):
         self.assertEqual(0, result.exitcode)
         self.assertEqual(
             'SYSTEMD OK - all | '
-            'count_units=386 startup_time=12.345 units_activating=0 '
+            'count_units=386 units_activating=0 '
             'units_active=275 units_failed=0 units_inactive=111',
             result.first_line
         )

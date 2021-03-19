@@ -31,7 +31,7 @@ pip3 install check_systemd
 ## Command line interface
 
 ```
-usage: check_systemd [-h] [-v] [-V] [-i] [-I REGEXP] [-u UNIT_NAME]
+usage: check_systemd [-h] [-v] [-V] [-I REGEXP] [-u UNIT_NAME]
                      [--include-type UNIT_TYPE [UNIT_TYPE ...]] [-e REGEXP]
                      [--exclude-unit UNIT_NAME [UNIT_NAME ...]]
                      [--exclude-type UNIT_TYPE] [-t] [-W SECONDS] [-C SECONDS]
@@ -51,12 +51,6 @@ Options related to unit selection:
   By default all systemd units are checked. Use the option '-e' to exclude units
   by a regular expression. Use the option '-u' to check only one unit.
 
-  -i, --ignore-inactive-state
-                        Ignore an inactive state on a specific unit. Oneshot
-                        services for example are only active while running and
-                        not enabled. The rest of the time they are inactive.
-                        This option has only an affect if it is used with the
-                        option -u.
   -I REGEXP, --include REGEXP
                         Include systemd units to the checks. This option can be
                         applied multiple times, for example: -i mnt-data.mount

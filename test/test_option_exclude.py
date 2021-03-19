@@ -52,11 +52,7 @@ class TestOptionExclude(unittest.TestCase):
             argv=['-e', '.*', '--no-performance-data'],
             unit_suffix='regexp-excludes',
         )
-        self.assertEqual(0, result.exitcode)
-        self.assertEqual(
-            'SYSTEMD OK - all',
-            result.first_line
-        )
+        self.assertEqual(3, result.exitcode)
 
 
 if __name__ == '__main__':
