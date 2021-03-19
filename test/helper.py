@@ -206,3 +206,11 @@ def execute_main(
 class Expected:
     startup_time = 'startup_time=12.345;60;120'
     """``startup_time=12.345;60;120``"""
+
+
+def debug(msg):
+    file_object = open('debug.txt', 'a')
+    file_object.write('\n---\n')
+
+    file_object.write(msg)
+    file_object.close()

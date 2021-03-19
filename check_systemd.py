@@ -52,11 +52,11 @@ Presentation (``Summary``)
 
 * :class:`SystemdSummary`
 """
-import subprocess
 import argparse
-import re
-import typing
 import collections.abc
+import re
+import subprocess
+import typing
 
 import nagiosplugin
 from nagiosplugin import Metric, Result
@@ -70,12 +70,12 @@ Bindings (pgi) are available."""
 
 try:
     # Look for gi https://pygobject.readthedocs.io/en/latest/index.html
-    from gi.repository.Gio import DBusProxy, BusType
+    from gi.repository.Gio import BusType, DBusProxy
 except ImportError:
     try:
         # Fallback to pgi Pure Python GObject Introspection Bindings
         # https://github.com/pygobject/pgi
-        from pgi.repository.Gio import DBusProxy, BusType
+        from pgi.repository.Gio import BusType, DBusProxy
     except ImportError:
         # Fallback to the command line interface source.
         is_gi = False
@@ -212,6 +212,8 @@ def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
 
 
 class TableParser:
+    """This class reads the text tables that some systemd commands like
+    ``systemctl list-units`` or ``systemctl list-timers`` produce."""
 
     def __init__(self, stdout):
         rows = stdout.splitlines()
@@ -280,6 +282,16 @@ class TableParser:
         """The number of rows. Only the body rows are counted. The header row
         is not taken into account."""
         return len(self.body_rows)
+
+    def check_header(self, column_names: typing.Iterable):
+        """Check if the specified column names are present in the header row of
+        the text table. Raise an exception if not."""
+        for column_name in column_names:
+            if self.header_row.find(column_name) == -1:
+                msg = 'The column heading \'{}\' couldn’t found in the ' \
+                      'table header. Possibly the table layout of systemctl ' \
+                      'has changed.'
+                raise ValueError(msg.format(column_name))
 
     def get_row(self, row_number: int) -> dict:
         """Retrieve a table row as a dictionary. The keys are taken from the
@@ -637,6 +649,7 @@ class CliUnitCache(UnitCache):
         stdout = execute_cli(['systemctl', 'list-units', '--all'])
         if stdout:
             table_parser = TableParser(stdout)
+            table_parser.check_header(('unit', 'active', 'sub', 'load'))
             for row in table_parser.list_rows():
                 self.add_unit(name=row['unit'], active_state=row['active'],
                               sub_state=row['sub'], load_state=row['load'])
@@ -1195,7 +1208,7 @@ def normalize_argparser(opts: argparse.Namespace) -> argparse.Namespace:
     return opts
 
 
-@nagiosplugin.guarded
+@nagiosplugin.guarded(verbose=0)
 def main():
     """The main entry point of the monitoring plugin. First the command line
     arguments are read into the variable ``opts``. The configuration of this
