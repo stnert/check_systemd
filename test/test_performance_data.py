@@ -9,7 +9,8 @@ class TestPerformanceData(unittest.TestCase):
         self.assertEqual(0, result.exitcode)
         self.assertEqual(
             'SYSTEMD OK - all '
-            '| count_units=386 startup_time=12.345;60;120 units_activating=0 '
+            '| count_units=386 data_source=cli startup_time=12.345;60;120 '
+            'units_activating=0 '
             'units_active=275 units_failed=0 units_inactive=111',
             result.first_line
         )
@@ -23,7 +24,8 @@ class TestPerformanceData(unittest.TestCase):
         self.assertEqual(2, result.exitcode)
         self.assertEqual(
             'SYSTEMD CRITICAL - phpsessionclean.timer '
-            '| count_units=3 startup_time=12.345;60;120 units_activating=0 '
+            '| count_units=3 data_source=cli startup_time=12.345;60;120 '
+            'units_activating=0 '
             'units_active=3 units_failed=0 units_inactive=0',
             result.first_line
         )
@@ -39,6 +41,7 @@ class TestPerformanceData(unittest.TestCase):
         self.assertEqual(result.exitcode, 2)
         self.assertEqual(
             'SYSTEMD CRITICAL - smartd.service: failed | count_units=3 '
+            'data_source=cli '
             'startup_time=12.345;60;120 '
             'units_activating=0 units_active=1 units_failed=1 '
             'units_inactive=1',

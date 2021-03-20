@@ -13,3 +13,5 @@
 * The options `--include`, `--include-unit`, `--include-type`,
   `--exclude`, `--exclude-unit`, `--exclude-type` have been added to
   have better control over which units should be selected for testing.
+* A new entry was added to the performance data: `data_source=cli` or
+  `data_source=dbus`

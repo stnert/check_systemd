@@ -812,6 +812,16 @@ class PerformanceDataResource(nagiosplugin.Resource):
                      context='performance_data')
 
 
+class PerformanceDataDataSourceResource(nagiosplugin.Resource):
+
+    name = 'SYSTEMD'
+
+    def probe(self) -> typing.Generator[Metric, None, None]:
+
+        yield Metric(name='data_source', value=opts.data_source,
+                     context='performance_data')
+
+
 # Evaluation: *Context ########################################################
 
 
@@ -1254,6 +1264,7 @@ def main():
     if opts.performance_data:
         tasks += [
             PerformanceDataResource(),
+            PerformanceDataDataSourceResource(),
             PerformanceDataContext(),
         ]
 
