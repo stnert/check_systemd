@@ -10,6 +10,8 @@ class TestDbus(unittest.TestCase):
     def test_mocking(self):
 
         with patch('sys.exit'), \
+             patch('check_systemd.is_gi'), \
+             patch('check_systemd.DbusManager'), \
              patch('sys.argv', ['check_systemd.py', '--dbus']):
             check_systemd.main()
 
