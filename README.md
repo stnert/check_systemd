@@ -34,8 +34,9 @@ pip3 install check_systemd
 usage: check_systemd [-h] [-v] [-V] [-I REGEXP] [-u UNIT_NAME]
                      [--include-type UNIT_TYPE [UNIT_TYPE ...]] [-e REGEXP]
                      [--exclude-unit UNIT_NAME [UNIT_NAME ...]]
-                     [--exclude-type UNIT_TYPE] [-t] [-W SECONDS] [-C SECONDS]
-                     [-n] [-w SECONDS] [-c SECONDS] [--dbus | --cli] [-P | -p]
+                     [--exclude-type UNIT_TYPE] [--required REQUIRED_STATE] [-t]
+                     [-W SECONDS] [-C SECONDS] [-n] [-w SECONDS] [-c SECONDS]
+                     [--dbus | --cli] [-P | -p]
 
 Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>
 Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>
@@ -75,6 +76,9 @@ Options related to unit selection:
                         Name of the systemd unit that is being tested.
   --exclude-type UNIT_TYPE
                         One or more unit types (for example: 'service', 'timer')
+  --required REQUIRED_STATE
+                        Set the state that the systemd unit must have (for
+                        example: active, inactive)
 
 Timers related options:
   -t, --timers, --dead-timers
