@@ -466,6 +466,8 @@ class Unit:
 
         :return: A Nagios compatible exit code: 0, 1, 2, 3
         :rtype: int"""
+        if opts.required and opts.required.lower() != self.active_state:
+            return nagiosplugin.Critical
         if self.load_state == 'error' or self.active_state == 'failed':
             return nagiosplugin.Critical
         return nagiosplugin.Ok
@@ -1084,6 +1086,14 @@ def get_argparser():
         metavar='UNIT_TYPE',
         action='append',
         help='One or more unit types (for example: \'service\', \'timer\')',
+    )
+    
+    units.add_argument(
+        '--required',
+        type=str,
+        metavar='REQUIRED_STATE',
+        dest='required',
+        help='Set the state that the systemd unit must have (for example: active, inactive)',
     )
 
     # Scope: timers ###########################################################
