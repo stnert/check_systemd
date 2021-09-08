@@ -466,6 +466,8 @@ class Unit:
 
         :return: A Nagios compatible exit code: 0, 1, 2, 3
         :rtype: int"""
+        if opts.required and opts.required.lower() != self.active_state:
+            return nagiosplugin.Critical
         if self.load_state == 'error' or self.active_state == 'failed':
             return nagiosplugin.Critical
         return nagiosplugin.Ok
@@ -813,6 +815,16 @@ class PerformanceDataResource(nagiosplugin.Resource):
                      context='performance_data')
 
 
+class PerformanceDataDataSourceResource(nagiosplugin.Resource):
+
+    name = 'SYSTEMD'
+
+    def probe(self) -> typing.Generator[Metric, None, None]:
+
+        yield Metric(name='data_source', value=opts.data_source,
+                     context='performance_data')
+
+
 # Evaluation: *Context ########################################################
 
 
@@ -1076,6 +1088,14 @@ def get_argparser():
         action='append',
         help='One or more unit types (for example: \'service\', \'timer\')',
     )
+    
+    units.add_argument(
+        '--required',
+        type=str,
+        metavar='REQUIRED_STATE',
+        dest='required',
+        help='Set the state that the systemd unit must have (for example: active, inactive)',
+    )
 
     # Scope: timers ###########################################################
 
@@ -1255,6 +1275,7 @@ def main():
     if opts.performance_data:
         tasks += [
             PerformanceDataResource(),
+            PerformanceDataDataSourceResource(),
             PerformanceDataContext(),
         ]
 
