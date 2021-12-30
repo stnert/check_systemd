@@ -54,6 +54,18 @@ class TestOptionExclude(unittest.TestCase):
         )
         self.assertEqual(3, result.exitcode)
 
+    def test_invalid_regexp(self):
+        result = execute_with_opt_e(
+            argv=['-e', '*service'],
+            unit_suffix='ok',
+        )
+        self.assertEqual(3, result.exitcode)
+        self.assertEqual(
+            'SYSTEMD UNKNOWN: check_systemd.CheckSystemdRegexpError: '
+            'Invalid regular expression: \'*service\'',
+            result.first_line
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

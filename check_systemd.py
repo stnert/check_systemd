@@ -323,6 +323,17 @@ class TableParser:
 
 # Unit abstraction ############################################################
 
+class CheckSystemdError(Exception):
+    """Base class for exceptions in this module. All exceptions are caught by
+    the decorator ``@nagiosplugin.guarded()`` on the main function and printed
+    out nicely."""
+    pass
+
+
+class CheckSystemdRegexpError(CheckSystemdError):
+    """Raised when an invalid regular expression is specified."""
+    pass
+
 
 def match_multiple(unit_name: str,
                    regexes: typing.Union[str, typing.Iterator[str]]) -> bool:
@@ -338,8 +349,12 @@ def match_multiple(unit_name: str,
     if isinstance(regexes, str):
         regexes = [regexes]
     for regex in regexes:
-        if re.match(regex, unit_name):
-            return True
+        try:
+            if re.match(regex, unit_name):
+                return True
+        except Exception:
+            raise CheckSystemdRegexpError(
+                'Invalid regular expression: \'{}\''.format(regex))
     return False
 
 
