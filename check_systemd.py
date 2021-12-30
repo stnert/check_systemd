@@ -1088,13 +1088,14 @@ def get_argparser():
         action='append',
         help='One or more unit types (for example: \'service\', \'timer\')',
     )
-    
+
     units.add_argument(
         '--required',
         type=str,
         metavar='REQUIRED_STATE',
         dest='required',
-        help='Set the state that the systemd unit must have (for example: active, inactive)',
+        help='Set the state that the systemd unit must have '
+             '(for example: active, inactive)',
     )
 
     # Scope: timers ###########################################################
