@@ -1036,10 +1036,10 @@ def get_argparser():
         action='append',
         default=[],
         help='Include systemd units to the checks. This option can be '
-             'applied multiple times, for example: -i mnt-data.mount -i '
+             'applied multiple times, for example: -I mnt-data.mount -I '
              'task.service. Regular expressions can be used to include '
              'multiple units at once, for example: '
-             '-e \'user@\\d+\\.service\'. '
+             '-i \'user@\\d+\\.service\'. '
              'For more informations see the Python documentation about '
              'regular expressions '
              '(https://docs.python.org/3/library/re.html).',

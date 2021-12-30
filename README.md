@@ -54,9 +54,9 @@ Options related to unit selection:
 
   -I REGEXP, --include REGEXP
                         Include systemd units to the checks. This option can be
-                        applied multiple times, for example: -i mnt-data.mount
-                        -i task.service. Regular expressions can be used to
-                        include multiple units at once, for example: -e
+                        applied multiple times, for example: -I mnt-data.mount
+                        -I task.service. Regular expressions can be used to
+                        include multiple units at once, for example: -i
                         'user@\d+\.service'. For more informations see the
                         Python documentation about regular expressions
                         (https://docs.python.org/3/library/re.html).
