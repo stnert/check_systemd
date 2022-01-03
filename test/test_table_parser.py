@@ -22,15 +22,11 @@ class TestTableParser(unittest.TestCase):
         self.assertEquals(['', 'unit', 'load', 'active',
                            'sub', 'description'], parser.columns)
 
-    def test_normalize_header_line(self):
-        normalize = TableParser._TableParser__normalize_header
-        self.assertEqual('unit_one  unit_two', normalize('UNIT ONE  UNIT TWO'))
-
     def test_detect_column_lengths(self):
         detect = TableParser._TableParser__detect_lengths
         self.assertEqual([3, 3], detect('1  2  3'))
         self.assertEqual([2, 3, 3], detect('  1  2  3  '))
-        self.assertEqual([2, 5, 5], detect('  1 1  2 2  3 3  '))
+        self.assertEqual([2, 2, 3, 2, 3, 2], detect('  1 1  2 2  3 3  '))
 
     def test_split_line_into_columns(self):
         split = TableParser._TableParser__split_row
@@ -59,6 +55,15 @@ class TestTableParser(unittest.TestCase):
         for row in parser.list_rows():
             pass
         self.assertEqual('systemd-tmpfiles-clean.timer', row['unit'])
+
+    def test_narrow_column_separators(self):
+        parser = TableParser(read_stdout('systemctl-list-timers_all-n-a.txt'))
+        row = parser.get_row(1)
+        self.assertEqual('n/a', row['next'])
+        self.assertEqual('n/a', row['left'])
+        self.assertEqual('n/a', row['last'])
+        self.assertEqual('n/a', row['passed'])
+        self.assertEqual('systemd-readahead-done.timer', row['unit'])
 
 
 if __name__ == '__main__':

@@ -87,7 +87,7 @@ class TestScopeTimers(unittest.TestCase):
     def test_all_n_a(self):
         """n/a -> not available"""
         result = execute_with_opt_t(stdout_timers_suffix='all-n-a')
-        self.assertEqual(0, result.exitcode)
+        self.assertEqual(2, result.exitcode)
 
 
 if __name__ == '__main__':

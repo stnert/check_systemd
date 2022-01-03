@@ -216,6 +216,12 @@ class TableParser:
     ``systemctl list-units`` or ``systemctl list-timers`` produce."""
 
     def __init__(self, stdout):
+        """
+        :param stdout: The standard output of certain systemd command line
+          utilities.
+        :param expected_column_headers: The expected column headers
+          (for example ``('UNIT', 'LOAD', 'ACTIVE')``)
+        """
         rows = stdout.splitlines()
         self.header_row = TableParser.__normalize_header(rows[0])
         self.column_lengths = TableParser.__detect_lengths(self.header_row)
@@ -231,17 +237,20 @@ class TableParser:
 
     @staticmethod
     def __normalize_header(header_row: str) -> str:
-        """Replace a single space character that is surrounded by word
-        characters with an underscore and convert the word to lower case. Now
-        we can more easily detect the column boundaries. A column starts with a
-        word followed by whitespaces. The first word character after a
-        whitespace marks the beginning of a new row."""
+        """Normalize the header row
+
+        :param header_row: The first line of a systemd table output.
+        """
         header_row = header_row.lower()
-        header_row = re.sub(r'(\w) (\w)', r'\1_\2', header_row)
         return header_row
 
     @staticmethod
     def __detect_lengths(header_row: str) -> list:
+        """
+        :param header_row: The first line of a systemd table output.
+
+        :return: A list of column lengths in number of characters.
+        """
         column_lengths = []
         match = re.search(r'^ +', header_row)
         if match:
@@ -249,12 +258,11 @@ class TableParser:
             column_lengths.append(whitespace_prefix_length)
             header_row = header_row[whitespace_prefix_length:]
 
-        header_row = re.sub(r'(\w) (\w)', '\1_\2', header_row)
         word = 0
         space = 0
 
         for char in header_row:
-            if word and space > 1 and char != ' ':
+            if word and space >= 1 and char != ' ':
                 column_lengths.append(word + space)
                 word = 0
                 space = 0
@@ -283,11 +291,15 @@ class TableParser:
         is not taken into account."""
         return len(self.body_rows)
 
-    def check_header(self, column_names: typing.Iterable):
+    def check_header(self, column_header: typing.Iterable):
         """Check if the specified column names are present in the header row of
-        the text table. Raise an exception if not."""
-        for column_name in column_names:
-            if self.header_row.find(column_name) == -1:
+        the text table. Raise an exception if not.
+
+        :param column_headers: The expected column headers
+          (for example ``('UNIT', 'LOAD', 'ACTIVE')``)
+        """
+        for column_name in column_header:
+            if self.header_row.find(column_name.lower()) == -1:
                 msg = 'The column heading \'{}\' couldn’t found in the ' \
                       'table header. Possibly the table layout of systemctl ' \
                       'has changed.'
