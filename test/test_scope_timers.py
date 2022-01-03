@@ -84,6 +84,11 @@ class TestScopeTimers(unittest.TestCase):
                     '-e', 'dfm-auto-jf.timer', '-e', '.*timer'])
         self.assertEqual(0, result.exitcode)
 
+    def test_all_n_a(self):
+        """n/a -> not available"""
+        result = execute_with_opt_t(stdout_timers_suffix='all-n-a')
+        self.assertEqual(0, result.exitcode)
+
 
 if __name__ == '__main__':
     unittest.main()

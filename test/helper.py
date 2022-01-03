@@ -100,7 +100,7 @@ class MockResult:
         """The captured print calls as a list for each line."""
         output = []
         for call in self.__print.call_args_list:
-            output.append(call[0][0])
+            output.append(str(call[0][0]))
         return output
 
     @property
@@ -177,7 +177,7 @@ def execute_main(
     :param int analyze_returncode: The first call `systemctl analyze` to check
         if the startup process is finished
 
-    :return: A results a assembled in the class ``MockResult``
+    :return: The results are assembled in the class ``MockResult``
     """
     if not argv or argv[0] != 'check_systemd.py':
         argv.insert(0, 'check_systemd.py')

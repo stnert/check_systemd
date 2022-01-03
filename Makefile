@@ -19,6 +19,9 @@ test:
 	pip3 install tox
 	tox
 
+test_38:
+	tox -e py38
+
 doc:
 	tox -e docs
 	xdg-open .tox/docs/tmp/html/index.html

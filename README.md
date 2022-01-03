@@ -178,6 +178,12 @@ pip3 install tox
 tox
 ```
 
+Test a single test case:
+
+```
+tox -e py38 -- test/test_scope_timers.py:TestScopeTimers.test_all_n_a
+```
+
 ## Deploying
 
 Edit the version number in check_systemd.py (without `v`). Use the `-s`
