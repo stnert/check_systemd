@@ -760,19 +760,17 @@ class TimersResource(nagiosplugin.Resource):
                 unit = row['unit']
                 if match_multiple(unit, opts.exclude):
                     continue
-                next_date_time = row['next']
 
-                if next_date_time == 'n/a':
-                    passed_text = row['passed']
+                if row['next'] == 'n/a':
 
-                    if passed_text == 'n/a':
+                    if row['passed'] == 'n/a':
                         state = nagiosplugin.Critical
                     else:
                         passed = format_timespan_to_seconds(
-                            passed_text
+                            row['passed']
                         )
 
-                        if passed_text == 'n/a' or \
+                        if row['passed'] == 'n/a' or \
                                 passed >= opts.timers_critical:
                             state = nagiosplugin.Critical
                         elif passed >= opts.timers_warning:
