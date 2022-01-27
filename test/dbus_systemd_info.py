@@ -24,7 +24,7 @@ dbus = DBusProxy.new_for_bus_sync(BusType.SYSTEM, 0, None,
                                   'org.freedesktop.systemd1.Manager', None)
 
 
-def load_unit(unit_name):
+def load_unit(unit_name, interface='Unit'):
     try:
         loaded_unit = dbus.LoadUnit('(s)', unit_name)
     except Exception as e:
@@ -33,7 +33,8 @@ def load_unit(unit_name):
     return DBusProxy.new_for_bus_sync(BusType.SYSTEM,
                                       0, None, 'org.freedesktop.systemd1',
                                       loaded_unit,
-                                      'org.freedesktop.systemd1.Unit', None)
+                                      'org.freedesktop.systemd1.' + interface, None)
+
 
 
 def get_unit_property(unit, property_name):
@@ -155,3 +156,17 @@ for (name, description, load, active, sub_state, followed_unit, object_path,
     dbus_unit = load_unit(name)
 
     print_unit_property(dbus_unit, 'ActiveState')
+
+# timers
+for (name, description, load, active, sub_state, followed_unit, object_path,
+     job_id, job_type, job_object_path) in dbus.ListUnits():
+
+    if '.timer' in name:
+        print(name)
+        dbus_unit = load_unit(name, 'Timer')
+        try:
+            print_unit_property(dbus_unit, 'TimersMonotonic')
+            print_unit_property(dbus_unit, 'NextElapseUSecRealtime')
+
+        except Exception as e:
+            pass
