@@ -16,7 +16,7 @@ except ImportError as e:
 
 # https://lazka.github.io/pgi-docs/#Gio-2.0/classes/DBusProxy.html#Gio.DBusProxy
 
-# https://www.freedesktop.org/wiki/Software/systemd/dbus/
+# https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html
 
 dbus = DBusProxy.new_for_bus_sync(BusType.SYSTEM, 0, None,
                                   'org.freedesktop.systemd1',
@@ -39,7 +39,6 @@ def load_unit(unit_name, interface='Unit'):
                                       0, None, 'org.freedesktop.systemd1',
                                       loaded_unit,
                                       'org.freedesktop.systemd1.' + interface, None)
-
 
 
 def get_unit_property(unit, property_name):
@@ -188,4 +187,6 @@ def list_all_timers():
                 pass
 
 
-list_properties_of_unit('apt-daily.timer')
+# list_properties_of_unit('apt-daily.timer')
+
+list_all_units()
