@@ -54,8 +54,6 @@ def print_properties(properties: dict, filter: list = None):
 
 
 def list_units(unit_type=None, properties=None):
-    print(unit_type)
-
     for (name, _, _, _, _, _, object_path, _, _, _) in manager.ListUnits():
 
         if unit_type and not utils.is_unit_type(name, unit_type):
@@ -65,7 +63,9 @@ def list_units(unit_type=None, properties=None):
         result = {}
 
         collect_properties_of_object(result, object_path)
-        collect_properties_of_object(result,
-                                        object_path, utils.get_interface_name_from_object_path(object_path))
+        collect_properties_of_object(
+            result,
+            object_path,
+            utils.get_interface_name_from_object_path(object_path))
 
         print_properties(result, properties)
