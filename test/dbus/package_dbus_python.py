@@ -24,13 +24,12 @@ manager = dbus.Interface(
 )
 
 
-def print_all_properties_of_object(object_path: str, interface_name='org.freedesktop.systemd1.Unit') -> str:
+def collect_properties_of_object(result: dict, object_path: str, interface_name='org.freedesktop.systemd1.Unit'):
     """
     :param object_path: for example /org/freedesktop/systemd1/unit/apt_2ddaily_2eservice
     :param interface_name: for example org.freedesktop.systemd1.Service
     """
 
-    print(utils.format_colorized_heading(interface_name))
     proxy = bus.get_object('org.freedesktop.systemd1',
                            object_path,)
 
@@ -41,18 +40,32 @@ def print_all_properties_of_object(object_path: str, interface_name='org.freedes
     properties = interface.GetAll(
         interface_name)
     for key, value in properties.items():
+        result[key] = value
+
+
+def print_properties(properties: dict, filter: list = None):
+    if filter:
+        for key in filter:
+            print(utils.colorize_key_value(key, properties[key]))
+        return
+
+    for key, value in properties.items():
         print(utils.colorize_key_value(key, value))
 
 
-for (name, description, load, active, sub_state, followed_unit, object_path,
-        job_id, job_type, job_object_path) in manager.ListUnits():
-    print()
-    print(name)
-    print(object_path)
+def list_units(unit_type=None, properties=None):
+    print(unit_type)
 
-    proxy = bus.get_object('org.freedesktop.systemd1',
-                           object_path,)
+    for (name, _, _, _, _, _, object_path, _, _, _) in manager.ListUnits():
 
-    print_all_properties_of_object(object_path)
-    print_all_properties_of_object(
-        object_path, utils.get_interface_name_from_object_path(object_path))
+        if unit_type and not utils.is_unit_type(name, unit_type):
+            continue
+        print(name)
+
+        result = {}
+
+        collect_properties_of_object(result, object_path)
+        collect_properties_of_object(result,
+                                        object_path, utils.get_interface_name_from_object_path(object_path))
+
+        print_properties(result, properties)

@@ -1,4 +1,11 @@
 from colors import color
+import typing
+import re
+
+
+UnitType = typing.Literal['service', 'service', 'socket', 'target', 'device',
+                          'mount', 'automount', 'timer', 'swap', 'path',
+                          'slice', 'scope']
 
 
 def colorize_key_value(key: any, value: any) -> str:
@@ -34,3 +41,9 @@ def get_interface_name_from_object_path(object_path: str) -> str:
     name_segments = object_path.split('_2e')
     interface_name = name_segments[-1]
     return 'org.freedesktop.systemd1.{}'.format(interface_name.title())
+
+
+def is_unit_type(
+    unit_name_or_object_path,
+    type_name: UnitType) -> bool:
+    return re.match('.*(\.|_2e)' + type_name + '$', unit_name_or_object_path) != None
