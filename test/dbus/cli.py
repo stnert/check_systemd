@@ -2,6 +2,7 @@
 
 import argparse
 import package_dbus_python
+import package_gio
 import utils
 import typing
 
@@ -14,7 +15,17 @@ parser.add_argument(
 
 parser.add_argument('--properties', '-p', type=str, nargs='+')
 
+parser.add_argument('--package', '-P', choices=('gio',
+                                                'dbus-python'), default='gio')
+
+
 args = parser.parse_args()
 
-package_dbus_python.list_units(
+list_units = None
+if args.package == 'dbus-python':
+    list_units = package_dbus_python.list_units
+else:
+    list_units = package_gio.list_units
+
+list_units(
     unit_type=args.unit_type, properties=args.properties)

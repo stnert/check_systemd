@@ -21,6 +21,16 @@ def format_colorized_heading(heading: str) -> str:
     return '\n{}'.format(color(heading, fg='red'))
 
 
+def print_properties(properties: dict, filter: list = None):
+    if filter:
+        for key in filter:
+            print(colorize_key_value(key, properties[key]))
+        return
+
+    for key, value in properties.items():
+        print(colorize_key_value(key, value))
+
+
 def get_interface_name_from_unit_name(unit_name: str) -> str:
     """
     :param name: for example apt-daily.service
@@ -44,6 +54,6 @@ def get_interface_name_from_object_path(object_path: str) -> str:
 
 
 def is_unit_type(
-    unit_name_or_object_path,
-    type_name: UnitType) -> bool:
+        unit_name_or_object_path,
+        type_name: UnitType) -> bool:
     return re.match('.*(\.|_2e)' + type_name + '$', unit_name_or_object_path) != None

@@ -43,16 +43,6 @@ def collect_properties_of_object(result: dict, object_path: str, interface_name=
         result[key] = value
 
 
-def print_properties(properties: dict, filter: list = None):
-    if filter:
-        for key in filter:
-            print(utils.colorize_key_value(key, properties[key]))
-        return
-
-    for key, value in properties.items():
-        print(utils.colorize_key_value(key, value))
-
-
 def list_units(unit_type=None, properties=None):
     for (name, _, _, _, _, _, object_path, _, _, _) in manager.ListUnits():
 
@@ -68,4 +58,4 @@ def list_units(unit_type=None, properties=None):
             object_path,
             utils.get_interface_name_from_object_path(object_path))
 
-        print_properties(result, properties)
+        utils.print_properties(result, properties)
