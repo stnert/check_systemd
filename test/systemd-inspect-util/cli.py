@@ -16,8 +16,11 @@ parser.add_argument(
 
 parser.add_argument('--properties', '-p', type=str, nargs='+')
 
-parser.add_argument('--package', '-P', choices=('gio',
-                                                'dbus-python', 'cli'), default='gio')
+parser.add_argument(
+    '--package', '-P',
+    choices=('gio', 'dbus-python', 'cli'),
+    default='gio'
+)
 
 
 args = parser.parse_args()

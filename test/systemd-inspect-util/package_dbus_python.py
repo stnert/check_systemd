@@ -24,9 +24,12 @@ manager = dbus.Interface(
 )
 
 
-def collect_properties_of_object(result: dict, object_path: str, interface_name='org.freedesktop.systemd1.Unit'):
+def collect_properties_of_object(
+        result: dict, object_path: str,
+        interface_name='org.freedesktop.systemd1.Unit'):
     """
-    :param object_path: for example /org/freedesktop/systemd1/unit/apt_2ddaily_2eservice
+    :param object_path: for example
+      /org/freedesktop/systemd1/unit/apt_2ddaily_2eservice
     :param interface_name: for example org.freedesktop.systemd1.Service
     """
 

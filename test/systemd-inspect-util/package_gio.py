@@ -4,8 +4,6 @@
 A little script to explore the D-Bus API of systemd.
 """
 
-from colors import color
-
 import utils
 
 # https://raw.githubusercontent.com/pengutronix/monitoring-check-systemd-service/master/check-systemd-service
@@ -26,9 +24,12 @@ dbus = DBusProxy.new_for_bus_sync(BusType.SYSTEM, 0, None,
                                   'org.freedesktop.systemd1.Manager', None)
 
 
-def collect_properties_of_object(result: dict, object_path: str, interface_name='org.freedesktop.systemd1.Unit'):
+def collect_properties_of_object(
+        result: dict, object_path: str,
+        interface_name='org.freedesktop.systemd1.Unit'):
     """
-    :param object_path: for example /org/freedesktop/systemd1/unit/apt_2ddaily_2eservice
+    :param object_path: for example
+      /org/freedesktop/systemd1/unit/apt_2ddaily_2eservice
     :param interface_name: for example org.freedesktop.systemd1.Service
     """
 

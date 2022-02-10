@@ -48,7 +48,7 @@ def collect_all_units():
 
 def collect_properties(unit_name: str) -> dict:
     stdout = execute_cli(['systemctl', 'show', unit_name])
-    if stdout == None:
+    if stdout is None:
         return
     rows = stdout.splitlines()
 
@@ -69,5 +69,5 @@ def list_units(unit_type=None, properties=None):
         print(unit_name)
 
         result = collect_properties(unit_name)
-        if result != None:
+        if result is not None:
             utils.print_properties(result, properties)

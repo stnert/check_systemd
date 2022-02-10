@@ -44,7 +44,8 @@ def get_interface_name_from_unit_name(unit_name: str) -> str:
 
 def get_interface_name_from_object_path(object_path: str) -> str:
     """
-    :param object_path: for example /org/freedesktop/systemd1/unit/apt_2ddaily_2eservice
+    :param object_path: for example
+      /org/freedesktop/systemd1/unit/apt_2ddaily_2eservice
 
     :return: org.freedesktop.systemd1.Service
     """
@@ -56,4 +57,5 @@ def get_interface_name_from_object_path(object_path: str) -> str:
 def is_unit_type(
         unit_name_or_object_path,
         type_name: UnitType) -> bool:
-    return re.match('.*(\.|_2e)' + type_name + '$', unit_name_or_object_path) != None
+    return re.match(
+        '.*(\\.|_2e)' + type_name + '$', unit_name_or_object_path) is not None
