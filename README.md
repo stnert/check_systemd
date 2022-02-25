@@ -1,5 +1,4 @@
 [![pypi.org](http://img.shields.io/pypi/v/check_systemd.svg)](https://pypi.python.org/pypi/check_systemd)
-[![Build Status](https://travis-ci.org/Josef-Friedrich/check_systemd.svg?branch=master)](https://travis-ci.org/Josef-Friedrich/check_systemd)
 
 Please use the latest stable release v2.3.1 and not the current master
 branch. The plugin is currently being rewritten so that it can collect
