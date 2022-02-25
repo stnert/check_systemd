@@ -1,4 +1,5 @@
 [![pypi.org](http://img.shields.io/pypi/v/check_systemd.svg)](https://pypi.python.org/pypi/check_systemd)
+[![tests](https://github.com/Josef-Friedrich/check_systemd/actions/workflows/main.yml/badge.svg)](https://github.com/Josef-Friedrich/check_systemd/actions/workflows/main.yml)
 
 Please use the latest stable release v2.3.1 and not the current master
 branch. The plugin is currently being rewritten so that it can collect
