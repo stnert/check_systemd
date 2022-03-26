@@ -1179,7 +1179,7 @@ def get_argparser():
         default=60,
         metavar='SECONDS',
         help='Startup time in seconds to result in a warning status. The'
-             'default is 60 seconds.',
+             ' default is 60 seconds.',
     )
 
     startup_time.add_argument(
@@ -1187,7 +1187,7 @@ def get_argparser():
         metavar='SECONDS',
         default=120,
         help='Startup time in seconds to result in a critical status. The'
-             'default is 120 seconds.',
+             ' default is 120 seconds.',
     )
 
     # Backend #################################################################
