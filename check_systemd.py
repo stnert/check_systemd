@@ -673,9 +673,12 @@ class UnitCache:
 
 class CliUnitCache(UnitCache):
 
-    def __init__(self):
+    def __init__(self, with_user_units: bool = False):
         super().__init__()
-        stdout = execute_cli(['systemctl', 'list-units', '--all'])
+        command = ['systemctl', 'list-units', '--all']
+        if with_user_units:
+            command += ['--user']
+        stdout = execute_cli(command)
         if stdout:
             table_parser = TableParser(stdout)
             table_parser.check_header(('unit', 'active', 'sub', 'load'))
@@ -1211,6 +1214,11 @@ def get_argparser():
              '(cli) binaries to gather the required data for the monitoring '
              'process.'
     )
+    acquisition.add_argument(
+        '--user',
+        dest='with_user_units', action='store_true', default=False,
+        help='Also show user (systemctl --user) units.'
+    )
 
     # Performance data ########################################################
 
@@ -1278,7 +1286,7 @@ def main():
     if opts.data_source == 'dbus':
         unit_cache = DbusUnitCache()
     else:
-        unit_cache = CliUnitCache()
+        unit_cache = CliUnitCache(with_user_units=opts.with_user_units)
 
     tasks = [
         UnitsResource(),
