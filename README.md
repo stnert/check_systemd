@@ -36,7 +36,7 @@ usage: check_systemd [-h] [-v] [-V] [-I REGEXP] [-u UNIT_NAME]
                      [--exclude-unit UNIT_NAME [UNIT_NAME ...]]
                      [--exclude-type UNIT_TYPE] [--required REQUIRED_STATE] [-t]
                      [-W SECONDS] [-C SECONDS] [-n] [-w SECONDS] [-c SECONDS]
-                     [--dbus | --cli] [-P | -p]
+                     [--dbus | --cli] [--user] [-P | -p]
 
 Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>
 Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>
@@ -106,10 +106,10 @@ Startup time related options:
                         triggered.
   -w SECONDS, --warning SECONDS
                         Startup time in seconds to result in a warning status.
-                        Thedefault is 60 seconds.
+                        The default is 60 seconds.
   -c SECONDS, --critical SECONDS
                         Startup time in seconds to result in a critical status.
-                        Thedefault is 120 seconds.
+                        The default is 120 seconds.
 
 Monitoring data acquisition:
   --dbus                Use the systemd’s D-Bus API instead of parsing the text
@@ -119,6 +119,7 @@ Monitoring data acquisition:
   --cli                 Use the text output of serveral systemd command line
                         interface (cli) binaries to gather the required data for
                         the monitoring process.
+  --user                Also show user (systemctl --user) units.
 
 Performance data:
   -P, --performance-data
