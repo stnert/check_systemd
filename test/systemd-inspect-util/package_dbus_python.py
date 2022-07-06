@@ -4,11 +4,11 @@
 A little script to explore the D-Bus API of systemd using dbus-python.
 """
 
+import dbus
 import utils
 
 # https://dbus.freedesktop.org/doc/dbus-python/
 
-import dbus
 
 unit_name = 'apt-daily.timer'
 

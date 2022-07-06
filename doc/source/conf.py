@@ -1,4 +1,5 @@
 import sphinx_rtd_theme
+
 import check_systemd
 
 html_theme = 'sphinx_rtd_theme'

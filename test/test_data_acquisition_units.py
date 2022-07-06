@@ -1,8 +1,8 @@
 """Tests related to data acquisition of systemd units."""
 
 import unittest
-from check_systemd import Unit, UnitCache, UnitNameFilter
 
+from check_systemd import Unit, UnitCache, UnitNameFilter
 
 unit_modem_manager = Unit(name='ModemManager.service',
                           active_state='active', sub_state='sub',

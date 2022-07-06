@@ -1,11 +1,14 @@
 """Unit tests"""
 
 import unittest
+from unittest.mock import patch
+
+from nagiosplugin import CheckError
+
 import check_systemd
 from check_systemd import SystemdUnitTypesList, execute_cli
-from unittest.mock import patch
+
 from .helper import MPopen
-from nagiosplugin import CheckError
 
 
 class TestUnit(unittest.TestCase):

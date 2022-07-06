@@ -1,8 +1,9 @@
 """Test the D-Bus API as a data source."""
 
 import unittest
-import check_systemd
 from unittest.mock import patch
+
+import check_systemd
 
 
 class TestDbus(unittest.TestCase):

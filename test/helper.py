@@ -1,11 +1,12 @@
-import typing
-from unittest import mock
-from unittest.mock import Mock
-from os import path
-import check_systemd
-from contextlib import redirect_stdout, redirect_stderr
 import io
 import os
+import typing
+from contextlib import redirect_stderr, redirect_stdout
+from os import path
+from unittest import mock
+from unittest.mock import Mock
+
+import check_systemd
 
 
 class AddBin(object):

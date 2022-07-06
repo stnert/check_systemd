@@ -1,7 +1,7 @@
-from colors import color
-import typing
 import re
+import typing
 
+from colors import color
 
 UnitType = typing.Literal['service', 'service', 'socket', 'target', 'device',
                           'mount', 'automount', 'timer', 'swap', 'path',

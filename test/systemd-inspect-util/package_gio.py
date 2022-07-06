@@ -9,7 +9,7 @@ import utils
 # https://raw.githubusercontent.com/pengutronix/monitoring-check-systemd-service/master/check-systemd-service
 
 try:
-    from gi.repository.Gio import DBusProxy, BusType
+    from gi.repository.Gio import BusType, DBusProxy
 except ImportError as e:
     print("Please install python3-gi")
     raise e

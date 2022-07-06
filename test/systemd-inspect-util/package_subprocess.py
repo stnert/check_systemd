@@ -1,6 +1,7 @@
 import subprocess
-import utils
 import typing
+
+import utils
 
 
 def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:

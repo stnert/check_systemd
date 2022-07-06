@@ -1,13 +1,15 @@
 """Test the command line interface. The CLI interface is implemented with
 argparse."""
 
+import io
+import subprocess
 import unittest
-from .helper import execute_main
+from contextlib import redirect_stderr
+
 import check_systemd
 from check_systemd import get_argparser
-import subprocess
-import io
-from contextlib import redirect_stderr
+
+from .helper import execute_main
 
 
 class TestFromFunction(unittest.TestCase):

@@ -1,6 +1,7 @@
-import unittest
-from check_systemd import get_argparser
 import re
+import unittest
+
+from check_systemd import get_argparser
 
 
 def argparser_to_readme(argparser, template='README.md',

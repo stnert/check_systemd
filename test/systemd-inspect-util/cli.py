@@ -1,11 +1,12 @@
 #! /usr/bin/python3
 
 import argparse
+import typing
+
 import package_dbus_python
 import package_gio
 import package_subprocess
 import utils
-import typing
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 
