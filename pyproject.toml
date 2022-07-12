@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "check_systemd"
+version = "2.3.1"
+description = "Nagios / Icinga monitoring plugin to check systemd for failed units."
+authors = ["Josef Friedrich <josef@friedrich.rocks>"]
+readme = "README.md"
+license = "GNU LGPL v2"
+repository = 'https://github.com/Josef-Friedrich/check_systemd'
+classifiers = [
+  'Development Status :: 5 - Production/Stable',
+  'Environment :: Plugins',
+  'Intended Audience :: System Administrators',
+  'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
+  'Programming Language :: Python',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.6',
+  'Programming Language :: Python :: 3.7',
+  'Programming Language :: Python :: 3.8',
+  'Programming Language :: Python :: 3.9',
+  'Operating System :: POSIX :: Linux',
+  'Topic :: System :: Networking :: Monitoring'
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+nagiosplugin = "^1.2"
+
+[build-system]
+requires = ["poetry>=1.2.0b2"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry.scripts]
+check_systemd = "check_systemd:main"
