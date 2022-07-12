@@ -4,7 +4,7 @@ version = "2.3.1"
 description = "Nagios / Icinga monitoring plugin to check systemd for failed units."
 authors = ["Josef Friedrich <josef@friedrich.rocks>"]
 readme = "README.md"
-license = "GNU LGPL v2"
+license = "LGPL-2.1-only"
 repository = 'https://github.com/Josef-Friedrich/check_systemd'
 classifiers = [
   'Development Status :: 5 - Production/Stable',
