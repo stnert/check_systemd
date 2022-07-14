@@ -16,9 +16,9 @@ source_suffix = '.rst'
 
 master_doc = 'index'
 
-project = u'check_systemd'
-copyright = u'2020, Josef Friedrich'
-author = u'Josef Friedrich'
+project = 'check_systemd'
+copyright = '2020, Josef Friedrich'
+author = 'Josef Friedrich'
 version = check_systemd.__version__
 release = check_systemd.__version__
 language = 'en'
