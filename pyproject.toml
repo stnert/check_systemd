@@ -5,20 +5,20 @@ description = "Nagios / Icinga monitoring plugin to check systemd for failed uni
 authors = ["Josef Friedrich <josef@friedrich.rocks>"]
 readme = "README.md"
 license = "LGPL-2.1-only"
-repository = 'https://github.com/Josef-Friedrich/check_systemd'
+repository = "https://github.com/Josef-Friedrich/check_systemd"
 classifiers = [
-  'Development Status :: 5 - Production/Stable',
-  'Environment :: Plugins',
-  'Intended Audience :: System Administrators',
-  'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
-  'Programming Language :: Python',
-  'Programming Language :: Python :: 3',
-  'Programming Language :: Python :: 3.7',
-  'Programming Language :: Python :: 3.8',
-  'Programming Language :: Python :: 3.9',
-  'Programming Language :: Python :: 3.10',
-  'Operating System :: POSIX :: Linux',
-  'Topic :: System :: Networking :: Monitoring'
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Plugins",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: System :: Networking :: Monitoring"
 ]
 
 [tool.poetry.dependencies]
