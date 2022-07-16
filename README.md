@@ -1,5 +1,5 @@
 [![pypi.org](http://img.shields.io/pypi/v/check_systemd.svg)](https://pypi.python.org/pypi/check_systemd)
-[![tests](https://github.com/Josef-Friedrich/check_systemd/actions/workflows/main.yml/badge.svg)](https://github.com/Josef-Friedrich/check_systemd/actions/workflows/main.yml)
+[![tests](https://github.com/Josef-Friedrich/check_systemd/actions/workflows/tests.yml/badge.svg)](https://github.com/Josef-Friedrich/check_systemd/actions/workflows/tests.yml)
 
 Please use the latest stable release v2.3.1 and not the current master
 branch. The plugin is currently being rewritten so that it can collect
@@ -43,7 +43,7 @@ Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>
 
 Nagios / Icinga monitoring plugin to check systemd.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -v, --verbose         Increase output verbosity (use up to 3 times).
   -V, --version         show program's version number and exit
