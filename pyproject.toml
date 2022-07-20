@@ -3,7 +3,7 @@ name = "check_systemd"
 version = "2.3.1"
 description = "Nagios / Icinga monitoring plugin to check systemd for failed units."
 authors = ["Josef Friedrich <josef@friedrich.rocks>"]
-readme = "README.md"
+readme = "README.rst"
 license = "LGPL-2.1-only"
 repository = "https://github.com/Josef-Friedrich/check_systemd"
 classifiers = [
@@ -24,6 +24,9 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.7"
 nagiosplugin = "^1.2"
+
+[tool.poetry.group.dev.dependencies]
+readme-patcher = "^0.4.0"
 
 [build-system]
 requires = ["poetry>=1.2.0b2"]
