@@ -59,7 +59,11 @@ import subprocess
 import typing
 
 import nagiosplugin
-from nagiosplugin import Metric, Result
+from nagiosplugin.context import Context, ScalarContext
+from nagiosplugin.metric import Metric
+from nagiosplugin.performance import Performance
+from nagiosplugin.resource import Resource
+from nagiosplugin.result import Result
 
 __version__ = "2.3.1"
 
@@ -738,7 +742,7 @@ unit_cache: UnitCache = None
 # Acquisition: *Resource ######################################################
 
 
-class UnitsResource(nagiosplugin.Resource):
+class UnitsResource(Resource):
 
     name = "SYSTEMD"
 
@@ -756,7 +760,7 @@ class UnitsResource(nagiosplugin.Resource):
             )
 
 
-class TimersResource(nagiosplugin.Resource):
+class TimersResource(Resource):
     """
     Resource that calls ``systemctl list-timers --all`` on the command line to
     get informations about dead / inactive timers. There is one type of systemd
@@ -811,7 +815,7 @@ class TimersResource(nagiosplugin.Resource):
                 yield Metric(name=unit, value=state, context="timers")
 
 
-class StartupTimeResource(nagiosplugin.Resource):
+class StartupTimeResource(Resource):
     """Resource that calls ``systemd-analyze`` on the command line to get
     informations about the startup time."""
 
@@ -852,7 +856,7 @@ class StartupTimeResource(nagiosplugin.Resource):
                 )
 
 
-class PerformanceDataResource(nagiosplugin.Resource):
+class PerformanceDataResource(Resource):
 
     name = "SYSTEMD"
 
@@ -877,7 +881,7 @@ class PerformanceDataResource(nagiosplugin.Resource):
         )
 
 
-class PerformanceDataDataSourceResource(nagiosplugin.Resource):
+class PerformanceDataDataSourceResource(Resource):
 
     name = "SYSTEMD"
 
@@ -891,7 +895,7 @@ class PerformanceDataDataSourceResource(nagiosplugin.Resource):
 # Evaluation: *Context ########################################################
 
 
-class UnitsContext(nagiosplugin.Context):
+class UnitsContext(Context):
     def __init__(self):
         super(UnitsContext, self).__init__("units")
 
@@ -928,11 +932,11 @@ class UnitsContext(nagiosplugin.Context):
             return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
 
 
-class TimersContext(nagiosplugin.Context):
+class TimersContext(Context):
     def __init__(self):
         super(TimersContext, self).__init__("timers")
 
-    def evaluate(self, metric, resource):
+    def evaluate(self, metric: Metric, resource: Resource):
         """Determines state of a given metric.
 
         :param metric: associated metric that is to be evaluated
@@ -944,17 +948,17 @@ class TimersContext(nagiosplugin.Context):
         return self.result_cls(metric.value, metric=metric, hint=metric.name)
 
 
-class StartupTimeContext(nagiosplugin.ScalarContext):
+class StartupTimeContext(ScalarContext):
     def __init__(self):
         super(StartupTimeContext, self).__init__("startup_time")
         if opts.scope_startup_time:
             self.warning = nagiosplugin.Range(opts.warning)
             self.critical = nagiosplugin.Range(opts.critical)
 
-    def performance(self, metric, resource):
+    def performance(self, metric: Metric, resource: Resource):
         if not opts.performance_data:
             return None
-        return nagiosplugin.Performance(
+        return Performance(
             metric.name,
             metric.value,
             metric.uom,
