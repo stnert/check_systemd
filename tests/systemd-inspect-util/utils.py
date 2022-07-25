@@ -3,9 +3,20 @@ import typing
 
 from colors import color
 
-UnitType = typing.Literal['service', 'service', 'socket', 'target', 'device',
-                          'mount', 'automount', 'timer', 'swap', 'path',
-                          'slice', 'scope']
+UnitType = typing.Literal[
+    "service",
+    "service",
+    "socket",
+    "target",
+    "device",
+    "mount",
+    "automount",
+    "timer",
+    "swap",
+    "path",
+    "slice",
+    "scope",
+]
 
 
 def colorize_key_value(key: any, value: any) -> str:
@@ -13,12 +24,11 @@ def colorize_key_value(key: any, value: any) -> str:
     value = str(value)
 
     """Print a value of the structure returned by ListUnits()"""
-    return "{}: {}".format(color(key, fg='green'),
-                           color(value, fg='yellow'))
+    return "{}: {}".format(color(key, fg="green"), color(value, fg="yellow"))
 
 
 def format_colorized_heading(heading: str) -> str:
-    return '\n{}'.format(color(heading, fg='red'))
+    return "\n{}".format(color(heading, fg="red"))
 
 
 def print_properties(properties: dict, filter: list = None):
@@ -37,9 +47,9 @@ def get_interface_name_from_unit_name(unit_name: str) -> str:
 
     :return: org.freedesktop.systemd1.Service
     """
-    name_segments = unit_name.split('.')
+    name_segments = unit_name.split(".")
     interface_name = name_segments[-1]
-    return 'org.freedesktop.systemd1.{}'.format(interface_name.title())
+    return "org.freedesktop.systemd1.{}".format(interface_name.title())
 
 
 def get_interface_name_from_object_path(object_path: str) -> str:
@@ -49,13 +59,12 @@ def get_interface_name_from_object_path(object_path: str) -> str:
 
     :return: org.freedesktop.systemd1.Service
     """
-    name_segments = object_path.split('_2e')
+    name_segments = object_path.split("_2e")
     interface_name = name_segments[-1]
-    return 'org.freedesktop.systemd1.{}'.format(interface_name.title())
+    return "org.freedesktop.systemd1.{}".format(interface_name.title())
 
 
-def is_unit_type(
-        unit_name_or_object_path,
-        type_name: UnitType) -> bool:
-    return re.match(
-        '.*(\\.|_2e)' + type_name + '$', unit_name_or_object_path) is not None
+def is_unit_type(unit_name_or_object_path, type_name: UnitType) -> bool:
+    return (
+        re.match(".*(\\.|_2e)" + type_name + "$", unit_name_or_object_path) is not None
+    )

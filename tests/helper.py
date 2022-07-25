@@ -16,20 +16,18 @@ class AddBin(object):
 
     def __init__(self, bin_path):
         self.bin_path = bin_path
-        self.old_path = os.environ['PATH']
+        self.old_path = os.environ["PATH"]
 
     def __enter__(self):
-        BIN = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                           self.bin_path))
-        os.environ['PATH'] = BIN + ':' + os.environ['PATH']
+        BIN = os.path.abspath(os.path.join(os.path.dirname(__file__), self.bin_path))
+        os.environ["PATH"] = BIN + ":" + os.environ["PATH"]
 
     def __exit__(self, exc_type, exc_value, traceback):
-        os.environ['PATH'] = self.old_path
+        os.environ["PATH"] = self.old_path
 
 
 def get_cli_output_path(file_name: str) -> str:
-    return path.join(path.dirname(
-        path.abspath(__file__)), 'cli_output', file_name)
+    return path.join(path.dirname(path.abspath(__file__)), "cli_output", file_name)
 
 
 def convert_to_bytes(file_name_or_str: str) -> bytes:
@@ -42,7 +40,7 @@ def convert_to_bytes(file_name_or_str: str) -> bytes:
     """
     output_path = get_cli_output_path(file_name_or_str)
     if os.path.exists(output_path):
-        in_file = open(output_path, 'rb')
+        in_file = open(output_path, "rb")
         data = in_file.read()
         in_file.close()
         return data
@@ -86,10 +84,10 @@ class MockResult:
     function."""
 
     def __init__(self, **kwargs):
-        self.__sys_exit = kwargs.get('sys_exit')
-        self.__print = kwargs.get('print')
-        self.__stdout = kwargs.get('stdout')
-        self.__stderr = kwargs.get('stderr')
+        self.__sys_exit = kwargs.get("sys_exit")
+        self.__print = kwargs.get("print")
+        self.__stdout = kwargs.get("stdout")
+        self.__stderr = kwargs.get("stderr")
 
     @property
     def exitcode(self):
@@ -124,10 +122,10 @@ class MockResult:
         calls. Somehow the whole stdout couldn’t be read. The help text could
         be read, but not the plugin output using the function
         ``redirect_stdout()``."""
-        out = ''
+        out = ""
 
         if self.print_calls:
-            out += '\n'.join(self.print_calls)
+            out += "\n".join(self.print_calls)
 
         if self.__stdout:
             out += self.__stdout
@@ -143,14 +141,17 @@ class MockResult:
         end as a string.
         """
         if self.output:
-            return self.output.split('\n', 1)[0]
+            return self.output.split("\n", 1)[0]
 
 
 def execute_main(
-        argv: typing.Iterable[str] = ['check_systemd.py'],
-        stdout: typing.Iterable[str] = ['systemctl-list-units_ok.txt',
-                                        'systemd-analyze_12.345.txt', ],
-        popen: typing.Iterable[MPopen] = None) -> MockResult:
+    argv: typing.Iterable[str] = ["check_systemd.py"],
+    stdout: typing.Iterable[str] = [
+        "systemctl-list-units_ok.txt",
+        "systemd-analyze_12.345.txt",
+    ],
+    popen: typing.Iterable[MPopen] = None,
+) -> MockResult:
     """Execute the main function with a lot of patched functions and classes.
 
     :param argv: A list of command line arguments, e. g.
@@ -180,12 +181,13 @@ def execute_main(
 
     :return: The results are assembled in the class ``MockResult``
     """
-    if not argv or argv[0] != 'check_systemd.py':
-        argv.insert(0, 'check_systemd.py')
-    with mock.patch('sys.exit') as sys_exit, \
-            mock.patch('check_systemd.subprocess.Popen') as Popen, \
-            mock.patch('sys.argv', argv), \
-            mock.patch('builtins.print') as mocked_print:
+    if not argv or argv[0] != "check_systemd.py":
+        argv.insert(0, "check_systemd.py")
+    with mock.patch("sys.exit") as sys_exit, mock.patch(
+        "check_systemd.subprocess.Popen"
+    ) as Popen, mock.patch("sys.argv", argv), mock.patch(
+        "builtins.print"
+    ) as mocked_print:
         if popen:
             Popen.side_effect = popen
         else:
@@ -205,13 +207,13 @@ def execute_main(
 
 
 class Expected:
-    startup_time = 'startup_time=12.345;60;120'
+    startup_time = "startup_time=12.345;60;120"
     """``startup_time=12.345;60;120``"""
 
 
 def debug(msg):
-    file_object = open('debug.txt', 'a')
-    file_object.write('\n---\n')
+    file_object = open("debug.txt", "a")
+    file_object.write("\n---\n")
 
     file_object.write(msg)
     file_object.close()

@@ -61,7 +61,7 @@ import typing
 import nagiosplugin
 from nagiosplugin import Metric, Result
 
-__version__ = '2.3.1'
+__version__ = "2.3.1"
 
 
 is_gi = True
@@ -119,9 +119,14 @@ class DbusManager:
 
     def __init__(self):
         self.__manager = DBusProxy.new_for_bus_sync(
-            BusType.SYSTEM, 0, None, 'org.freedesktop.systemd1',
-            '/org/freedesktop/systemd1', 'org.freedesktop.systemd1.Manager',
-            None)
+            BusType.SYSTEM,
+            0,
+            None,
+            "org.freedesktop.systemd1",
+            "/org/freedesktop/systemd1",
+            "org.freedesktop.systemd1.Manager",
+            None,
+        )
 
     @property
     def manager(self):
@@ -151,27 +156,25 @@ def format_timespan_to_seconds(fmt_timespan: str) -> float:
     :return: The seconds
     """
     for replacement in [
-        ['years', 'y'],
-        ['months', 'month'],
-        ['weeks', 'w'],
-        ['days', 'd'],
+        ["years", "y"],
+        ["months", "month"],
+        ["weeks", "w"],
+        ["days", "d"],
     ]:
-        fmt_timespan = fmt_timespan.replace(
-            ' ' + replacement[0], replacement[1]
-        )
+        fmt_timespan = fmt_timespan.replace(" " + replacement[0], replacement[1])
     seconds = {
-        'y': 31536000,  # 365 * 24 * 60 * 60
-        'month': 2592000,  # 30 * 24 * 60 * 60
-        'w': 604800,  # 7 * 24 * 60 * 60
-        'd': 86400,  # 24 * 60 * 60
-        'h': 3600,  # 60 * 60
-        'min': 60,
-        's': 1,
-        'ms': 0.001,
+        "y": 31536000,  # 365 * 24 * 60 * 60
+        "month": 2592000,  # 30 * 24 * 60 * 60
+        "w": 604800,  # 7 * 24 * 60 * 60
+        "d": 86400,  # 24 * 60 * 60
+        "h": 3600,  # 60 * 60
+        "min": 60,
+        "s": 1,
+        "ms": 0.001,
     }
     result = 0
     for span in fmt_timespan.split():
-        match = re.search(r'([\d\.]+)([a-z]+)', span)
+        match = re.search(r"([\d\.]+)([a-z]+)", span)
         if match:
             value = match.group(1)
             unit = match.group(2)
@@ -191,23 +194,23 @@ def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
     :return: The stdout of the command.
     """
     try:
-        p = subprocess.Popen(args,
-                             stderr=subprocess.PIPE,
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE)
+        p = subprocess.Popen(
+            args, stderr=subprocess.PIPE, stdin=subprocess.PIPE, stdout=subprocess.PIPE
+        )
         stdout, stderr = p.communicate()
     except OSError as e:
         raise nagiosplugin.CheckError(e)
 
     if p.returncode != 0:
-        raise nagiosplugin.CheckError('The command exits with a none-zero'
-                                      'return code ({})'.format(p.returncode))
+        raise nagiosplugin.CheckError(
+            "The command exits with a none-zero" "return code ({})".format(p.returncode)
+        )
 
     if stderr:
         raise nagiosplugin.CheckError(stderr)
 
     if stdout:
-        stdout = stdout.decode('utf-8')
+        stdout = stdout.decode("utf-8")
         return stdout
 
 
@@ -225,12 +228,11 @@ class TableParser:
         rows = stdout.splitlines()
         self.header_row = TableParser.__normalize_header(rows[0])
         self.column_lengths = TableParser.__detect_lengths(self.header_row)
-        self.columns = TableParser.__split_row(
-            self.header_row, self.column_lengths)
+        self.columns = TableParser.__split_row(self.header_row, self.column_lengths)
         counter = 0
         for line in rows:
             # The table footer is separted by a blank line
-            if line == '':
+            if line == "":
                 break
             counter += 1
         self.body_rows = rows[1:counter]
@@ -252,7 +254,7 @@ class TableParser:
         :return: A list of column lengths in number of characters.
         """
         column_lengths = []
-        match = re.search(r'^ +', header_row)
+        match = re.search(r"^ +", header_row)
         if match:
             whitespace_prefix_length = match.end()
             column_lengths.append(whitespace_prefix_length)
@@ -262,12 +264,12 @@ class TableParser:
         space = 0
 
         for char in header_row:
-            if word and space >= 1 and char != ' ':
+            if word and space >= 1 and char != " ":
                 column_lengths.append(word + space)
                 word = 0
                 space = 0
 
-            if char == ' ':
+            if char == " ":
                 space += 1
             else:
                 word += 1
@@ -300,9 +302,11 @@ class TableParser:
         """
         for column_name in column_header:
             if self.header_row.find(column_name.lower()) == -1:
-                msg = 'The column heading \'{}\' couldn’t found in the ' \
-                      'table header. Possibly the table layout of systemctl ' \
-                      'has changed.'
+                msg = (
+                    "The column heading '{}' couldn’t found in the "
+                    "table header. Possibly the table layout of systemctl "
+                    "has changed."
+                )
                 raise ValueError(msg.format(column_name))
 
     def get_row(self, row_number: int) -> dict:
@@ -312,15 +316,16 @@ class TableParser:
         :param row_number: The index number of the table row starting at 0.
 
         """
-        body_columns = TableParser.__split_row(self.body_rows[row_number],
-                                               self.column_lengths)
+        body_columns = TableParser.__split_row(
+            self.body_rows[row_number], self.column_lengths
+        )
 
         result = {}
 
         index = 0
         for column in self.columns:
-            if column == '':
-                key = 'column_{}'.format(index)
+            if column == "":
+                key = "column_{}".format(index)
             else:
                 key = column
             result[key] = body_columns[index]
@@ -335,20 +340,24 @@ class TableParser:
 
 # Unit abstraction ############################################################
 
+
 class CheckSystemdError(Exception):
     """Base class for exceptions in this module. All exceptions are caught by
     the decorator ``@nagiosplugin.guarded()`` on the main function and printed
     out nicely."""
+
     pass
 
 
 class CheckSystemdRegexpError(CheckSystemdError):
     """Raised when an invalid regular expression is specified."""
+
     pass
 
 
-def match_multiple(unit_name: str,
-                   regexes: typing.Union[str, typing.Iterator[str]]) -> bool:
+def match_multiple(
+    unit_name: str, regexes: typing.Union[str, typing.Iterator[str]]
+) -> bool:
     """
     Match multiple regular expressions against a unit name.
 
@@ -366,7 +375,8 @@ def match_multiple(unit_name: str,
                 return True
         except Exception:
             raise CheckSystemdRegexpError(
-                'Invalid regular expression: \'{}\''.format(regex))
+                "Invalid regular expression: '{}'".format(regex)
+            )
     return False
 
 
@@ -377,13 +387,13 @@ class Unit:
     """
 
     def __init__(self, **kwargs):
-        self.name = kwargs.get('name')
+        self.name = kwargs.get("name")
         """The name of the system unit, for example ``nginx.service``. In the
         command line table of the command ``systemctl list-units`` is the
         column containing unit names titled with “UNIT”.
         """
 
-        self.active_state = kwargs.get('active_state')
+        self.active_state = kwargs.get("active_state")
         """From the `D-Bus interface of systemd documentation
         <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
 
@@ -417,7 +427,7 @@ class Unit:
         process of deactivation.
         """
 
-        self.sub_state = kwargs.get('sub_state')
+        self.sub_state = kwargs.get("sub_state")
         """From the `D-Bus interface of systemd documentation
         <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
 
@@ -460,7 +470,7 @@ class Unit:
         * timer: ``dead``, ``waiting``, ``running``, ``elapsed``, ``failed``
         """
 
-        self.load_state = kwargs.get('load_state')
+        self.load_state = kwargs.get("load_state")
         """From the `D-Bus interface of systemd documentation
         <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
 
@@ -495,18 +505,26 @@ class Unit:
         :rtype: int"""
         if opts.required and opts.required.lower() != self.active_state:
             return nagiosplugin.Critical
-        if self.load_state == 'error' or self.active_state == 'failed':
+        if self.load_state == "error" or self.active_state == "failed":
             return nagiosplugin.Critical
         return nagiosplugin.Ok
 
 
 class SystemdUnitTypesList(collections.abc.MutableSequence):
-
     def __init__(self, *args):
         self.unit_types = list()
         self.__all_types = (
-            'service', 'socket', 'target', 'device', 'mount', 'automount',
-            'timer', 'swap', 'path', 'slice', 'scope'
+            "service",
+            "socket",
+            "target",
+            "device",
+            "mount",
+            "automount",
+            "timer",
+            "swap",
+            "path",
+            "slice",
+            "scope",
         )
         self.extend(list(args))
 
@@ -532,11 +550,12 @@ class SystemdUnitTypesList(collections.abc.MutableSequence):
 
     def __check_type(self, type):
         if type not in self.__all_types:
-            raise ValueError('The given type \'{}\' is not a valid systemd '
-                             'unit type.'.format(type))
+            raise ValueError(
+                "The given type '{}' is not a valid systemd " "unit type.".format(type)
+            )
 
     def convert_to_regexp(self):
-        return r'.*\.({})$'.format('|'.join(self.unit_types))
+        return r".*\.({})$".format("|".join(self.unit_types))
 
 
 class UnitNameFilter:
@@ -558,10 +577,11 @@ class UnitNameFilter:
         """Get all stored unit names."""
         return self.__unit_names
 
-    def list(self,
-             include: typing.Union[str, typing.Iterator[str]] = None,
-             exclude: typing.Union[str, typing.Iterator[str]] = None
-             ) -> typing.Generator[str, None, None]:
+    def list(
+        self,
+        include: typing.Union[str, typing.Iterator[str]] = None,
+        exclude: typing.Union[str, typing.Iterator[str]] = None,
+    ) -> typing.Generator[str, None, None]:
         """
         List all unit names or apply filters (``include`` or ``exclude``) to
         the list of unit names.
@@ -599,9 +619,14 @@ class UnitCache:
         self.__units[unit.name] = unit
         self.__name_filter.add(unit.name)
 
-    def add_unit(self, unit: Unit = None, name: str = None,
-                 active_state: str = None, sub_state: str = None,
-                 load_state: str = None) -> Unit:
+    def add_unit(
+        self,
+        unit: Unit = None,
+        name: str = None,
+        active_state: str = None,
+        sub_state: str = None,
+        load_state: str = None,
+    ) -> Unit:
         if not unit:
             unit = Unit()
         if name:
@@ -619,10 +644,11 @@ class UnitCache:
         if name:
             return self.__units[name]
 
-    def list(self,
-             include: typing.Union[str, typing.Iterator[str]] = None,
-             exclude: typing.Union[str, typing.Iterator[str]] = None
-             ) -> typing.Generator[Unit, None, None]:
+    def list(
+        self,
+        include: typing.Union[str, typing.Iterator[str]] = None,
+        exclude: typing.Union[str, typing.Iterator[str]] = None,
+    ) -> typing.Generator[Unit, None, None]:
         """
         List all units or apply filters (``include`` or ``exclude``) to
         the list of unit.
@@ -644,58 +670,65 @@ class UnitCache:
     def count(self):
         return len(self.__units)
 
-    def count_by_states(self, states: typing.Iterator[str],
-                        include: typing.Union[str, typing.Iterator[str]] =
-                        None, exclude: typing.Union[str, typing.Iterator[str]]
-                        = None) -> dict:
+    def count_by_states(
+        self,
+        states: typing.Iterator[str],
+        include: typing.Union[str, typing.Iterator[str]] = None,
+        exclude: typing.Union[str, typing.Iterator[str]] = None,
+    ) -> dict:
         states_normalized = []
         counter = {}
         for state_spec in states:
             # state_proerty:state_value
             # for example: active_state:failed
-            state_property = state_spec.split(':')[0]
-            state_value = state_spec.split(':')[1]
+            state_property = state_spec.split(":")[0]
+            state_value = state_spec.split(":")[1]
             state = {
-                'property': state_property,
-                'value': state_value,
-                'spec': state_spec,
+                "property": state_property,
+                "value": state_value,
+                "spec": state_spec,
             }
             states_normalized.append(state)
             counter[state_spec] = 0
 
         for unit in self.list(include=include, exclude=exclude):
             for state in states_normalized:
-                if getattr(unit, state['property']) == state['value']:
-                    counter[state['spec']] += 1
+                if getattr(unit, state["property"]) == state["value"]:
+                    counter[state["spec"]] += 1
 
         return counter
 
 
 class CliUnitCache(UnitCache):
-
     def __init__(self, with_user_units: bool = False):
         super().__init__()
-        command = ['systemctl', 'list-units', '--all']
+        command = ["systemctl", "list-units", "--all"]
         if with_user_units:
-            command += ['--user']
+            command += ["--user"]
         stdout = execute_cli(command)
         if stdout:
             table_parser = TableParser(stdout)
-            table_parser.check_header(('unit', 'active', 'sub', 'load'))
+            table_parser.check_header(("unit", "active", "sub", "load"))
             for row in table_parser.list_rows():
-                self.add_unit(name=row['unit'], active_state=row['active'],
-                              sub_state=row['sub'], load_state=row['load'])
+                self.add_unit(
+                    name=row["unit"],
+                    active_state=row["active"],
+                    sub_state=row["sub"],
+                    load_state=row["load"],
+                )
 
 
 class DbusUnitCache(UnitCache):
-
     def __init__(self):
         super().__init__()
         all_units = dbus_manager.manager.ListUnits()
-        for (name, _, load_state, active_state, sub_state,
-             _, _, _, _, _) in all_units:
-            self.add_unit(name=name, active_state=active_state,
-                          sub_state=sub_state, load_state=load_state)
+        for (name, _, load_state, active_state, sub_state, _, _, _, _, _) in all_units:
+            self.add_unit(
+                name=name,
+                active_state=active_state,
+                sub_state=sub_state,
+                load_state=load_state,
+            )
 
 
 unit_cache: UnitCache = None
@@ -707,20 +740,19 @@ unit_cache: UnitCache = None
 
 class UnitsResource(nagiosplugin.Resource):
 
-    name = 'SYSTEMD'
+    name = "SYSTEMD"
 
     def probe(self) -> typing.Generator[Metric, None, None]:
         counter = 0
-        for unit in unit_cache.list(include=opts.include,
-                                    exclude=opts.exclude):
-            yield Metric(name=unit.name, value=unit, context='units')
+        for unit in unit_cache.list(include=opts.include, exclude=opts.exclude):
+            yield Metric(name=unit.name, value=unit, context="units")
             counter += 1
 
         if counter == 0:
             raise ValueError(
-                'Please verify your --include-* and --exclude-* '
-                'options. No units have been added for '
-                'testing.'
+                "Please verify your --include-* and --exclude-* "
+                "options. No units have been added for "
+                "testing."
             )
 
 
@@ -737,14 +769,14 @@ class TimersResource(nagiosplugin.Resource):
     def __init__(self):
         super().__init__()
 
-    name = 'SYSTEMD'
+    name = "SYSTEMD"
 
     def probe(self) -> typing.Generator[Metric, None, None]:
         """
         :return: generator that emits
           :class:`~nagiosplugin.metric.Metric` objects
         """
-        stdout = execute_cli(['systemctl', 'list-timers', '--all'])
+        stdout = execute_cli(["systemctl", "list-timers", "--all"])
 
         # NEXT                          LEFT
         # Sat 2020-05-16 15:11:15 CEST  34min left
@@ -756,41 +788,34 @@ class TimersResource(nagiosplugin.Resource):
         # apt-daily.timer  apt-daily.service
         if stdout:
             table_parser = TableParser(stdout)
-            table_parser.check_header(('unit', 'next', 'passed'))
+            table_parser.check_header(("unit", "next", "passed"))
             state = nagiosplugin.Ok
 
             for row in table_parser.list_rows():
-                unit = row['unit']
+                unit = row["unit"]
                 if match_multiple(unit, opts.exclude):
                     continue
 
-                if row['next'] == 'n/a':
+                if row["next"] == "n/a":
 
-                    if row['passed'] == 'n/a':
+                    if row["passed"] == "n/a":
                         state = nagiosplugin.Critical
                     else:
-                        passed = format_timespan_to_seconds(
-                            row['passed']
-                        )
+                        passed = format_timespan_to_seconds(row["passed"])
 
-                        if row['passed'] == 'n/a' or \
-                                passed >= opts.timers_critical:
+                        if row["passed"] == "n/a" or passed >= opts.timers_critical:
                             state = nagiosplugin.Critical
                         elif passed >= opts.timers_warning:
                             state = nagiosplugin.Warn
 
-                yield Metric(
-                    name=unit,
-                    value=state,
-                    context='timers'
-                )
+                yield Metric(name=unit, value=state, context="timers")
 
 
 class StartupTimeResource(nagiosplugin.Resource):
     """Resource that calls ``systemd-analyze`` on the command line to get
     informations about the startup time."""
 
-    name = 'SYSTEMD'
+    name = "SYSTEMD"
 
     def probe(self) -> typing.Generator[Metric, None, None]:
         """Query system state and return metrics.
@@ -800,7 +825,7 @@ class StartupTimeResource(nagiosplugin.Resource):
         """
         stdout = None
         try:
-            stdout = execute_cli(['systemd-analyze'])
+            stdout = execute_cli(["systemd-analyze"])
         except nagiosplugin.CheckError:
             pass
 
@@ -812,54 +837,63 @@ class StartupTimeResource(nagiosplugin.Resource):
             # On raspian no second line
             # Second line:
             # graphical.target reached after 1min 2.154s in userspace
-            match = re.search(r'reached after (.+) in userspace', stdout)
+            match = re.search(r"reached after (.+) in userspace", stdout)
 
             if not match:
-                match = re.search(r' = (.+)\n', stdout)
+                match = re.search(r" = (.+)\n", stdout)
 
             # Output when boot process is not finished:
             # Bootup is not yet finished. Please try again later.
             if match:
-                yield Metric(name='startup_time',
-                             value=format_timespan_to_seconds(match.group(1)),
-                             context='startup_time')
+                yield Metric(
+                    name="startup_time",
+                    value=format_timespan_to_seconds(match.group(1)),
+                    context="startup_time",
+                )
 
 
 class PerformanceDataResource(nagiosplugin.Resource):
 
-    name = 'SYSTEMD'
+    name = "SYSTEMD"
 
     def probe(self) -> typing.Generator[Metric, None, None]:
-        for state_spec, count in unit_cache.count_by_states((
-                'active_state:failed',
-                'active_state:active',
-                'active_state:activating',
-                'active_state:inactive',), exclude=opts.exclude).items():
-            yield Metric(name='units_{}'.format(state_spec.split(':')[1]),
-                         value=count,
-                         context='performance_data')
+        for state_spec, count in unit_cache.count_by_states(
+            (
+                "active_state:failed",
+                "active_state:active",
+                "active_state:activating",
+                "active_state:inactive",
+            ),
+            exclude=opts.exclude,
+        ).items():
+            yield Metric(
+                name="units_{}".format(state_spec.split(":")[1]),
+                value=count,
+                context="performance_data",
+            )
 
-        yield Metric(name='count_units', value=unit_cache.count,
-                     context='performance_data')
+        yield Metric(
+            name="count_units", value=unit_cache.count, context="performance_data"
+        )
 
 
 class PerformanceDataDataSourceResource(nagiosplugin.Resource):
 
-    name = 'SYSTEMD'
+    name = "SYSTEMD"
 
     def probe(self) -> typing.Generator[Metric, None, None]:
 
-        yield Metric(name='data_source', value=opts.data_source,
-                     context='performance_data')
+        yield Metric(
+            name="data_source", value=opts.data_source, context="performance_data"
+        )
 
 
 # Evaluation: *Context ########################################################
 
 
 class UnitsContext(nagiosplugin.Context):
-
     def __init__(self):
-        super(UnitsContext, self).__init__('units')
+        super(UnitsContext, self).__init__("units")
 
     def evaluate(self, metric, resource) -> Result:
         """Determines state of a given metric.
@@ -874,11 +908,11 @@ class UnitsContext(nagiosplugin.Context):
             unit = metric.value
             exitcode = unit.convert_to_exitcode()
             if exitcode != 0:
-                hint = '{}: {}'.format(metric.name, unit.active_state)
+                hint = "{}: {}".format(metric.name, unit.active_state)
                 return self.result_cls(exitcode, metric=metric, hint=hint)
 
         if metric.value:
-            hint = '{}: {}'.format(metric.name, metric.value)
+            hint = "{}: {}".format(metric.name, metric.value)
         else:
             hint = metric.name
 
@@ -886,20 +920,17 @@ class UnitsContext(nagiosplugin.Context):
         if not metric.value:
             return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
 
-        if opts.ignore_inactive_state and metric.value == 'failed':
-            return self.result_cls(nagiosplugin.Critical, metric=metric,
-                                   hint=hint)
-        elif not opts.ignore_inactive_state and metric.value != 'active':
-            return self.result_cls(nagiosplugin.Critical, metric=metric,
-                                   hint=hint)
+        if opts.ignore_inactive_state and metric.value == "failed":
+            return self.result_cls(nagiosplugin.Critical, metric=metric, hint=hint)
+        elif not opts.ignore_inactive_state and metric.value != "active":
+            return self.result_cls(nagiosplugin.Critical, metric=metric, hint=hint)
         else:
             return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
 
 
 class TimersContext(nagiosplugin.Context):
-
     def __init__(self):
-        super(TimersContext, self).__init__('timers')
+        super(TimersContext, self).__init__("timers")
 
     def evaluate(self, metric, resource):
         """Determines state of a given metric.
@@ -914,9 +945,8 @@ class TimersContext(nagiosplugin.Context):
 
 
 class StartupTimeContext(nagiosplugin.ScalarContext):
-
     def __init__(self):
-        super(StartupTimeContext, self).__init__('startup_time')
+        super(StartupTimeContext, self).__init__("startup_time")
         if opts.scope_startup_time:
             self.warning = nagiosplugin.Range(opts.warning)
             self.critical = nagiosplugin.Range(opts.critical)
@@ -924,15 +954,20 @@ class StartupTimeContext(nagiosplugin.ScalarContext):
     def performance(self, metric, resource):
         if not opts.performance_data:
             return None
-        return nagiosplugin.Performance(metric.name, metric.value, metric.uom,
-                                        self.warning, self.critical,
-                                        metric.min, metric.max)
+        return nagiosplugin.Performance(
+            metric.name,
+            metric.value,
+            metric.uom,
+            self.warning,
+            self.critical,
+            metric.min,
+            metric.max,
+        )
 
 
 class PerformanceDataContext(nagiosplugin.Context):
-
     def __init__(self):
-        super(PerformanceDataContext, self).__init__('performance_data')
+        super(PerformanceDataContext, self).__init__("performance_data")
 
     def performance(self, metric, resource):
         """Derives performance data from a given metric.
@@ -964,8 +999,8 @@ class SystemdSummary(nagiosplugin.Summary):
         if opts.include_unit:
             for result in results.most_significant:
                 if isinstance(result.context, UnitsContext):
-                    return '{0}'.format(result)
-        return 'all'
+                    return "{0}".format(result)
+        return "all"
 
     def problem(self, results) -> str:
         """Formats status line when overall state is not ok.
@@ -976,9 +1011,9 @@ class SystemdSummary(nagiosplugin.Summary):
         """
         summary = []
         for result in results.most_significant:
-            if result.context.name in ['startup_time', 'units', 'timers']:
+            if result.context.name in ["startup_time", "units", "timers"]:
                 summary.append(result)
-        return ', '.join(['{0}'.format(result) for result in summary])
+        return ", ".join(["{0}".format(result) for result in summary])
 
     def verbose(self, results) -> str:
         """Provides extra lines if verbose plugin execution is requested.
@@ -989,16 +1024,15 @@ class SystemdSummary(nagiosplugin.Summary):
         """
         summary = []
         for result in results.most_significant:
-            if result.context.name in ['startup_time', 'units', 'timers']:
-                summary.append('{0}: {1}'.format(result.state, result))
+            if result.context.name in ["startup_time", "units", "timers"]:
+                summary.append("{0}: {1}".format(result.state, result))
         return summary
 
 
 # Command line interface (argparse) ###########################################
 
 
-def convert_to_regexp_list(regexp=None, unit_names=None,
-                           unit_types=None):
+def convert_to_regexp_list(regexp=None, unit_names=None, unit_types=None):
     result = set()
     if regexp:
         for regexp in regexp:
@@ -1008,7 +1042,7 @@ def convert_to_regexp_list(regexp=None, unit_names=None,
         if isinstance(unit_names, str):
             unit_names = [unit_names]
         for unit_name in unit_names:
-            result.add(unit_name.replace('.', '\\.'))
+            result.add(unit_name.replace(".", "\\."))
 
     if unit_types:
         types = SystemdUnitTypesList(*unit_types)
@@ -1019,243 +1053,270 @@ def convert_to_regexp_list(regexp=None, unit_names=None,
 
 def get_argparser():
     parser = argparse.ArgumentParser(
-        prog='check_systemd',  # To get the right command name in the README.
-        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(prog, width=80),  # noqa: E501
-        description=  # noqa: E251
-        'Copyright (c) 2014-18 Andrea Briganti <kbytesys@gmail.com>\n'
-        'Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>\n'
-        '\n'
-        'Nagios / Icinga monitoring plugin to check systemd.\n',  # noqa: E501
-        epilog=  # noqa: E251
-        'Performance data:\n'
-        '  - count_units\n'
-        '  - startup_time\n'
-        '  - units_activating\n'
-        '  - units_active\n'
-        '  - units_failed\n'
-        '  - units_inactive\n',
+        prog="check_systemd",  # To get the right command name in the README.
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, width=80
+        ),  # noqa: E501
+        description="Copyright (c) 2014-18 Andrea Briganti "
+        "<kbytesys@gmail.com>\n"  # noqa: E251
+        "Copyright (c) 2019-21 Josef Friedrich <josef@friedrich.rocks>\n"
+        "\n"
+        "Nagios / Icinga monitoring plugin to check systemd.\n",  # noqa: E501
+        epilog="Performance data:\n"  # noqa: E251
+        "  - count_units\n"
+        "  - startup_time\n"
+        "  - units_activating\n"
+        "  - units_active\n"
+        "  - units_failed\n"
+        "  - units_inactive\n",
     )
 
     parser.add_argument(
-        '-v', '--verbose',
-        action='count',
+        "-v",
+        "--verbose",
+        action="count",
         default=0,
-        help='Increase output verbosity (use up to 3 times).'
+        help="Increase output verbosity (use up to 3 times).",
     )
 
     parser.add_argument(
-        '-V', '--version',
-        action='version',
-        version='%(prog)s {}'.format(__version__),
+        "-V",
+        "--version",
+        action="version",
+        version="%(prog)s {}".format(__version__),
     )
 
     # Scope: units ############################################################
 
     units = parser.add_argument_group(
-        'Options related to unit selection',
-        'By default all systemd units are checked. '
-        'Use the option \'-e\' to exclude units\nby a regular expression. '
-        'Use the option \'-u\' to check only one unit.'
+        "Options related to unit selection",
+        "By default all systemd units are checked. "
+        "Use the option '-e' to exclude units\nby a regular expression. "
+        "Use the option '-u' to check only one unit.",
     )
 
     units.add_argument(
-        '-I', '--include',
-        metavar='REGEXP',
-        action='append',
+        "-I",
+        "--include",
+        metavar="REGEXP",
+        action="append",
         default=[],
-        help='Include systemd units to the checks. This option can be '
-             'applied multiple times, for example: -I mnt-data.mount -I '
-             'task.service. Regular expressions can be used to include '
-             'multiple units at once, for example: '
-             '-i \'user@\\d+\\.service\'. '
-             'For more informations see the Python documentation about '
-             'regular expressions '
-             '(https://docs.python.org/3/library/re.html).',
+        help="Include systemd units to the checks. This option can be "
+        "applied multiple times, for example: -I mnt-data.mount -I "
+        "task.service. Regular expressions can be used to include "
+        "multiple units at once, for example: "
+        "-i 'user@\\d+\\.service'. "
+        "For more informations see the Python documentation about "
+        "regular expressions "
+        "(https://docs.python.org/3/library/re.html).",
     )
 
     units.add_argument(
-        '-u', '--unit', '--include-unit',
+        "-u",
+        "--unit",
+        "--include-unit",
         type=str,
-        metavar='UNIT_NAME',
-        dest='include_unit',
-        help='Name of the systemd unit that is being tested.',
+        metavar="UNIT_NAME",
+        dest="include_unit",
+        help="Name of the systemd unit that is being tested.",
     )
 
     units.add_argument(
-        '--include-type',
-        metavar='UNIT_TYPE',
-        nargs='+',
-        help='One or more unit types (for example: \'service\', \'timer\')',
+        "--include-type",
+        metavar="UNIT_TYPE",
+        nargs="+",
+        help="One or more unit types (for example: 'service', 'timer')",
     )
 
     units.add_argument(
-        '-e', '--exclude',
-        metavar='REGEXP',
-        action='append',
+        "-e",
+        "--exclude",
+        metavar="REGEXP",
+        action="append",
         default=[],
-        help='Exclude a systemd unit from the checks. This option can be '
-             'applied multiple times, for example: -e mnt-data.mount -e '
-             'task.service. Regular expressions can be used to exclude '
-             'multiple units at once, for example: '
-             '-e \'user@\\d+\\.service\'. '
-             'For more informations see the Python documentation about '
-             'regular expressions '
-             '(https://docs.python.org/3/library/re.html).',
+        help="Exclude a systemd unit from the checks. This option can be "
+        "applied multiple times, for example: -e mnt-data.mount -e "
+        "task.service. Regular expressions can be used to exclude "
+        "multiple units at once, for example: "
+        "-e 'user@\\d+\\.service'. "
+        "For more informations see the Python documentation about "
+        "regular expressions "
+        "(https://docs.python.org/3/library/re.html).",
     )
 
     units.add_argument(
-        '--exclude-unit',
-        metavar='UNIT_NAME',
-        nargs='+',
-        help='Name of the systemd unit that is being tested.',
+        "--exclude-unit",
+        metavar="UNIT_NAME",
+        nargs="+",
+        help="Name of the systemd unit that is being tested.",
     )
 
     units.add_argument(
-        '--exclude-type',
-        metavar='UNIT_TYPE',
-        action='append',
-        help='One or more unit types (for example: \'service\', \'timer\')',
+        "--exclude-type",
+        metavar="UNIT_TYPE",
+        action="append",
+        help="One or more unit types (for example: 'service', 'timer')",
     )
 
     units.add_argument(
-        '--required',
+        "--required",
         type=str,
-        metavar='REQUIRED_STATE',
-        dest='required',
-        help='Set the state that the systemd unit must have '
-             '(for example: active, inactive)',
+        metavar="REQUIRED_STATE",
+        dest="required",
+        help="Set the state that the systemd unit must have "
+        "(for example: active, inactive)",
     )
 
     # Scope: timers ###########################################################
 
-    timers = parser.add_argument_group('Timers related options')
+    timers = parser.add_argument_group("Timers related options")
 
     timers.add_argument(
-        '-t', '--timers', '--dead-timers',
-        dest='scope_timers', action='store_true',
-        help='Detect dead / inactive timers. See the corresponding options '
-             '\'-W, --dead-timer-warning\' and '
-             '\'-C, --dead-timers-critical\'. '
-             'Dead timers are detected by parsing the output of '
-             '\'systemctl list-timers\'. '
-             'Dead timer rows displaying \'n/a\' in the NEXT and LEFT '
-             'columns and the time span in the column PASSED exceeds the '
-             'values specified with the options \'-W, --dead-timer-warning\' '
-             'and \'-C, --dead-timers-critical\'.'
+        "-t",
+        "--timers",
+        "--dead-timers",
+        dest="scope_timers",
+        action="store_true",
+        help="Detect dead / inactive timers. See the corresponding options "
+        "'-W, --dead-timer-warning' and "
+        "'-C, --dead-timers-critical'. "
+        "Dead timers are detected by parsing the output of "
+        "'systemctl list-timers'. "
+        "Dead timer rows displaying 'n/a' in the NEXT and LEFT "
+        "columns and the time span in the column PASSED exceeds the "
+        "values specified with the options '-W, --dead-timer-warning' "
+        "and '-C, --dead-timers-critical'.",
     )
 
     timers.add_argument(
-        '-W', '--timers-warning', '--dead-timers-warning',
-        dest='timers_warning', metavar='SECONDS',
+        "-W",
+        "--timers-warning",
+        "--dead-timers-warning",
+        dest="timers_warning",
+        metavar="SECONDS",
         type=float,
         default=60 * 60 * 24 * 6,
-        help='Time ago in seconds for dead / inactive timers to trigger a '
-             'warning state (by default 6 days).'
+        help="Time ago in seconds for dead / inactive timers to trigger a "
+        "warning state (by default 6 days).",
     )
 
     timers.add_argument(
-        '-C', '--timers-critical', '--dead-timers-critical',
-        dest='timers_critical', metavar='SECONDS',
+        "-C",
+        "--timers-critical",
+        "--dead-timers-critical",
+        dest="timers_critical",
+        metavar="SECONDS",
         type=float,
         default=60 * 60 * 24 * 7,
-        help='Time ago in seconds for dead / inactive timers to trigger a '
-             'critical state (by default 7 days).'
+        help="Time ago in seconds for dead / inactive timers to trigger a "
+        "critical state (by default 7 days).",
     )
 
     # Scope: startup_time #####################################################
 
-    startup_time = parser.add_argument_group('Startup time related options')
+    startup_time = parser.add_argument_group("Startup time related options")
 
     startup_time.add_argument(
-        '-n', '--no-startup-time',
-        dest='scope_startup_time',
-        action='store_false',
+        "-n",
+        "--no-startup-time",
+        dest="scope_startup_time",
+        action="store_false",
         default=True,
-        help='Don’t check the startup time. Using this option the options '
-             '\'-w, --warning\' and \'-c, --critical\' have no effect. '
-             'Performance data about the startup time is collected, but '
-             'no critical, warning etc. states are triggered.',
+        help="Don’t check the startup time. Using this option the options "
+        "'-w, --warning' and '-c, --critical' have no effect. "
+        "Performance data about the startup time is collected, but "
+        "no critical, warning etc. states are triggered.",
     )
 
     startup_time.add_argument(
-        '-w', '--warning',
+        "-w",
+        "--warning",
         default=60,
-        metavar='SECONDS',
-        help='Startup time in seconds to result in a warning status. The'
-             ' default is 60 seconds.',
+        metavar="SECONDS",
+        help="Startup time in seconds to result in a warning status. The"
+        " default is 60 seconds.",
     )
 
     startup_time.add_argument(
-        '-c', '--critical',
-        metavar='SECONDS',
+        "-c",
+        "--critical",
+        metavar="SECONDS",
         default=120,
-        help='Startup time in seconds to result in a critical status. The'
-             ' default is 120 seconds.',
+        help="Startup time in seconds to result in a critical status. The"
+        " default is 120 seconds.",
     )
 
     # Backend #################################################################
 
-    acquisition = parser.add_argument_group('Monitoring data acquisition')
+    acquisition = parser.add_argument_group("Monitoring data acquisition")
     acquisition_exclusive_group = acquisition.add_mutually_exclusive_group()
 
     acquisition_exclusive_group.add_argument(
-        '--dbus',
-        dest='data_source', action='store_const', const='dbus', default='cli',
-        help='Use the systemd’s D-Bus API instead of parsing the text output '
-             'of various systemd related command line interfaces to monitor '
-             'systemd. At the moment the D-Bus backend of this plugin is '
-             'only partially implemented.'
+        "--dbus",
+        dest="data_source",
+        action="store_const",
+        const="dbus",
+        default="cli",
+        help="Use the systemd’s D-Bus API instead of parsing the text output "
+        "of various systemd related command line interfaces to monitor "
+        "systemd. At the moment the D-Bus backend of this plugin is "
+        "only partially implemented.",
     )
 
     acquisition_exclusive_group.add_argument(
-        '--cli',
-        dest='data_source', action='store_const', const='cli',
-        help='Use the text output of serveral systemd command line interface '
-             '(cli) binaries to gather the required data for the monitoring '
-             'process.'
+        "--cli",
+        dest="data_source",
+        action="store_const",
+        const="cli",
+        help="Use the text output of serveral systemd command line interface "
+        "(cli) binaries to gather the required data for the monitoring "
+        "process.",
     )
     acquisition.add_argument(
-        '--user',
-        dest='with_user_units', action='store_true', default=False,
-        help='Also show user (systemctl --user) units.'
+        "--user",
+        dest="with_user_units",
+        action="store_true",
+        default=False,
+        help="Also show user (systemctl --user) units.",
     )
 
     # Performance data ########################################################
 
-    perf_data = parser.add_argument_group('Performance data')
+    perf_data = parser.add_argument_group("Performance data")
     perf_data_exclusive_group = perf_data.add_mutually_exclusive_group()
 
     perf_data_exclusive_group.add_argument(
-        '-P', '--performance-data',
-        dest='performance_data', action='store_true', default=True,
-        help='Attach no performance data to the plugin output.'
+        "-P",
+        "--performance-data",
+        dest="performance_data",
+        action="store_true",
+        default=True,
+        help="Attach no performance data to the plugin output.",
     )
 
     perf_data_exclusive_group.add_argument(
-        '-p', '--no-performance-data',
-        dest='performance_data',  action='store_false',
-        help='Attach performance data to the plugin output.'
+        "-p",
+        "--no-performance-data",
+        dest="performance_data",
+        action="store_false",
+        help="Attach performance data to the plugin output.",
     )
 
     return parser
 
 
 def normalize_argparser(opts: argparse.Namespace) -> argparse.Namespace:
-    if opts.data_source == 'dbus' and not is_gi:
-        opts.data_source = 'cli'
+    if opts.data_source == "dbus" and not is_gi:
+        opts.data_source = "cli"
 
     opts.include = convert_to_regexp_list(
-        regexp=opts.include,
-        unit_names=opts.include_unit,
-        unit_types=opts.include_type
+        regexp=opts.include, unit_names=opts.include_unit, unit_types=opts.include_type
     )
     # del opts.include_unit
     del opts.include_type
 
     opts.exclude = convert_to_regexp_list(
-        regexp=opts.exclude,
-        unit_names=opts.exclude_unit,
-        unit_types=opts.exclude_type
+        regexp=opts.exclude, unit_names=opts.exclude_unit, unit_types=opts.exclude_type
     )
     del opts.exclude_type
     del opts.exclude_unit
@@ -1283,7 +1344,7 @@ def main():
     opts = normalize_argparser(opts)
 
     global unit_cache
-    if opts.data_source == 'dbus':
+    if opts.data_source == "dbus":
         unit_cache = DbusUnitCache()
     else:
         unit_cache = CliUnitCache(with_user_units=opts.with_user_units)
@@ -1317,5 +1378,5 @@ def main():
     check.main(opts.verbose)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -13,10 +13,9 @@ def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
     :return: The stdout of the command.
     """
     try:
-        p = subprocess.Popen(args,
-                             stderr=subprocess.PIPE,
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE)
+        p = subprocess.Popen(
+            args, stderr=subprocess.PIPE, stdin=subprocess.PIPE, stdout=subprocess.PIPE
+        )
         stdout, stderr = p.communicate()
     except OSError as e:
         raise Exception(e)
@@ -30,33 +29,33 @@ def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
         raise Exception(stderr)
 
     if stdout:
-        stdout = stdout.decode('utf-8')
+        stdout = stdout.decode("utf-8")
         return stdout
 
 
 def collect_all_units():
-    stdout = execute_cli(['systemctl', 'list-units', '--all', '--no-legend'])
+    stdout = execute_cli(["systemctl", "list-units", "--all", "--no-legend"])
 
     rows = stdout.splitlines()
 
     units = []
     for row in rows:
         row = row.strip()
-        units.append(row[:row.index(' ')])
+        units.append(row[: row.index(" ")])
 
     return units
 
 
 def collect_properties(unit_name: str) -> dict:
-    stdout = execute_cli(['systemctl', 'show', unit_name])
+    stdout = execute_cli(["systemctl", "show", unit_name])
     if stdout is None:
         return
     rows = stdout.splitlines()
 
     properties = {}
     for row in rows:
-        index_equal_sign = row.index('=')
-        properties[row[:index_equal_sign]] = row[index_equal_sign + 1:]
+        index_equal_sign = row.index("=")
+        properties[row[:index_equal_sign]] = row[index_equal_sign + 1 :]
 
     return properties
 

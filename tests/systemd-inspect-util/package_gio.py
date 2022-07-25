@@ -18,29 +18,38 @@ except ImportError as e:
 
 # https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html
 
-dbus = DBusProxy.new_for_bus_sync(BusType.SYSTEM, 0, None,
-                                  'org.freedesktop.systemd1',
-                                  '/org/freedesktop/systemd1',
-                                  'org.freedesktop.systemd1.Manager', None)
+dbus = DBusProxy.new_for_bus_sync(
+    BusType.SYSTEM,
+    0,
+    None,
+    "org.freedesktop.systemd1",
+    "/org/freedesktop/systemd1",
+    "org.freedesktop.systemd1.Manager",
+    None,
+)
 
 
 def collect_properties_of_object(
-        result: dict, object_path: str,
-        interface_name='org.freedesktop.systemd1.Unit'):
+    result: dict, object_path: str, interface_name="org.freedesktop.systemd1.Unit"
+):
     """
     :param object_path: for example
       /org/freedesktop/systemd1/unit/apt_2ddaily_2eservice
     :param interface_name: for example org.freedesktop.systemd1.Service
     """
 
-    unit = DBusProxy.new_for_bus_sync(BusType.SYSTEM,
-                                      0, None, 'org.freedesktop.systemd1',
-                                      object_path,
-                                      interface_name, None)
+    unit = DBusProxy.new_for_bus_sync(
+        BusType.SYSTEM,
+        0,
+        None,
+        "org.freedesktop.systemd1",
+        object_path,
+        interface_name,
+        None,
+    )
 
     for property_name in unit.get_cached_property_names():
-        result[property_name] = unit.get_cached_property(
-            property_name).unpack()
+        result[property_name] = unit.get_cached_property(property_name).unpack()
 
 
 def list_units(unit_type=None, properties=None):
@@ -53,8 +62,7 @@ def list_units(unit_type=None, properties=None):
 
         collect_properties_of_object(result, object_path)
         collect_properties_of_object(
-            result,
-            object_path,
-            utils.get_interface_name_from_object_path(object_path))
+            result, object_path, utils.get_interface_name_from_object_path(object_path)
+        )
 
         utils.print_properties(result, properties)
