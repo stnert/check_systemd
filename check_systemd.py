@@ -61,10 +61,13 @@ import typing
 import nagiosplugin
 from nagiosplugin.check import Check
 from nagiosplugin.context import Context, ScalarContext
+from nagiosplugin.error import CheckError
 from nagiosplugin.metric import Metric
 from nagiosplugin.performance import Performance
+from nagiosplugin.range import Range
 from nagiosplugin.resource import Resource
 from nagiosplugin.result import Result, Results
+from nagiosplugin.state import Critical, Ok
 from nagiosplugin.summary import Summary
 
 __version__ = "2.3.1"
@@ -832,7 +835,7 @@ class StartupTimeResource(Resource):
         stdout = None
         try:
             stdout = execute_cli(["systemd-analyze"])
-        except nagiosplugin.CheckError:
+        except CheckError:
             pass
 
         if stdout:
@@ -924,14 +927,14 @@ class UnitsContext(Context):
 
         # The option -u is not specifed
         if not metric.value:
-            return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
+            return self.result_cls(Ok, metric=metric, hint=hint)
 
         if opts.ignore_inactive_state and metric.value == "failed":
-            return self.result_cls(nagiosplugin.Critical, metric=metric, hint=hint)
+            return self.result_cls(Critical, metric=metric, hint=hint)
         elif not opts.ignore_inactive_state and metric.value != "active":
-            return self.result_cls(nagiosplugin.Critical, metric=metric, hint=hint)
+            return self.result_cls(Critical, metric=metric, hint=hint)
         else:
-            return self.result_cls(nagiosplugin.Ok, metric=metric, hint=hint)
+            return self.result_cls(Ok, metric=metric, hint=hint)
 
 
 class TimersContext(Context):
@@ -954,8 +957,8 @@ class StartupTimeContext(ScalarContext):
     def __init__(self):
         super(StartupTimeContext, self).__init__("startup_time")
         if opts.scope_startup_time:
-            self.warning = nagiosplugin.Range(opts.warning)
-            self.critical = nagiosplugin.Range(opts.critical)
+            self.warning = Range(opts.warning)
+            self.critical = Range(opts.critical)
 
     def performance(self, metric: Metric, resource: Resource):
         if not opts.performance_data:
@@ -971,7 +974,7 @@ class StartupTimeContext(ScalarContext):
         )
 
 
-class PerformanceDataContext(nagiosplugin.Context):
+class PerformanceDataContext(Context):
     def __init__(self):
         super(PerformanceDataContext, self).__init__("performance_data")
 
@@ -1015,22 +1018,30 @@ class SystemdSummary(Summary):
 
         :returns: status line
         """
-        summary = []
+        summary: typing.List[Result] = []
         for result in results.most_significant:
-            if result.context.name in ["startup_time", "units", "timers"]:
+            if result.context and result.context.name in [
+                "startup_time",
+                "units",
+                "timers",
+            ]:
                 summary.append(result)
         return ", ".join(["{0}".format(result) for result in summary])
 
-    def verbose(self, results: Results) -> str:
+    def verbose(self, results: Results) -> typing.List[str]:
         """Provides extra lines if verbose plugin execution is requested.
 
         :param results: :class:`~.result.Results` container
 
         :returns: list of strings
         """
-        summary = []
+        summary: typing.List[str] = []
         for result in results.most_significant:
-            if result.context.name in ["startup_time", "units", "timers"]:
+            if result.context and result.context.name in [
+                "startup_time",
+                "units",
+                "timers",
+            ]:
                 summary.append("{0}: {1}".format(result.state, result))
         return summary
 
