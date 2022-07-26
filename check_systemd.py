@@ -59,11 +59,13 @@ import subprocess
 import typing
 
 import nagiosplugin
+from nagiosplugin.check import Check
 from nagiosplugin.context import Context, ScalarContext
 from nagiosplugin.metric import Metric
 from nagiosplugin.performance import Performance
 from nagiosplugin.resource import Resource
-from nagiosplugin.result import Result
+from nagiosplugin.result import Result, Results
+from nagiosplugin.summary import Summary
 
 __version__ = "2.3.1"
 
@@ -899,7 +901,7 @@ class UnitsContext(Context):
     def __init__(self):
         super(UnitsContext, self).__init__("units")
 
-    def evaluate(self, metric, resource) -> Result:
+    def evaluate(self, metric: Metric, resource: Resource) -> Result:
         """Determines state of a given metric.
 
         :param metric: associated metric that is to be evaluated
@@ -973,7 +975,7 @@ class PerformanceDataContext(nagiosplugin.Context):
     def __init__(self):
         super(PerformanceDataContext, self).__init__("performance_data")
 
-    def performance(self, metric, resource):
+    def performance(self, metric: Metric, resource: Resource):
         """Derives performance data from a given metric.
 
         :param metric: associated metric from which performance data are
@@ -983,18 +985,18 @@ class PerformanceDataContext(nagiosplugin.Context):
 
         :returns: :class:`Perfdata` object
         """
-        return nagiosplugin.Performance(label=metric.name, value=metric.value)
+        return Performance(label=metric.name, value=metric.value)
 
 
 # Presentation: *Summary ######################################################
 
 
-class SystemdSummary(nagiosplugin.Summary):
+class SystemdSummary(Summary):
     """Format the different status lines. A subclass of `nagiosplugin.Summary
     <https://github.com/mpounsett/nagiosplugin/blob/master/nagiosplugin/summary.py>`_.
     """
 
-    def ok(self, results) -> str:
+    def ok(self, results: Results) -> str:
         """Formats status line when overall state is ok.
 
         :param results: :class:`~nagiosplugin.result.Results` container
@@ -1006,7 +1008,7 @@ class SystemdSummary(nagiosplugin.Summary):
                     return "{0}".format(result)
         return "all"
 
-    def problem(self, results) -> str:
+    def problem(self, results: Results) -> str:
         """Formats status line when overall state is not ok.
 
         :param results: :class:`~.result.Results` container
@@ -1019,7 +1021,7 @@ class SystemdSummary(nagiosplugin.Summary):
                 summary.append(result)
         return ", ".join(["{0}".format(result) for result in summary])
 
-    def verbose(self, results) -> str:
+    def verbose(self, results: Results) -> str:
         """Provides extra lines if verbose plugin execution is requested.
 
         :param results: :class:`~.result.Results` container
@@ -1353,7 +1355,7 @@ def main():
     else:
         unit_cache = CliUnitCache(with_user_units=opts.with_user_units)
 
-    tasks = [
+    tasks: typing.List[object] = [
         UnitsResource(),
         UnitsContext(),
         SystemdSummary(),
@@ -1378,7 +1380,7 @@ def main():
             PerformanceDataContext(),
         ]
 
-    check = nagiosplugin.Check(*tasks)
+    check = Check(*tasks)
     check.main(opts.verbose)
 
 
