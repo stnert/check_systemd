@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Iterator, Protocol, Type
+from typing import Callable, Iterator, Protocol
 
 from nagiosplugin.metric import Metric
 from nagiosplugin.performance import Performance
@@ -40,7 +40,7 @@ class ScalarContext(Context):
     def performance(self, metric: Metric, resource: Resource) -> Performance: ...
 
 class Contexts:
-    by_name: Dict[str, Context]
+    by_name: dict[str, Context]
 
     def __init__(self) -> None: ...
     def add(self, context: Context) -> Context: ...

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Generator, List, Literal
+from typing import Generator, Literal
 
 from nagiosplugin.context import Context
 from nagiosplugin.metric import Metric
@@ -27,9 +27,9 @@ class ScalarResult(Result):
     ) -> ScalarResult: ...
 
 class Results:
-    results: List[Result]
-    by_state: Dict[Literal[0, 1, 2, 3], Result]
-    by_name: Dict[str, Result]
+    results: list[Result]
+    by_state: dict[Literal[0, 1, 2, 3], Result]
+    by_name: dict[str, Result]
 
     def __init__(self, *results: Result) -> None: ...
     def add(self, *results: Result) -> Results: ...
@@ -40,6 +40,6 @@ class Results:
     @property
     def most_significant_state(self) -> ServiceState: ...
     @property
-    def most_significant(self) -> List[Result]: ...
+    def most_significant(self) -> list[Result]: ...
     @property
     def first_significant(self) -> Result: ...

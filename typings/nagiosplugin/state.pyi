@@ -1,10 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
-def worst(states):
-    """Reduce list of *states* to the most significant state."""
-    ...
-
+def worst(states: list[ServiceState]) -> ServiceState: ...
 @dataclass
 class ServiceState:
     code: Literal[0, 1, 2, 3]
