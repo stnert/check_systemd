@@ -52,6 +52,8 @@ Presentation (``Summary``)
 
 * :class:`SystemdSummary`
 """
+from __future__ import annotations
+
 import argparse
 import collections.abc
 import re
@@ -67,7 +69,7 @@ from nagiosplugin.performance import Performance
 from nagiosplugin.range import Range
 from nagiosplugin.resource import Resource
 from nagiosplugin.result import Result, Results
-from nagiosplugin.state import Critical, Ok
+from nagiosplugin.state import Critical, Ok, ServiceState, Warn
 from nagiosplugin.summary import Summary
 
 __version__ = "2.3.1"
@@ -94,11 +96,28 @@ class OptionContainer:
     """This class has the same attributes as the ``Namespace`` instance
     returned by the ``argparse`` package."""
 
+    include: list[str] = []
+    exclude: list[str] = []
+    unit: str | None
+    required: str | None
+    timers_critical: int
+    timers_warning: int
+    ignore_inactive_state: bool
+    scope_startup_time: bool
+    warning: str
+    critical: str
+    performance_data: bool
+    include_unit: str
+    data_source: typing.Literal["dbus", "cli"]
+    include_type: list[str]
+    exclude_type: list[str]
+    exclude_unit: list[str]
+
     def __init__(self):
         self.include = []
         self.exclude = []
         self.unit = None
-        self.data_source: str = None
+        self.data_source = None
 
 
 opts = OptionContainer()
@@ -191,7 +210,7 @@ def format_timespan_to_seconds(fmt_timespan: str) -> float:
     return round(float(result), 3)
 
 
-def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
+def execute_cli(args: str | typing.Sequence[str]) -> str | None:
     """Execute a command on the command line (cli = command line interface))
     and capture the stdout. This is a wrapper around ``subprocess.Popen``.
 
@@ -208,15 +227,15 @@ def execute_cli(args: typing.Union[str, typing.Iterator[str]]) -> str:
         )
         stdout, stderr = p.communicate()
     except OSError as e:
-        raise nagiosplugin.CheckError(e)
+        raise CheckError(e)
 
     if p.returncode != 0:
-        raise nagiosplugin.CheckError(
+        raise CheckError(
             "The command exits with a none-zero" "return code ({})".format(p.returncode)
         )
 
     if stderr:
-        raise nagiosplugin.CheckError(stderr)
+        raise CheckError(stderr)
 
     if stdout:
         stdout = stdout.decode("utf-8")
@@ -227,14 +246,19 @@ class TableParser:
     """This class reads the text tables that some systemd commands like
     ``systemctl list-units`` or ``systemctl list-timers`` produce."""
 
-    def __init__(self, stdout):
+    header_row: str
+    body_rows: list[str]
+    column_lengths: list[int]
+    columns: list[str]
+
+    def __init__(self, stdout: str) -> None:
         """
         :param stdout: The standard output of certain systemd command line
           utilities.
         :param expected_column_headers: The expected column headers
           (for example ``('UNIT', 'LOAD', 'ACTIVE')``)
         """
-        rows = stdout.splitlines()
+        rows: list[str] = stdout.splitlines()
         self.header_row = TableParser.__normalize_header(rows[0])
         self.column_lengths = TableParser.__detect_lengths(self.header_row)
         self.columns = TableParser.__split_row(self.header_row, self.column_lengths)
@@ -252,17 +276,16 @@ class TableParser:
 
         :param header_row: The first line of a systemd table output.
         """
-        header_row = header_row.lower()
-        return header_row
+        return header_row.lower()
 
     @staticmethod
-    def __detect_lengths(header_row: str) -> list:
+    def __detect_lengths(header_row: str) -> list[int]:
         """
         :param header_row: The first line of a systemd table output.
 
         :return: A list of column lengths in number of characters.
         """
-        column_lengths = []
+        column_lengths: list[int] = []
         match = re.search(r"^ +", header_row)
         if match:
             whitespace_prefix_length = match.end()
@@ -286,8 +309,8 @@ class TableParser:
         return column_lengths
 
     @staticmethod
-    def __split_row(line: str, column_lengths: list) -> list:
-        columns = []
+    def __split_row(line: str, column_lengths: list[int]) -> list[str]:
+        columns: list[str] = []
         right = 0
         for length in column_lengths:
             left = right
@@ -302,7 +325,7 @@ class TableParser:
         is not taken into account."""
         return len(self.body_rows)
 
-    def check_header(self, column_header: typing.Iterable):
+    def check_header(self, column_header: typing.Sequence[str]) -> None:
         """Check if the specified column names are present in the header row of
         the text table. Raise an exception if not.
 
@@ -318,7 +341,7 @@ class TableParser:
                 )
                 raise ValueError(msg.format(column_name))
 
-    def get_row(self, row_number: int) -> dict:
+    def get_row(self, row_number: int) -> dict[str, str]:
         """Retrieve a table row as a dictionary. The keys are taken from the
         header row. The first row number is 0.
 
@@ -329,7 +352,7 @@ class TableParser:
             self.body_rows[row_number], self.column_lengths
         )
 
-        result = {}
+        result: dict[str, str] = {}
 
         index = 0
         for column in self.columns:
@@ -341,7 +364,7 @@ class TableParser:
             index += 1
         return result
 
-    def list_rows(self) -> typing.Generator[dict, None, None]:
+    def list_rows(self) -> typing.Generator[dict[str, str], None, None]:
         """List all rows."""
         for i in range(0, self.row_count):
             yield self.get_row(i)
@@ -364,9 +387,7 @@ class CheckSystemdRegexpError(CheckSystemdError):
     pass
 
 
-def match_multiple(
-    unit_name: str, regexes: typing.Union[str, typing.Iterator[str]]
-) -> bool:
+def match_multiple(unit_name: str, regexes: str | typing.Sequence[str]) -> bool:
     """
     Match multiple regular expressions against a unit name.
 
@@ -395,128 +416,181 @@ class Unit:
     attributes are overwritten by properties.
     """
 
+    name: str
+    """The name of the system unit, for example ``nginx.service``. In the
+    command line table of the command ``systemctl list-units`` is the
+    column containing unit names titled with “UNIT”.
+    """
+
+    active_state: typing.Literal[
+        "active", "reloading", "inactive", "failed", "activating", "deactivating"
+    ]
+    """From the `D-Bus interface of systemd documentation
+    <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
+
+    ``ActiveState`` contains a state value that reflects whether the unit
+    is currently active or not. The following states are currently defined:
+
+    * ``active``,
+    * ``reloading``,
+    * ``inactive``,
+    * ``failed``,
+    * ``activating``, and
+    * ``deactivating``.
+
+    ``active`` indicates that unit is active (obviously...).
+
+    ``reloading`` indicates that the unit is active and currently reloading
+    its configuration.
+
+    ``inactive`` indicates that it is inactive and the previous run was
+    successful or no previous run has taken place yet.
+
+    ``failed`` indicates that it is inactive and the previous run was not
+    successful (more information about the reason for this is available on
+    the unit type specific interfaces, for example for services in the
+    Result property, see below).
+
+    ``activating`` indicates that the unit has previously been inactive but
+    is currently in the process of entering an active state.
+
+    Conversely ``deactivating`` indicates that the unit is currently in the
+    process of deactivation.
+    """
+
+    sub_state: typing.Literal[
+        "abandoned",
+        "activating-done",
+        "activating",
+        "active",
+        "auto-restart",
+        "cleaning",
+        "condition",
+        "deactivating-sigkill",
+        "deactivating-sigterm",
+        "deactivating",
+        "dead",
+        "elapsed",
+        "exited",
+        "failed",
+        "final-sigkill",
+        "final-sigterm",
+        "final-watchdog",
+        "listening",
+        "mounted",
+        "mounting-done",
+        "mounting",
+        "plugged",
+        "reload",
+        "remounting-sigkill",
+        "remounting-sigterm",
+        "remounting",
+        "running",
+        "start-chown",
+        "start-post",
+        "start-pre",
+        "start",
+        "stop-post",
+        "stop-pre-sigkill",
+        "stop-pre-sigterm",
+        "stop-pre",
+        "stop-sigkill",
+        "stop-sigterm",
+        "stop-watchdog",
+        "stop",
+        "tentative",
+        "unmounting-sigkill",
+        "unmounting-sigterm",
+        "unmounting",
+        "waiting",
+    ]
+
+    """From the `D-Bus interface of systemd documentation
+    <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
+
+    ``SubState`` encodes states of the same state machine that
+    ``ActiveState`` covers, but knows more fine-grained states that are
+    unit-type-specific. Where ``ActiveState`` only covers six high-level
+    states, ``SubState`` covers possibly many more low-level
+    unit-type-specific states that are mapped to the six high-level states.
+    Note that multiple low-level states might map to the same high-level
+    state, but not vice versa. Not all high-level states have low-level
+    counterparts on all unit types.
+
+    All sub states are listed in the file `basic/unit-def.c
+    <https://github.com/systemd/systemd/blob/main/src/basic/unit-def.c>`_
+    of the systemd source code:
+
+    * automount: ``dead``, ``waiting``, ``running``, ``failed``
+    * device: ``dead``, ``tentative``, ``plugged``
+    * mount: ``dead``, ``mounting``, ``mounting-done``, ``mounted``,
+        ``remounting``, ``unmounting``, ``remounting-sigterm``,
+        ``remounting-sigkill``, ``unmounting-sigterm``,
+        ``unmounting-sigkill``, ``failed``, ``cleaning``
+    * path: ``dead``, ``waiting``, ``running``, ``failed``
+    * scope: ``dead``, ``running``, ``abandoned``, ``stop-sigterm``,
+        ``stop-sigkill``, ``failed``
+    * service: ``dead``, ``condition``, ``start-pre``, ``start``,
+        ``start-post``, ``running``, ``exited``, ``reload``, ``stop``,
+        ``stop-watchdog``, ``stop-sigterm``, ``stop-sigkill``, ``stop-post``,
+        ``final-watchdog``, ``final-sigterm``, ``final-sigkill``, ``failed``,
+        ``auto-restart``, ``cleaning``
+    * slice: ``dead``, ``active``
+    * socket: ``dead``, ``start-pre``, ``start-chown``, ``start-post``,
+        ``listening``, ``running``, ``stop-pre``, ``stop-pre-sigterm``,
+        ``stop-pre-sigkill``, ``stop-post``, ``final-sigterm``,
+        ``final-sigkill``, ``failed``, ``cleaning``
+    * swap: ``dead``, ``activating``, ``activating-done``, ``active``,
+        ``deactivating``, ``deactivating-sigterm``, ``deactivating-sigkill``,
+        ``failed``, ``cleaning``
+    * target:``dead``, ``active``
+    * timer: ``dead``, ``waiting``, ``running``, ``elapsed``, ``failed``
+    """
+
+    load_state: typing.Literal["loaded", "error", "masked"]
+    """From the `D-Bus interface of systemd documentation
+    <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
+
+    ``LoadState`` contains a state value that reflects whether the
+    configuration file of this unit has been loaded. The following states
+    are currently defined:
+
+    * ``loaded``,
+    * ``error`` and
+    * ``masked``.
+
+    ``loaded`` indicates that the configuration was successfully loaded.
+
+    ``error`` indicates that the configuration failed to load, the
+    ``LoadError`` field contains information about the cause of this
+    failure.
+
+    ``masked`` indicates that the unit is currently masked out (i.e.
+    symlinked to /dev/null or suchlike).
+
+    Note that the ``LoadState`` is fully orthogonal to the ``ActiveState``
+    (see below) as units without valid loaded configuration might be active
+    (because configuration might have been reloaded at a time where a unit
+    was already active).
+    """
+
     def __init__(self, **kwargs):
         self.name = kwargs.get("name")
-        """The name of the system unit, for example ``nginx.service``. In the
-        command line table of the command ``systemctl list-units`` is the
-        column containing unit names titled with “UNIT”.
-        """
-
         self.active_state = kwargs.get("active_state")
-        """From the `D-Bus interface of systemd documentation
-        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
-
-        ``ActiveState`` contains a state value that reflects whether the unit
-        is currently active or not. The following states are currently defined:
-
-        * ``active``,
-        * ``reloading``,
-        * ``inactive``,
-        * ``failed``,
-        * ``activating``, and
-        * ``deactivating``.
-
-        ``active`` indicates that unit is active (obviously...).
-
-        ``reloading`` indicates that the unit is active and currently reloading
-        its configuration.
-
-        ``inactive`` indicates that it is inactive and the previous run was
-        successful or no previous run has taken place yet.
-
-        ``failed`` indicates that it is inactive and the previous run was not
-        successful (more information about the reason for this is available on
-        the unit type specific interfaces, for example for services in the
-        Result property, see below).
-
-        ``activating`` indicates that the unit has previously been inactive but
-        is currently in the process of entering an active state.
-
-        Conversely ``deactivating`` indicates that the unit is currently in the
-        process of deactivation.
-        """
-
         self.sub_state = kwargs.get("sub_state")
-        """From the `D-Bus interface of systemd documentation
-        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
-
-        ``SubState`` encodes states of the same state machine that
-        ``ActiveState`` covers, but knows more fine-grained states that are
-        unit-type-specific. Where ``ActiveState`` only covers six high-level
-        states, ``SubState`` covers possibly many more low-level
-        unit-type-specific states that are mapped to the six high-level states.
-        Note that multiple low-level states might map to the same high-level
-        state, but not vice versa. Not all high-level states have low-level
-        counterparts on all unit types.
-
-        All sub states are listed in the file `basic/unit-def.c
-        <https://github.com/systemd/systemd/blob/main/src/basic/unit-def.c>`_
-        of the systemd source code:
-
-        * automount: ``dead``, ``waiting``, ``running``, ``failed``
-        * device: ``dead``, ``tentative``, ``plugged``
-        * mount: ``dead``, ``mounting``, ``mounting-done``, ``mounted``,
-          ``remounting``, ``unmounting``, ``remounting-sigterm``,
-          ``remounting-sigkill``, ``unmounting-sigterm``,
-          ``unmounting-sigkill``, ``failed``, ``cleaning``
-        * path: ``dead``, ``waiting``, ``running``, ``failed``
-        * scope: ``dead``, ``running``, ``abandoned``, ``stop-sigterm``,
-          ``stop-sigkill``, ``failed``
-        * service: ``dead``, ``condition``, ``start-pre``, ``start``,
-          ``start-post``, ``running``, ``exited``, ``reload``, ``stop``,
-          ``stop-watchdog``, ``stop-sigterm``, ``stop-sigkill``, ``stop-post``,
-          ``final-watchdog``, ``final-sigterm``, ``final-sigkill``, ``failed``,
-          ``auto-restart``, ``cleaning``
-        * slice: ``dead``, ``active``
-        * socket: ``dead``, ``start-pre``, ``start-chown``, ``start-post``,
-          ``listening``, ``running``, ``stop-pre``, ``stop-pre-sigterm``,
-          ``stop-pre-sigkill``, ``stop-post``, ``final-sigterm``,
-          ``final-sigkill``, ``failed``, ``cleaning``
-        * swap: ``dead``, ``activating``, ``activating-done``, ``active``,
-          ``deactivating``, ``deactivating-sigterm``, ``deactivating-sigkill``,
-          ``failed``, ``cleaning``
-        * target:``dead``, ``active``
-        * timer: ``dead``, ``waiting``, ``running``, ``elapsed``, ``failed``
-        """
-
         self.load_state = kwargs.get("load_state")
-        """From the `D-Bus interface of systemd documentation
-        <https://www.freedesktop.org/software/systemd/man/org.freedesktop.systemd1.html#Properties1>`_:
 
-        ``LoadState`` contains a state value that reflects whether the
-        configuration file of this unit has been loaded. The following states
-        are currently defined:
-
-        * ``loaded``,
-        * ``error`` and
-        * ``masked``.
-
-        ``loaded`` indicates that the configuration was successfully loaded.
-
-        ``error`` indicates that the configuration failed to load, the
-        ``LoadError`` field contains information about the cause of this
-        failure.
-
-        ``masked`` indicates that the unit is currently masked out (i.e.
-        symlinked to /dev/null or suchlike).
-
-        Note that the ``LoadState`` is fully orthogonal to the ``ActiveState``
-        (see below) as units without valid loaded configuration might be active
-        (because configuration might have been reloaded at a time where a unit
-        was already active).
-        """
-
-    def convert_to_exitcode(self):
+    def convert_to_exitcode(self) -> ServiceState:
         """Convert the different systemd states into a Nagios compatible
         exit code.
 
         :return: A Nagios compatible exit code: 0, 1, 2, 3
-        :rtype: int"""
+        """
         if opts.required and opts.required.lower() != self.active_state:
-            return nagiosplugin.Critical
+            return Critical
         if self.load_state == "error" or self.active_state == "failed":
-            return nagiosplugin.Critical
-        return nagiosplugin.Ok
+            return Critical
+        return Ok
 
 
 class SystemdUnitTypesList(collections.abc.MutableSequence):
@@ -588,8 +662,8 @@ class UnitNameFilter:
 
     def list(
         self,
-        include: typing.Union[str, typing.Iterator[str]] = None,
-        exclude: typing.Union[str, typing.Iterator[str]] = None,
+        include: str | typing.Iterator[str] | None = None,
+        exclude: str | typing.Iterator[str] | None = None,
     ) -> typing.Generator[str, None, None]:
         """
         List all unit names or apply filters (``include`` or ``exclude``) to
@@ -655,8 +729,8 @@ class UnitCache:
 
     def list(
         self,
-        include: typing.Union[str, typing.Iterator[str]] = None,
-        exclude: typing.Union[str, typing.Iterator[str]] = None,
+        include: str | typing.Iterator[str] | None = None,
+        exclude: str | typing.Iterator[str] | None = None,
     ) -> typing.Generator[Unit, None, None]:
         """
         List all units or apply filters (``include`` or ``exclude``) to
@@ -682,8 +756,8 @@ class UnitCache:
     def count_by_states(
         self,
         states: typing.Iterator[str],
-        include: typing.Union[str, typing.Iterator[str]] = None,
-        exclude: typing.Union[str, typing.Iterator[str]] = None,
+        include: str | typing.Iterator[str] | None = None,
+        exclude: str | typing.Iterator[str] | None = None,
     ) -> dict:
         states_normalized = []
         counter = {}
@@ -798,7 +872,7 @@ class TimersResource(Resource):
         if stdout:
             table_parser = TableParser(stdout)
             table_parser.check_header(("unit", "next", "passed"))
-            state = nagiosplugin.Ok
+            state = Ok
 
             for row in table_parser.list_rows():
                 unit = row["unit"]
@@ -808,14 +882,14 @@ class TimersResource(Resource):
                 if row["next"] == "n/a":
 
                     if row["passed"] == "n/a":
-                        state = nagiosplugin.Critical
+                        state = Critical
                     else:
                         passed = format_timespan_to_seconds(row["passed"])
 
                         if row["passed"] == "n/a" or passed >= opts.timers_critical:
-                            state = nagiosplugin.Critical
+                            state = Critical
                         elif passed >= opts.timers_warning:
-                            state = nagiosplugin.Warn
+                            state = Warn
 
                 yield Metric(name=unit, value=state, context="timers")
 
