@@ -72,7 +72,7 @@ from nagiosplugin.result import Result, Results
 from nagiosplugin.state import Critical, Ok, ServiceState, Warn
 from nagiosplugin.summary import Summary
 
-__version__ = "2.3.1"
+__version__: str = "2.3.1"
 
 
 is_gi = True
