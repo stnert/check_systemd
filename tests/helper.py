@@ -49,7 +49,7 @@ def convert_to_bytes(file_name_or_str: str) -> bytes:
 
 
 def MPopen(returncode=0, stdout=None, stderr=None) -> Mock:
-    """A mocked version of ``subprocess.P0pen``."""
+    """A mocked version of ``subprocess.POpen``."""
     mock = Mock()
     mock.returncode = returncode
     if stdout:
@@ -83,46 +83,53 @@ class MockResult:
     """A class to collect all results of a mocked execution of the main
     function."""
 
-    def __init__(self, **kwargs):
-        self.__sys_exit = kwargs.get("sys_exit")
-        self.__print = kwargs.get("print")
-        self.__stdout = kwargs.get("stdout")
-        self.__stderr = kwargs.get("stderr")
+    __sys_exit: Mock
+    __print: Mock
+    __stdout: str | None
+    __stderr: str | None
+
+    def __init__(
+        self, sys_exit_mock: Mock, print_mock: Mock, stdout: str, stderr: str
+    ) -> None:
+        self.__sys_exit = sys_exit_mock
+        self.__print = print_mock
+        self.__stdout = stdout
+        self.__stderr = stderr
 
     @property
-    def exitcode(self):
+    def exitcode(self) -> int:
         """The captured exit code"""
         return self.__sys_exit.call_args[0][0]
 
     @property
-    def print_calls(self):
+    def print_calls(self) -> list[str]:
         """The captured print calls as a list for each line."""
-        output = []
+        output: list[str] = []
         for call in self.__print.call_args_list:
             output.append(str(call[0][0]))
         return output
 
     @property
-    def stdout(self):
+    def stdout(self) -> str | None:
         """The function ``redirect_stdout()`` is used to capture the ``stdout``
         output."""
         if self.__stdout:
             return self.__stdout
 
     @property
-    def stderr(self):
+    def stderr(self) -> str | None:
         """The function ``redirect_stderr()`` is used to capture the ``stderr``
         output."""
         if self.__stderr:
             return self.__stderr
 
     @property
-    def output(self):
+    def output(self) -> str:
         """A combined string of the captured stdout, stderr and the print
         calls. Somehow the whole stdout couldn’t be read. The help text could
         be read, but not the plugin output using the function
         ``redirect_stdout()``."""
-        out = ""
+        out: str = ""
 
         if self.print_calls:
             out += "\n".join(self.print_calls)
@@ -136,7 +143,7 @@ class MockResult:
         return out
 
     @property
-    def first_line(self):
+    def first_line(self) -> str | None:
         """The first line of the stdout output without a newline break at the
         end as a string.
         """
@@ -145,12 +152,12 @@ class MockResult:
 
 
 def execute_main(
-    argv: typing.Iterable[str] = ["check_systemd.py"],
-    stdout: typing.Iterable[str] = [
+    argv: list[str] = ["check_systemd.py"],
+    stdout: list[str] = [
         "systemctl-list-units_ok.txt",
         "systemd-analyze_12.345.txt",
     ],
-    popen: typing.Iterable[MPopen] = None,
+    popen: typing.Iterable[MPopen] | None = None,
 ) -> MockResult:
     """Execute the main function with a lot of patched functions and classes.
 
@@ -193,14 +200,14 @@ def execute_main(
         else:
             Popen.side_effect = get_mocks_for_popen(*stdout)
 
-        file_stdout = io.StringIO()
-        file_stderr = io.StringIO()
+        file_stdout: io.StringIO = io.StringIO()
+        file_stderr: io.StringIO = io.StringIO()
         with redirect_stdout(file_stdout), redirect_stderr(file_stderr):
             check_systemd.main()
 
     return MockResult(
-        sys_exit=sys_exit,
-        print=mocked_print,
+        sys_exit_mock=sys_exit,
+        print_mock=mocked_print,
         stdout=file_stdout.getvalue(),
         stderr=file_stderr.getvalue(),
     )
