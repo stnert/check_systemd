@@ -13,9 +13,10 @@ To learn more about the project, please visit the repository on `Github
 Monitoring scopes
 =================
 
-* State of unites (``context=units``)
-* Timers (``context=timers``)
-* Startup time (``context=startup_time``)
+* ``units``: State of unites
+* ``timers``: Timers
+* ``startup_time``: Startup time
+* ``performance_data``: Performance data
 
 Data sources
 ============
@@ -818,7 +819,7 @@ unit_cache: UnitCache = None
 """An instance of :class:`DbusUnitCache` or :class:`CliUnitCache`"""
 
 
-# Acquisition: *Resource ######################################################
+# scope: units ################################################################
 
 
 class UnitsResource(Resource):
@@ -837,6 +838,46 @@ class UnitsResource(Resource):
                 "options. No units have been added for "
                 "testing."
             )
+
+
+class UnitsContext(Context):
+    def __init__(self):
+        super(UnitsContext, self).__init__("units")
+
+    def evaluate(self, metric: Metric, resource: Resource) -> Result:
+        """Determines state of a given metric.
+
+        :param metric: associated metric that is to be evaluated
+        :param resource: resource that produced the associated metric
+            (may optionally be consulted)
+
+        :returns: :class:`~.result.Result`
+        """
+        if isinstance(metric.value, Unit):
+            unit = metric.value
+            exitcode = unit.convert_to_exitcode()
+            if exitcode != 0:
+                hint = "{}: {}".format(metric.name, unit.active_state)
+                return self.result_cls(exitcode, metric=metric, hint=hint)
+
+        if metric.value:
+            hint = "{}: {}".format(metric.name, metric.value)
+        else:
+            hint = metric.name
+
+        # The option -u is not specifed
+        if not metric.value:
+            return self.result_cls(Ok, metric=metric, hint=hint)
+
+        if opts.ignore_inactive_state and metric.value == "failed":
+            return self.result_cls(Critical, metric=metric, hint=hint)
+        elif not opts.ignore_inactive_state and metric.value != "active":
+            return self.result_cls(Critical, metric=metric, hint=hint)
+        else:
+            return self.result_cls(Ok, metric=metric, hint=hint)
+
+
+# scope: timers ###############################################################
 
 
 class TimersResource(Resource):
@@ -894,6 +935,25 @@ class TimersResource(Resource):
                 yield Metric(name=unit, value=state, context="timers")
 
 
+class TimersContext(Context):
+    def __init__(self):
+        super(TimersContext, self).__init__("timers")
+
+    def evaluate(self, metric: Metric, resource: Resource):
+        """Determines state of a given metric.
+
+        :param metric: associated metric that is to be evaluated
+        :param resource: resource that produced the associated metric
+            (may optionally be consulted)
+
+        :returns: :class:`~.result.Result`
+        """
+        return self.result_cls(metric.value, metric=metric, hint=metric.name)
+
+
+# scope: startup_time #########################################################
+
+
 class StartupTimeResource(Resource):
     """Resource that calls ``systemd-analyze`` on the command line to get
     informations about the startup time."""
@@ -935,6 +995,30 @@ class StartupTimeResource(Resource):
                 )
 
 
+class StartupTimeContext(ScalarContext):
+    def __init__(self):
+        super(StartupTimeContext, self).__init__("startup_time")
+        if opts.scope_startup_time:
+            self.warning = Range(opts.warning)
+            self.critical = Range(opts.critical)
+
+    def performance(self, metric: Metric, resource: Resource):
+        if not opts.performance_data:
+            return None
+        return Performance(
+            metric.name,
+            metric.value,
+            metric.uom,
+            self.warning,
+            self.critical,
+            metric.min,
+            metric.max,
+        )
+
+
+# scope: performance_data #####################################################
+
+
 class PerformanceDataResource(Resource):
 
     name = "SYSTEMD"
@@ -965,86 +1049,8 @@ class PerformanceDataDataSourceResource(Resource):
     name = "SYSTEMD"
 
     def probe(self) -> typing.Generator[Metric, None, None]:
-
         yield Metric(
             name="data_source", value=opts.data_source, context="performance_data"
-        )
-
-
-# Evaluation: *Context ########################################################
-
-
-class UnitsContext(Context):
-    def __init__(self):
-        super(UnitsContext, self).__init__("units")
-
-    def evaluate(self, metric: Metric, resource: Resource) -> Result:
-        """Determines state of a given metric.
-
-        :param metric: associated metric that is to be evaluated
-        :param resource: resource that produced the associated metric
-            (may optionally be consulted)
-
-        :returns: :class:`~.result.Result`
-        """
-        if isinstance(metric.value, Unit):
-            unit = metric.value
-            exitcode = unit.convert_to_exitcode()
-            if exitcode != 0:
-                hint = "{}: {}".format(metric.name, unit.active_state)
-                return self.result_cls(exitcode, metric=metric, hint=hint)
-
-        if metric.value:
-            hint = "{}: {}".format(metric.name, metric.value)
-        else:
-            hint = metric.name
-
-        # The option -u is not specifed
-        if not metric.value:
-            return self.result_cls(Ok, metric=metric, hint=hint)
-
-        if opts.ignore_inactive_state and metric.value == "failed":
-            return self.result_cls(Critical, metric=metric, hint=hint)
-        elif not opts.ignore_inactive_state and metric.value != "active":
-            return self.result_cls(Critical, metric=metric, hint=hint)
-        else:
-            return self.result_cls(Ok, metric=metric, hint=hint)
-
-
-class TimersContext(Context):
-    def __init__(self):
-        super(TimersContext, self).__init__("timers")
-
-    def evaluate(self, metric: Metric, resource: Resource):
-        """Determines state of a given metric.
-
-        :param metric: associated metric that is to be evaluated
-        :param resource: resource that produced the associated metric
-            (may optionally be consulted)
-
-        :returns: :class:`~.result.Result`
-        """
-        return self.result_cls(metric.value, metric=metric, hint=metric.name)
-
-
-class StartupTimeContext(ScalarContext):
-    def __init__(self):
-        super(StartupTimeContext, self).__init__("startup_time")
-        if opts.scope_startup_time:
-            self.warning = Range(opts.warning)
-            self.critical = Range(opts.critical)
-
-    def performance(self, metric: Metric, resource: Resource):
-        if not opts.performance_data:
-            return None
-        return Performance(
-            metric.name,
-            metric.value,
-            metric.uom,
-            self.warning,
-            self.critical,
-            metric.min,
-            metric.max,
         )
 
 

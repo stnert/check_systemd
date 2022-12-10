@@ -101,9 +101,7 @@ class MockResult:
     __stdout: str | None
     __stderr: str | None
 
-    def __init__(
-        self, sys_exit_mock: Mock, stdout: str, stderr: str
-    ) -> None:
+    def __init__(self, sys_exit_mock: Mock, stdout: str, stderr: str) -> None:
         self.__sys_exit = sys_exit_mock
         self.__stdout = stdout
         self.__stderr = stderr
