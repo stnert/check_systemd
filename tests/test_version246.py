@@ -12,7 +12,7 @@ class TestVersion246(unittest.TestCase):
                 "systemd-analyze_12.345.txt",
             ],
         )
-        self.assertEqual(result.exitcode, 2)
+        result.assert_critical()
         self.assertEqual(
             "SYSTEMD CRITICAL - nm-wait-online.service: failed", result.first_line
         )

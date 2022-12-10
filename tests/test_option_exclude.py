@@ -19,7 +19,7 @@ class TestOptionExclude(unittest.TestCase):
             argv=["-e", "smartd.service", "--no-performance-data"],
             unit_suffix="failed",
         )
-        self.assertEqual(result.exitcode, 0)
+        result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
     def test_unknown_service(self):
@@ -27,7 +27,7 @@ class TestOptionExclude(unittest.TestCase):
             argv=["-e", "testX.service", "--no-performance-data"],
             unit_suffix="failed",
         )
-        self.assertEqual(result.exitcode, 2)
+        result.assert_critical()
         self.assertEqual("SYSTEMD CRITICAL - smartd.service: failed", result.first_line)
 
     def test_regexp(self):
@@ -35,7 +35,7 @@ class TestOptionExclude(unittest.TestCase):
             argv=["-e", "user@\\d+\\.service", "--no-performance-data"],
             unit_suffix="regexp-excludes",
         )
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
     def test_regexp_dot(self):
@@ -43,14 +43,14 @@ class TestOptionExclude(unittest.TestCase):
             argv=["-e", ".*", "--no-performance-data"],
             unit_suffix="regexp-excludes",
         )
-        self.assertEqual(3, result.exitcode)
+        result.assert_unknown()
 
     def test_invalid_regexp(self):
         result = execute_with_opt_e(
             argv=["-e", "*service"],
             unit_suffix="ok",
         )
-        self.assertEqual(3, result.exitcode)
+        result.assert_unknown()
         self.assertEqual(
             "SYSTEMD UNKNOWN: check_systemd.CheckSystemdRegexpError: "
             "Invalid regular expression: '*service'",

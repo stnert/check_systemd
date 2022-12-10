@@ -6,7 +6,7 @@ from .helper import execute_main
 class TestPerformanceData(unittest.TestCase):
     def test_ok(self):
         result = execute_main(argv=["--performance-data"])
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
         self.assertEqual(
             "SYSTEMD OK - all "
             "| count_units=386 data_source=cli startup_time=12.345;60;120 "
@@ -24,7 +24,7 @@ class TestPerformanceData(unittest.TestCase):
                 "systemctl-list-timers_1.txt",
             ],
         )
-        self.assertEqual(2, result.exitcode)
+        result.assert_critical()
         self.assertEqual(
             "SYSTEMD CRITICAL - phpsessionclean.timer "
             "| count_units=3 data_source=cli startup_time=12.345;60;120 "
@@ -41,7 +41,7 @@ class TestPerformanceData(unittest.TestCase):
                 "systemd-analyze_12.345.txt",
             ],
         )
-        self.assertEqual(result.exitcode, 2)
+        result.assert_critical()
         self.assertEqual(
             "SYSTEMD CRITICAL - smartd.service: failed | count_units=3 "
             "data_source=cli "

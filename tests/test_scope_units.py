@@ -16,19 +16,19 @@ def execute(argv, units_suffix="ok"):
 class TestOk(unittest.TestCase):
     def test_ok(self):
         result = execute(argv=["--no-performance-data"])
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
     def test_multiple_units(self):
         result = execute_main(argv=["--no-performance-data"])
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
 
 class TestFailure(unittest.TestCase):
     def test_failure(self):
         result = execute(argv=["--no-performance-data"], units_suffix="failed")
-        self.assertEqual(2, result.exitcode)
+        result.assert_critical()
         self.assertEqual("SYSTEMD CRITICAL - smartd.service: failed", result.first_line)
 
 
@@ -37,7 +37,7 @@ class TestMultipleFailure(unittest.TestCase):
         result = execute(
             argv=["--no-performance-data"], units_suffix="multiple-failure"
         )
-        self.assertEqual(2, result.exitcode)
+        result.assert_critical()
         self.assertIn("rtkit-daemon.service: failed", result.first_line)
         self.assertIn("smartd.service: failed", result.first_line)
 

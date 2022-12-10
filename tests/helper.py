@@ -5,10 +5,13 @@ import os
 import typing
 from contextlib import redirect_stderr, redirect_stdout
 from os import path
-from unittest import mock
+from unittest import TestCase, mock
 from unittest.mock import Mock
 
 import check_systemd
+
+test: TestCase = TestCase()
+test.maxDiff = None
 
 
 class AddBin(object):
@@ -151,6 +154,21 @@ class MockResult:
         """
         if self.output:
             return self.output.split("\n", 1)[0]
+
+    def assert_exitcode(self, exitcode: int) -> None:
+        test.assertEqual(self.exitcode, exitcode)
+
+    def assert_ok(self) -> None:
+        self.assert_exitcode(0)
+
+    def assert_warn(self) -> None:
+        self.assert_exitcode(1)
+
+    def assert_critical(self) -> None:
+        self.assert_exitcode(2)
+
+    def assert_unknown(self) -> None:
+        self.assert_exitcode(3)
 
 
 def execute_main(

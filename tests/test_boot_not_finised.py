@@ -12,7 +12,7 @@ class TestBootupNotFinished(unittest.TestCase):
                 MPopen(returncode=1, stderr="systemd-analyze_not-finished.txt"),
             ),
         )
-        self.assertEqual(result.exitcode, 0)
+        result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
     def test_bootup_not_finished_verbose(self):
@@ -25,7 +25,7 @@ class TestBootupNotFinished(unittest.TestCase):
             ),
         )
 
-        self.assertEqual(result.exitcode, 0)
+        result.assert_ok()
         self.assertIn("SYSTEMD OK - all\n", result.output)
 
 

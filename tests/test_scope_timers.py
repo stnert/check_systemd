@@ -28,12 +28,12 @@ def execute_with_opt_t(
 class TestScopeTimers(unittest.TestCase):
     def test_dead_timers_1(self):
         result = execute_with_opt_t()
-        self.assertEqual(2, result.exitcode)
+        result.assert_critical()
         self.assertEqual("SYSTEMD CRITICAL - phpsessionclean.timer", result.first_line)
 
     def test_dead_timers_2(self):
         result = execute_with_opt_t(stdout_timers_suffix="2")
-        self.assertEqual(2, result.exitcode)
+        result.assert_critical()
         self.assertEqual(
             "SYSTEMD CRITICAL - dfm-auto-jf.timer, " "rsync.timer", result.first_line
         )
@@ -42,30 +42,30 @@ class TestScopeTimers(unittest.TestCase):
         result = execute_with_opt_t(
             stdout_timers_suffix="2", warning=2764801, critical=2764802
         )
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
 
     def test_dead_timers_2_warning(self):
         result = execute_with_opt_t(
             stdout_timers_suffix="2", warning=2764799, critical=2764802
         )
-        self.assertEqual(1, result.exitcode)
+        result.assert_warn()
 
     def test_dead_timers_2_warning_equal(self):
         result = execute_with_opt_t(
             stdout_timers_suffix="2", warning=2764800, critical=2764802
         )
-        self.assertEqual(1, result.exitcode)
+        result.assert_warn()
 
     def test_dead_timers_ok(self):
         result = execute_with_opt_t(stdout_timers_suffix="ok")
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
     def test_dead_timers_exclude(self):
         result = execute_with_opt_t(
             stdout_timers_suffix="2", additional_argv=["-e", "dfm-auto-jf.timer"]
         )
-        self.assertEqual(2, result.exitcode)
+        result.assert_critical()
         self.assertEqual("SYSTEMD CRITICAL - rsync.timer", result.first_line)
 
     def test_dead_timers_exclude_multiple(self):
@@ -73,19 +73,19 @@ class TestScopeTimers(unittest.TestCase):
             stdout_timers_suffix="2",
             additional_argv=["-e", "dfm-auto-jf.timer", "-e", "rsync.timer"],
         )
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
 
     def test_dead_timers_exclude_regexp(self):
         result = execute_with_opt_t(
             stdout_timers_suffix="2",
             additional_argv=["-e", "dfm-auto-jf.timer", "-e", ".*timer"],
         )
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
 
     def test_all_n_a(self):
         """n/a -> not available"""
         result = execute_with_opt_t(stdout_timers_suffix="all-n-a")
-        self.assertEqual(2, result.exitcode)
+        result.assert_critical()
 
 
 if __name__ == "__main__":

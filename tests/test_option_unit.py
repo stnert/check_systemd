@@ -18,7 +18,7 @@ def execute_with_opt_u(argv, list_units="ok"):
 class TestOptionUnit(unittest.TestCase):
     def test_ok(self):
         result = execute_with_opt_u(argv=["--unit", "nginx.service"], list_units="ok")
-        self.assertEqual(0, result.exitcode)
+        result.assert_ok()
         self.assertEqual(
             "SYSTEMD OK - nginx.service: active",
             result.first_line,
@@ -29,7 +29,7 @@ class TestOptionUnit(unittest.TestCase):
             argv=["--unit", "smartd.service"], list_units="failed"
         )
 
-        self.assertEqual(2, result.exitcode)
+        result.assert_critical()
         self.assertEqual(
             "SYSTEMD CRITICAL - smartd.service: failed",
             result.first_line,
