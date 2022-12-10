@@ -98,25 +98,15 @@ class MockResult:
     function."""
 
     __sys_exit: Mock
-    __print: Mock
     __stdout: str | None
     __stderr: str | None
 
     def __init__(
-        self, sys_exit_mock: Mock, print_mock: Mock, stdout: str, stderr: str
+        self, sys_exit_mock: Mock, stdout: str, stderr: str
     ) -> None:
         self.__sys_exit = sys_exit_mock
-        self.__print = print_mock
         self.__stdout = stdout
         self.__stderr = stderr
-
-    @property
-    def print_calls(self) -> list[str]:
-        """The captured print calls as a list for each line."""
-        output: list[str] = []
-        for call in self.__print.call_args_list:
-            output.append(str(call[0][0]))
-        return output
 
     @property
     def stdout(self) -> str | None:
@@ -139,9 +129,6 @@ class MockResult:
         be read, but not the plugin output using the function
         ``redirect_stdout()``."""
         out: str = ""
-
-        if self.print_calls:
-            out += "\n".join(self.print_calls)
 
         if self.__stdout:
             out += self.__stdout
@@ -224,9 +211,7 @@ def execute_main(
         argv.insert(0, "check_systemd.py")
     with mock.patch("sys.exit") as sys_exit, mock.patch(
         "check_systemd.subprocess.Popen"
-    ) as Popen, mock.patch("sys.argv", argv), mock.patch(
-        "builtins.print"
-    ) as mocked_print:
+    ) as Popen, mock.patch("sys.argv", argv):
         if popen:
             Popen.side_effect = popen
         else:
@@ -239,7 +224,6 @@ def execute_main(
 
     return MockResult(
         sys_exit_mock=sys_exit,
-        print_mock=mocked_print,
         stdout=file_stdout.getvalue(),
         stderr=file_stderr.getvalue(),
     )
