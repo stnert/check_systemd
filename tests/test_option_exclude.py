@@ -14,7 +14,7 @@ def execute_with_opt_e(argv, unit_suffix="failed"):
 
 
 class TestOptionExclude(unittest.TestCase):
-    def test_known_service(self):
+    def test_known_service(self) -> None:
         result = execute_with_opt_e(
             argv=["-e", "smartd.service", "--no-performance-data"],
             unit_suffix="failed",
@@ -22,7 +22,7 @@ class TestOptionExclude(unittest.TestCase):
         result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
-    def test_unknown_service(self):
+    def test_unknown_service(self) -> None:
         result = execute_with_opt_e(
             argv=["-e", "testX.service", "--no-performance-data"],
             unit_suffix="failed",
@@ -30,7 +30,7 @@ class TestOptionExclude(unittest.TestCase):
         result.assert_critical()
         self.assertEqual("SYSTEMD CRITICAL - smartd.service: failed", result.first_line)
 
-    def test_regexp(self):
+    def test_regexp(self) -> None:
         result = execute_with_opt_e(
             argv=["-e", "user@\\d+\\.service", "--no-performance-data"],
             unit_suffix="regexp-excludes",
@@ -38,14 +38,14 @@ class TestOptionExclude(unittest.TestCase):
         result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
-    def test_regexp_dot(self):
+    def test_regexp_dot(self) -> None:
         result = execute_with_opt_e(
             argv=["-e", ".*", "--no-performance-data"],
             unit_suffix="regexp-excludes",
         )
         result.assert_unknown()
 
-    def test_invalid_regexp(self):
+    def test_invalid_regexp(self) -> None:
         result = execute_with_opt_e(
             argv=["-e", "*service"],
             unit_suffix="ok",

@@ -14,7 +14,7 @@ def get_parser():
 
 
 class TestTableParser(unittest.TestCase):
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         parser = get_parser()
         self.assertIn("description", parser.header_row)
         self.assertIn("systemd-tmpfiles-clean.timer", parser.body_rows[-1])
@@ -24,20 +24,20 @@ class TestTableParser(unittest.TestCase):
             ["", "unit", "load", "active", "sub", "description"], parser.columns
         )
 
-    def test_detect_column_lengths(self):
+    def test_detect_column_lengths(self) -> None:
         detect = TableParser._TableParser__detect_lengths
         self.assertEqual([3, 3], detect("1  2  3"))
         self.assertEqual([2, 3, 3], detect("  1  2  3  "))
         self.assertEqual([2, 2, 3, 2, 3, 2], detect("  1 1  2 2  3 3  "))
 
-    def test_split_line_into_columns(self):
+    def test_split_line_into_columns(self) -> None:
         split = TableParser._TableParser__split_row
         self.assertEqual(["123", "456", "789"], split("123456789", [3, 3]))
         self.assertEqual(
             ["UNIT", "STATE", "LOAD"], split("UNIT  STATE  LOAD  ", [6, 7])
         )
 
-    def test_get_row(self):
+    def test_get_row(self) -> None:
         parser = get_parser()
         row = parser.get_row(0)
         self.assertEqual("", row["column_0"])
@@ -47,19 +47,19 @@ class TestTableParser(unittest.TestCase):
         self.assertEqual("plugged", row["sub"])
         self.assertEqual("/dev/block/254:0", row["description"])
 
-    def test_get_row_all(self):
+    def test_get_row_all(self) -> None:
         parser = get_parser()
         for i in range(0, parser.row_count):
             row = parser.get_row(i)
         self.assertEqual("systemd-tmpfiles-clean.timer", row["unit"])
 
-    def test_list_rows(self):
+    def test_list_rows(self) -> None:
         parser = get_parser()
         for row in parser.list_rows():
             pass
         self.assertEqual("systemd-tmpfiles-clean.timer", row["unit"])
 
-    def test_narrow_column_separators(self):
+    def test_narrow_column_separators(self) -> None:
         parser = TableParser(read_stdout("systemctl-list-timers_all-n-a.txt"))
         row = parser.get_row(1)
         self.assertEqual("n/a", row["next"])

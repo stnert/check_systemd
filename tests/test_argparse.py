@@ -13,15 +13,15 @@ from .helper import execute_main
 
 
 class TestFromFunction(unittest.TestCase):
-    def test_default(self):
+    def test_default(self) -> None:
         opts = get_argparser().parse_args([])
         self.assertEqual("cli", opts.data_source)
 
-    def test_dbus(self):
+    def test_dbus(self) -> None:
         opts = get_argparser().parse_args(["--dbus"])
         self.assertEqual("dbus", opts.data_source)
 
-    def test_cli(self):
+    def test_cli(self) -> None:
         opts = get_argparser().parse_args(["--cli"])
         self.assertEqual("cli", opts.data_source)
 
@@ -33,36 +33,36 @@ class TestFromFunction(unittest.TestCase):
 
 
 class TestWithMocking(unittest.TestCase):
-    def test_without_arguments(self):
+    def test_without_arguments(self) -> None:
         result = execute_main()
         result.assert_ok()
 
-    def test_help_short(self):
+    def test_help_short(self) -> None:
         result = execute_main(argv=["-h"])
         self.assertIn("usage: check_systemd", result.output)
 
-    def test_help_long(self):
+    def test_help_long(self) -> None:
         result = execute_main(argv=["--help"])
         self.assertIn("usage: check_systemd", result.output)
 
-    def test_version_short(self):
+    def test_version_short(self) -> None:
         result = execute_main(argv=["-V"])
         self.assertIn("check_systemd " + check_systemd.__version__, result.output)
 
-    def test_version_long(self):
+    def test_version_long(self) -> None:
         result = execute_main(argv=["--version"])
         self.assertIn("check_systemd " + check_systemd.__version__, result.output)
 
 
 class TestWithSubprocess(unittest.TestCase):
-    def test_help(self):
+    def test_help(self) -> None:
         process = subprocess.run(
             ["./check_systemd.py", "--help"], encoding="utf-8", stdout=subprocess.PIPE
         )
         self.assertEqual(process.returncode, 0)
         self.assertIn("usage: check_systemd", process.stdout)
 
-    def test_version(self):
+    def test_version(self) -> None:
         process = subprocess.run(
             ["./check_systemd.py", "--version"],
             encoding="utf-8",
@@ -71,7 +71,7 @@ class TestWithSubprocess(unittest.TestCase):
         self.assertEqual(process.returncode, 0)
         self.assertIn("check_systemd " + check_systemd.__version__, process.stdout)
 
-    def test_exclusive_cli_dbus(self):
+    def test_exclusive_cli_dbus(self) -> None:
         process = subprocess.run(
             ["./check_systemd.py", "--cli", "--dbus"],
             encoding="utf-8",
@@ -83,7 +83,7 @@ class TestWithSubprocess(unittest.TestCase):
             process.stderr,
         )
 
-    def test_entry_point(self):
+    def test_entry_point(self) -> None:
         process = subprocess.run(
             ["check_systemd", "--help"], encoding="utf-8", stdout=subprocess.PIPE
         )

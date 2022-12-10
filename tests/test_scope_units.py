@@ -14,26 +14,26 @@ def execute(argv, units_suffix="ok"):
 
 
 class TestOk(unittest.TestCase):
-    def test_ok(self):
+    def test_ok(self) -> None:
         result = execute(argv=["--no-performance-data"])
         result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
-    def test_multiple_units(self):
+    def test_multiple_units(self) -> None:
         result = execute_main(argv=["--no-performance-data"])
         result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
 
 class TestFailure(unittest.TestCase):
-    def test_failure(self):
+    def test_failure(self) -> None:
         result = execute(argv=["--no-performance-data"], units_suffix="failed")
         result.assert_critical()
         self.assertEqual("SYSTEMD CRITICAL - smartd.service: failed", result.first_line)
 
 
 class TestMultipleFailure(unittest.TestCase):
-    def test_failure_multiple(self):
+    def test_failure_multiple(self) -> None:
         result = execute(
             argv=["--no-performance-data"], units_suffix="multiple-failure"
         )

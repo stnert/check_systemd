@@ -4,7 +4,7 @@ from .helper import execute_main
 
 
 class TestPerformanceData(unittest.TestCase):
-    def test_ok(self):
+    def test_ok(self) -> None:
         result = execute_main(argv=["--performance-data"])
         result.assert_ok()
         self.assertEqual(
@@ -15,7 +15,7 @@ class TestPerformanceData(unittest.TestCase):
             result.first_line,
         )
 
-    def test_dead_timers(self):
+    def test_dead_timers(self) -> None:
         result = execute_main(
             argv=["--timers"],
             stdout=[
@@ -33,7 +33,7 @@ class TestPerformanceData(unittest.TestCase):
             result.first_line,
         )
 
-    def test_options_exclude(self):
+    def test_options_exclude(self) -> None:
         result = execute_main(
             argv=["-e", "testX.service"],
             stdout=[

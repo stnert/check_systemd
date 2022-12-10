@@ -12,7 +12,7 @@ from .helper import MPopen
 
 
 class TestUnit(unittest.TestCase):
-    def test_function_format_timespan_to_seconds(self):
+    def test_function_format_timespan_to_seconds(self) -> None:
         _to_sec = check_systemd.format_timespan_to_seconds
         self.assertEqual(_to_sec("1s"), 1)
         self.assertEqual(_to_sec("1s ago"), 1)
@@ -25,23 +25,23 @@ class TestUnit(unittest.TestCase):
 
 
 class TestClassSystemdUnitTypesList(unittest.TestCase):
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         unit_types = SystemdUnitTypesList("service", "timer")
         self.assertEqual(["service", "timer"], list(unit_types))
 
-    def test_convert_to_regexp(self):
+    def test_convert_to_regexp(self) -> None:
         unit_types = SystemdUnitTypesList("service", "timer")
         self.assertEqual(".*\\.(service|timer)$", unit_types.convert_to_regexp())
 
 
 class TestFunctionExecuteCli(unittest.TestCase):
-    def test_execute_cli_stdout(self):
+    def test_execute_cli_stdout(self) -> None:
         with patch("check_systemd.subprocess.Popen") as Popen:
             Popen.return_value = MPopen(stdout="ok")
             stdout = execute_cli(["ls"])
         self.assertEqual("ok", stdout)
 
-    def test_execute_cli_stderr(self):
+    def test_execute_cli_stderr(self) -> None:
         with patch("check_systemd.subprocess.Popen") as Popen:
             Popen.side_effect = (MPopen(stdout="ok"), MPopen(stderr="Not ok"))
             stdout = execute_cli(["ls"])

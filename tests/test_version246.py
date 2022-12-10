@@ -4,7 +4,7 @@ from .helper import execute_main
 
 
 class TestVersion246(unittest.TestCase):
-    def test_version_246(self):
+    def test_version_246(self) -> None:
         result = execute_main(
             argv=["--no-performance-data"],
             stdout=[

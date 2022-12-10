@@ -4,7 +4,7 @@ from .helper import MPopen, execute_main
 
 
 class TestBootupNotFinished(unittest.TestCase):
-    def test_bootup_not_finished(self):
+    def test_bootup_not_finished(self) -> None:
         result = execute_main(
             argv=["--no-performance-data"],
             popen=(
@@ -15,7 +15,7 @@ class TestBootupNotFinished(unittest.TestCase):
         result.assert_ok()
         self.assertEqual("SYSTEMD OK - all", result.first_line)
 
-    def test_bootup_not_finished_verbose(self):
+    def test_bootup_not_finished_verbose(self) -> None:
         self.maxDiff = None
         result = execute_main(
             argv=["--verbose"],

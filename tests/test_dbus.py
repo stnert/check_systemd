@@ -7,7 +7,7 @@ import check_systemd
 
 
 class TestDbus(unittest.TestCase):
-    def test_mocking(self):
+    def test_mocking(self) -> None:
 
         with patch("sys.exit"), patch("check_systemd.is_gi"), patch(
             "check_systemd.DbusManager"

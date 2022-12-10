@@ -19,15 +19,19 @@ class AddBin(object):
     :param string bin_path: Path relative to the test folder.
     """
 
-    def __init__(self, bin_path):
+    bin_path: str
+
+    old_path: str
+
+    def __init__(self, bin_path: str) -> None:
         self.bin_path = bin_path
         self.old_path = os.environ["PATH"]
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         BIN = os.path.abspath(os.path.join(os.path.dirname(__file__), self.bin_path))
         os.environ["PATH"] = BIN + ":" + os.environ["PATH"]
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self) -> None:
         os.environ["PATH"] = self.old_path
 
 
@@ -53,19 +57,24 @@ def convert_to_bytes(file_name_or_str: str) -> bytes:
         return file_name_or_str.encode()
 
 
-def MPopen(returncode=0, stdout=None, stderr=None) -> Mock:
+def MPopen(
+    returncode: int = 0, stdout: str | None = None, stderr: str | None = None
+) -> Mock:
     """A mocked version of ``subprocess.POpen``."""
     mock = Mock()
     mock.returncode = returncode
+    stdout_bytes = None
     if stdout:
-        stdout = convert_to_bytes(stdout)
+        stdout_bytes = convert_to_bytes(stdout)
+
+    stderr_bytes = None
     if stderr:
-        stderr = convert_to_bytes(stderr)
-    mock.communicate.return_value = (stdout, stderr)
+        stderr_bytes = convert_to_bytes(stderr)
+    mock.communicate.return_value = (stdout_bytes, stderr_bytes)
     return mock
 
 
-def get_mocks_for_popen(*stdout):
+def get_mocks_for_popen(*stdout: str) -> list[Mock]:
     """
     Create multiple mock objects which are suitable to mimic multiple calls of
     ``subprocess.Popen()``.
@@ -78,7 +87,7 @@ def get_mocks_for_popen(*stdout):
 
     :return: A list of mock objects for the class ``subprocess.Popen()``.
     """
-    mocks = []
+    mocks: list[Mock] = []
     for out in stdout:
         mocks.append(MPopen(stdout=out))
     return mocks
@@ -100,11 +109,6 @@ class MockResult:
         self.__print = print_mock
         self.__stdout = stdout
         self.__stderr = stderr
-
-    @property
-    def exitcode(self) -> int:
-        """The captured exit code"""
-        return self.__sys_exit.call_args[0][0]
 
     @property
     def print_calls(self) -> list[str]:
@@ -154,6 +158,11 @@ class MockResult:
         """
         if self.output:
             return self.output.split("\n", 1)[0]
+
+    @property
+    def exitcode(self) -> int:
+        """The captured exit code"""
+        return int(self.__sys_exit.call_args[0][0])
 
     def assert_exitcode(self, exitcode: int) -> None:
         test.assertEqual(self.exitcode, exitcode)
