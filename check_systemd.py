@@ -823,9 +823,6 @@ unit_cache: UnitCache = None
 
 
 class UnitsResource(Resource):
-
-    name = "SYSTEMD"
-
     def probe(self) -> typing.Generator[Metric, None, None]:
         counter = 0
         for unit in unit_cache.list(include=opts.include, exclude=opts.exclude):
@@ -958,8 +955,6 @@ class StartupTimeResource(Resource):
     """Resource that calls ``systemd-analyze`` on the command line to get
     informations about the startup time."""
 
-    name = "SYSTEMD"
-
     def probe(self) -> typing.Generator[Metric, None, None]:
         """Query system state and return metrics.
 
@@ -1020,9 +1015,6 @@ class StartupTimeContext(ScalarContext):
 
 
 class PerformanceDataResource(Resource):
-
-    name = "SYSTEMD"
-
     def probe(self) -> typing.Generator[Metric, None, None]:
         for state_spec, count in unit_cache.count_by_states(
             (
@@ -1045,9 +1037,6 @@ class PerformanceDataResource(Resource):
 
 
 class PerformanceDataDataSourceResource(Resource):
-
-    name = "SYSTEMD"
-
     def probe(self) -> typing.Generator[Metric, None, None]:
         yield Metric(
             name="data_source", value=opts.data_source, context="performance_data"
@@ -1472,6 +1461,7 @@ def main():
         ]
 
     check = Check(*tasks)
+    check.name = "systemd"
     check.main(opts.verbose)
 
 
