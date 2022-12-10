@@ -7,12 +7,11 @@ class TestPerformanceData(unittest.TestCase):
     def test_ok(self) -> None:
         result = execute_main(argv=["--performance-data"])
         result.assert_ok()
-        self.assertEqual(
+        result.assert_first_line(
             "SYSTEMD OK - all "
             "| count_units=386 data_source=cli startup_time=12.345;60;120 "
             "units_activating=0 "
-            "units_active=275 units_failed=0 units_inactive=111",
-            result.first_line,
+            "units_active=275 units_failed=0 units_inactive=111"
         )
 
     def test_dead_timers(self) -> None:
@@ -25,12 +24,11 @@ class TestPerformanceData(unittest.TestCase):
             ],
         )
         result.assert_critical()
-        self.assertEqual(
+        result.assert_first_line(
             "SYSTEMD CRITICAL - phpsessionclean.timer "
             "| count_units=3 data_source=cli startup_time=12.345;60;120 "
             "units_activating=0 "
-            "units_active=3 units_failed=0 units_inactive=0",
-            result.first_line,
+            "units_active=3 units_failed=0 units_inactive=0"
         )
 
     def test_options_exclude(self) -> None:
@@ -42,13 +40,12 @@ class TestPerformanceData(unittest.TestCase):
             ],
         )
         result.assert_critical()
-        self.assertEqual(
+        result.assert_first_line(
             "SYSTEMD CRITICAL - smartd.service: failed | count_units=3 "
             "data_source=cli "
             "startup_time=12.345;60;120 "
             "units_activating=0 units_active=1 units_failed=1 "
-            "units_inactive=1",
-            result.first_line,
+            "units_inactive=1"
         )
 
 

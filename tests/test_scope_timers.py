@@ -34,9 +34,7 @@ class TestScopeTimers(unittest.TestCase):
     def test_dead_timers_2(self) -> None:
         result = execute_with_opt_t(stdout_timers_suffix="2")
         result.assert_critical()
-        self.assertEqual(
-            "SYSTEMD CRITICAL - dfm-auto-jf.timer, " "rsync.timer", result.first_line
-        )
+        result.assert_first_line("SYSTEMD CRITICAL - dfm-auto-jf.timer, " "rsync.timer")
 
     def test_dead_timers_2_ok(self) -> None:
         result = execute_with_opt_t(
@@ -59,14 +57,14 @@ class TestScopeTimers(unittest.TestCase):
     def test_dead_timers_ok(self) -> None:
         result = execute_with_opt_t(stdout_timers_suffix="ok")
         result.assert_ok()
-        self.assertEqual("SYSTEMD OK - all", result.first_line)
+        result.assert_first_line("SYSTEMD OK - all")
 
     def test_dead_timers_exclude(self) -> None:
         result = execute_with_opt_t(
             stdout_timers_suffix="2", additional_argv=["-e", "dfm-auto-jf.timer"]
         )
         result.assert_critical()
-        self.assertEqual("SYSTEMD CRITICAL - rsync.timer", result.first_line)
+        result.assert_first_line("SYSTEMD CRITICAL - rsync.timer")
 
     def test_dead_timers_exclude_multiple(self) -> None:
         result = execute_with_opt_t(

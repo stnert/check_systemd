@@ -13,9 +13,7 @@ class TestVersion246(unittest.TestCase):
             ],
         )
         result.assert_critical()
-        self.assertEqual(
-            "SYSTEMD CRITICAL - nm-wait-online.service: failed", result.first_line
-        )
+        result.assert_first_line("SYSTEMD CRITICAL - nm-wait-online.service: failed")
 
 
 if __name__ == "__main__":

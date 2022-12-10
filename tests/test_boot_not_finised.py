@@ -13,7 +13,7 @@ class TestBootupNotFinished(unittest.TestCase):
             ),
         )
         result.assert_ok()
-        self.assertEqual("SYSTEMD OK - all", result.first_line)
+        result.assert_first_line("SYSTEMD OK - all")
 
     def test_bootup_not_finished_verbose(self) -> None:
         self.maxDiff = None

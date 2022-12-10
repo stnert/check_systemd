@@ -7,17 +7,15 @@ class TestScopeStartupTime(unittest.TestCase):
     def test_option_critical(self) -> None:
         result = execute_main(argv=["-c", "1", "--no-performance-data"])
         result.assert_critical()
-        self.assertEqual(
-            "SYSTEMD CRITICAL - startup_time is 12.35 (outside range 0:1)",
-            result.first_line,
+        result.assert_first_line(
+            "SYSTEMD CRITICAL - startup_time is 12.35 (outside range 0:1)"
         )
 
     def test_option_warning(self) -> None:
         result = execute_main(argv=["-w", "2", "--no-performance-data"])
         result.assert_warn()
-        self.assertEqual(
-            "SYSTEMD WARNING - startup_time is 12.35 (outside range 0:2)",
-            result.first_line,
+        result.assert_first_line(
+            "SYSTEMD WARNING - startup_time is 12.35 (outside range 0:2)"
         )
 
     def test_option_no_startup_time_long(self) -> None:
@@ -25,7 +23,7 @@ class TestScopeStartupTime(unittest.TestCase):
             argv=["-c", "1", "--no-startup-time", "--no-performance-data"]
         )
         result.assert_ok()
-        self.assertEqual("SYSTEMD OK - all", result.first_line)
+        result.assert_first_line("SYSTEMD OK - all")
 
     def test_option_no_startup_time_short(self) -> None:
         result = execute_main(argv=["-c", "1", "-n"])

@@ -152,14 +152,6 @@ class MockResult:
         return out
 
     @property
-    def first_line(self) -> str | None:
-        """The first line of the stdout output without a newline break at the
-        end as a string.
-        """
-        if self.output:
-            return self.output.split("\n", 1)[0]
-
-    @property
     def exitcode(self) -> int:
         """The captured exit code"""
         return int(self.__sys_exit.call_args[0][0])
@@ -178,6 +170,17 @@ class MockResult:
 
     def assert_unknown(self) -> None:
         self.assert_exitcode(3)
+
+    @property
+    def first_line(self) -> str | None:
+        """The first line of the stdout output without a newline break at the
+        end as a string.
+        """
+        if self.output:
+            return self.output.split("\n", 1)[0]
+
+    def assert_first_line(self, first_line: str) -> None:
+        test.assertEqual(self.first_line, first_line)
 
 
 def execute_main(

@@ -17,19 +17,19 @@ class TestOk(unittest.TestCase):
     def test_ok(self) -> None:
         result = execute(argv=["--no-performance-data"])
         result.assert_ok()
-        self.assertEqual("SYSTEMD OK - all", result.first_line)
+        result.assert_first_line("SYSTEMD OK - all")
 
     def test_multiple_units(self) -> None:
         result = execute_main(argv=["--no-performance-data"])
         result.assert_ok()
-        self.assertEqual("SYSTEMD OK - all", result.first_line)
+        result.assert_first_line("SYSTEMD OK - all")
 
 
 class TestFailure(unittest.TestCase):
     def test_failure(self) -> None:
         result = execute(argv=["--no-performance-data"], units_suffix="failed")
         result.assert_critical()
-        self.assertEqual("SYSTEMD CRITICAL - smartd.service: failed", result.first_line)
+        result.assert_first_line("SYSTEMD CRITICAL - smartd.service: failed")
 
 
 class TestMultipleFailure(unittest.TestCase):
@@ -38,8 +38,9 @@ class TestMultipleFailure(unittest.TestCase):
             argv=["--no-performance-data"], units_suffix="multiple-failure"
         )
         result.assert_critical()
-        self.assertIn("rtkit-daemon.service: failed", result.first_line)
-        self.assertIn("smartd.service: failed", result.first_line)
+        if result.first_line:
+            self.assertIn("rtkit-daemon.service: failed", result.first_line)
+            self.assertIn("smartd.service: failed", result.first_line)
 
 
 if __name__ == "__main__":

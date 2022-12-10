@@ -19,29 +19,21 @@ class TestOptionUnit(unittest.TestCase):
     def test_ok(self) -> None:
         result = execute_with_opt_u(argv=["--unit", "nginx.service"], list_units="ok")
         result.assert_ok()
-        self.assertEqual(
-            "SYSTEMD OK - nginx.service: active",
-            result.first_line,
-        )
+        result.assert_first_line("SYSTEMD OK - nginx.service: active")
 
     def test_failed(self) -> None:
         result = execute_with_opt_u(
             argv=["--unit", "smartd.service"], list_units="failed"
         )
-
         result.assert_critical()
-        self.assertEqual(
-            "SYSTEMD CRITICAL - smartd.service: failed",
-            result.first_line,
-        )
+        result.assert_first_line("SYSTEMD CRITICAL - smartd.service: failed")
 
     def test_different_unit_name(self) -> None:
         result = execute_with_opt_u(argv=["--unit", "XXXXX.service"], list_units="ok")
-        self.assertEqual(result.exitcode, 3)
-        self.assertEqual(
+        result.assert_unknown()
+        result.assert_first_line(
             "SYSTEMD UNKNOWN: ValueError: Please verify your --include-* and "
-            "--exclude-* options. No units have been added for testing.",
-            result.first_line,
+            "--exclude-* options. No units have been added for testing."
         )
 
 
